@@ -42,12 +42,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && !$errors) {
                     'smtp_host' => '', 'smtp_port' => 465, 'smtp_secure' => 'ssl', 'smtp_user' => '', 'smtp_pass' => ''],
             ];
             if ($defaults['mail_from']) $GLOBALS['CONFIG']['mail']['from'] = $defaults['mail_from'];
-            $pdo = db()->pdo;
-            $sql = file_get_contents(APP_DIR . '/sql/schema.sql');
-            foreach (preg_split('/;\s*\n/', (string)$sql) as $stmt) {
-                $stmt = trim(preg_replace('/^--.*$/m', '', $stmt));
-                if ($stmt !== '') $pdo->exec($stmt);
-            }
+            db()->pdo;
+            Migrator::execFile(APP_DIR . '/sql/schema.sql');
+            set_setting('schema_version', (string)Migrator::VERSION);
             $email = mb_strtolower($defaults['admin_email']);
             if (db()->val('SELECT id FROM users WHERE email = ?', [$email])) {
                 db()->exec("UPDATE users SET role = 'admin', password_hash = ? WHERE email = ?", [password_hash($pass, PASSWORD_DEFAULT), $email]);
@@ -56,7 +53,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && !$errors) {
                     'first_name' => $defaults['admin_first'], 'last_name' => $defaults['admin_last'], 'role' => 'admin']);
             }
             set_setting('contact_email', $email);
-            if (!empty($_POST['demo']) && !db()->val("SELECT id FROM suppliers WHERE name LIKE '%(démo)%'")) Demo::seed();
+            if (!empty($_POST['demo']) && !db()->val("SELECT id FROM `groups` LIMIT 1")) Demo::seed();
 
             $export = "<?php\n// Généré par l'assistant d'installation le " . date('d/m/Y H:i') . "\nreturn " . var_export($GLOBALS['CONFIG'], true) . ";\n";
             if (file_put_contents(APP_DIR . '/config.php', $export) === false) throw new RuntimeException('Impossible d\'écrire app/config.php');
@@ -102,7 +99,7 @@ $csrf = csrf_token();
       <div class="field"><label for="admin_email">Email</label><input id="admin_email" name="admin_email" type="email" required value="<?= e($defaults['admin_email']) ?>"></div>
       <div class="field"><label for="admin_pass">Mot de passe</label><input id="admin_pass" name="admin_pass" type="password" minlength="10" required><span class="hint">10 caractères minimum.</span></div>
     </div>
-    <label class="check mt-4"><input type="checkbox" name="demo" value="1" checked> Charger les données de démonstration (8 semences, campagnes en cours, créneaux). Supprimables en un clic depuis le back-office.</label>
+    <label class="check mt-4"><input type="checkbox" name="demo" value="1" checked> Charger les données de démonstration (packs avec photos, 4 groupes à différents stades). Supprimables en un clic depuis le back-office.</label>
     <p class="mt-6"><button class="btn btn--lg" type="submit">Installer la plateforme</button></p>
   </form>
 </main>

@@ -10,7 +10,7 @@
       <div class="field"><label for="postal_code">Code postal</label><input id="postal_code" name="postal_code" value="<?= e($u['postal_code']) ?>"></div>
     </div>
     <p class="muted small">Email : <?= e($u['email']) ?></p>
-    <label class="check"><input type="checkbox" name="notify_tiers" value="1"<?= $u['notify_tiers'] ? ' checked' : '' ?>> Me prévenir quand un palier est débloqué sur mes campagnes</label>
+    <label class="check"><input type="checkbox" name="notify_tiers" value="1"<?= $u['notify_tiers'] ? ' checked' : '' ?>> Recevoir les annonces de mes groupes (vote, ouverture des ventes)</label>
     <h2 class="mt-6">Changer de mot de passe</h2>
     <div class="grid-2">
       <div class="field"><label for="current_password">Mot de passe actuel</label><input id="current_password" name="current_password" type="password" autocomplete="current-password"></div>

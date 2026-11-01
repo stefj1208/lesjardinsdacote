@@ -4,30 +4,16 @@ Plateforme complète (Phase 1 du cahier des charges JDC-2026-V3 : semences & gra
 
 ---
 
-## 1. Ce qui est livré
+## 1. Fonctionnement (version 2)
 
-**Espace acheteur**
-- Accueil, catalogue filtrable sans rechargement (univers, exposition, mois de semis, difficulté, recherche) et tris « bientôt validées / fin imminente / nouveaux arrivages / prix en baisse ».
-- Fiche campagne « Ardoise & Bois » : prix public barré, prix débloqué, paliers à la craie avec le palier actif entouré, parts manquantes, compte à rebours, décomposition transparente du prix, calendrier de semis, conversion grammes ↔ graines (PMG).
-- **La plante qui pousse** : SVG animé à 5 états (graine, jeune pousse, plante validée, fleurs, récolte) ; l'arrosoir verse quelques gouttes et la plante grandit en aperçu quand on change sa quantité ; mise à jour en direct toutes les 20 s quand un voisin commande.
-- Panier mixte (plusieurs campagnes, plusieurs contenances), une commande par date de distribution, option « j'apporte mes contenants ».
-- Engagement avec **carte enregistrée sans débit** (Stripe SetupIntent, 3-D Secure) et débit automatique à la clôture **au prix du palier le plus bas atteint pour tout le monde** ; 0 € prélevé si la campagne échoue. Sans Stripe : paiement au retrait.
-- Partage WhatsApp / Facebook / lien, avec **visuel de partage généré** (prix actuel + parts manquantes).
-- Compte : suivi des engagements, annulation jusqu'à la clôture, factures, régularisation de paiement, **Pass Retrait QR code** + code à 6 caractères.
-- Emails : bienvenue, engagement, palier franchi, campagne non atteinte, commande confirmée (avec économie réalisée), paiement à confirmer, commande prête (QR), relance des retardataires.
-
-**Espace bénévoles** (gros boutons, lisible sur tablette)
-- Planning des chantiers, inscription en 1 clic, ajout à l'agenda (iCal), rappel la veille.
-- Atelier : ce qu'il faut recevoir du fournisseur, saisie du **n° de lot d'origine**, feuille d'ensachage (« 42 sachets de 10 g »), pointage par commande avec casier, **planches d'étiquettes A4 (24 × 70×37 mm)** : espèce, variété, latin, poids net + nb de graines, lot, année, mention « Semences destinées aux jardiniers amateurs », QR code.
-- Distribution : **scan du QR avec la caméra du téléphone**, recherche par code ou nom, récapitulatif à remettre, encaissement sur place, validation de la remise.
-
-**Back-office**
-- Tableau de bord, alertes « campagne à sauver » (prolonger 48 h / racheter le reliquat).
-- Campagnes : 3 modes de paliers (volume, unité logistique, franco de port), **générateur automatique de paliers** depuis la grille fournisseur (formule du §6), **simulateur de rentabilité** en direct, clôture, statuts logistiques, duplication, export des participants.
-- **Bon de commande fournisseur consolidé** : calcule la combinaison de sacs la moins chère (CSV / impression).
-- Paniers fournisseur (franco), produits (6 unités : g, graines, L, kg, pot, pièce), **import CSV** avec prévisualisation et création automatique des campagnes, fournisseurs, distributions, créneaux, membres (validation des bénévoles), paramètres, test d'email.
-
----
+- **Groupes locaux** : « Les Jardins d'à Côté de Pins-Justaret », « … de Pinsaguel ». Mairies, entreprises, associations, jardins partagés ou habitants les proposent via le formulaire « Lancer un groupe » ; l'administrateur les valide.
+- **3 statuts publics** : *À la recherche de bénévoles* → *Pré-ouverture* (dès 2 bénévoles, vote parmi 3 packs) → *Ventes ouvertes*.
+- **Packs** : 3 packs par vente (graines, plants potagers, fruitiers, aromatiques), chacun avec ses variétés, quantités, photos et un prix total (≈ 30 €).
+- **Vote** : à la date de fin du vote, le pack en tête est mis en vente et déposé automatiquement dans le panier de chaque votant.
+- **Lots de 10** : rien n'est débité tant que le lot n'a pas 10 achats ; un lot complet est commandé et débité, puis un nouveau lot s'ouvre. À la fin de la vente, le lot incomplet est annulé (0 € débité).
+- **Bénévoles** : préparation (quantités totales par variété, composition d'un pack, étiquettes A4), puis remise des packs par scan du QR code.
+- **Photos** : référence Wikimedia Commons (`commons:Fichier.jpg`), adresse web ou envoi depuis le back-office. Les photos distantes sont copiées sur le serveur par la tâche planifiée, avec leurs crédits (page « Crédits photos »).
+- **Mise à jour de la base** : automatique au premier chargement après un déploiement.
 
 ## 2. Mise en ligne sur Hostinger (≈ 20 minutes)
 

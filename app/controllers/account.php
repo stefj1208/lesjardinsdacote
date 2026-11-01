@@ -22,6 +22,8 @@ function account_login(): void
     }
     $to = $_SESSION['intended'] ?? (Auth::isAdmin() ? '/admin' : '/compte');
     unset($_SESSION['intended']);
+    apply_pending_join();
+    Cart::applyPending((int)Auth::id());
     if (!is_string($to) || !str_starts_with($to, '/') || str_starts_with($to, '//')) $to = '/compte';
     redirect($to);
 }
@@ -61,9 +63,12 @@ function account_register(): void
         . ($u['wants_volunteer'] ? '<p>Merci aussi de proposer votre aide comme bénévole ! Un membre de l\'association valide votre accès très vite.</p>' : ''),
         'Voir les campagnes', abs_url('/campagnes')));
     flash('success', 'Bienvenue ' . $u['first_name'] . ' ! Votre compte est créé.');
-    $to = $_SESSION['intended'] ?? '/campagnes';
+    $to = $_SESSION['intended'] ?? '/groupes';
     unset($_SESSION['intended']);
-    redirect(Cart::count() > 0 ? '/engagement' : $to);
+    if (!is_string($to) || !str_starts_with($to, '/') || str_starts_with($to, '//')) $to = '/groupes';
+    apply_pending_join();
+    Cart::applyPending((int)$id);
+    redirect($to);
 }
 
 function account_logout(): void
@@ -120,11 +125,11 @@ function account_reset(string $token): void
 function account_home(): void
 {
     $u = Auth::requireLogin();
-    $orders = db()->all('SELECT o.*, (SELECT GROUP_CONCAT(DISTINCT c.title SEPARATOR ", ") FROM order_items oi JOIN campaigns c ON c.id = oi.campaign_id WHERE oi.order_id = o.id) AS titles
-        FROM orders o WHERE o.user_id = ? ORDER BY o.created_at DESC', [$u['id']]);
-    foreach ($orders as &$o) $o['live_total'] = Orders::liveTotal(Orders::items((int)$o['id']));
+    $orders = array_map(fn($id) => Orders::find((int)$id), db()->col('SELECT id FROM orders WHERE user_id = ? ORDER BY created_at DESC', [$u['id']]));
+    $groups = Groups::hydrate(db()->all("SELECT g.*, gm.role AS my_role FROM `groups` g JOIN group_members gm ON gm.group_id = g.id WHERE gm.user_id = ? AND g.status = 'active' ORDER BY g.commune", [$u['id']]));
+    $cart = Cart::items((int)$u['id']);
     $shifts = Auth::isVolunteer() ? db()->all('SELECT s.* FROM shifts s JOIN shift_signups ss ON ss.shift_id = s.id WHERE ss.user_id = ? AND s.ends_at > NOW() ORDER BY s.starts_at', [$u['id']]) : [];
-    view('account/home', ['u' => $u, 'orders' => $orders, 'shifts' => $shifts, 'title' => 'Mon compte', 'head' => NOINDEX]);
+    view('account/home', ['u' => $u, 'orders' => $orders, 'groups' => $groups, 'cart' => $cart, 'shifts' => $shifts, 'title' => 'Mon compte', 'head' => NOINDEX]);
 }
 
 function account_profile_form(): void
@@ -172,10 +177,9 @@ function account_order(string $ref): void
             }
         } catch (Throwable) { /* le webhook prendra le relais */ }
     }
-    $items = Orders::items((int)$o['id']);
-    $cancellable = $o['status'] === 'committed' && !array_filter($items, fn($it) => $it['status'] !== 'reserved' || $it['campaign_status'] !== 'active' || strtotime($it['end_at']) <= time());
-    view('account/order', ['o' => $o, 'items' => $items, 'cancellable' => $cancellable, 'live' => Orders::liveTotal($items),
-        'thanks' => (bool)input('merci'), 'title' => 'Commande ' . $o['reference'], 'head' => NOINDEX]);
+    $s = Sales::one((int)$o['sale_id']);
+    view('account/order', ['o' => $o, 'items' => Orders::items($o), 'sale' => $s, 'thanks' => (bool)input('merci'),
+        'title' => 'Commande ' . $o['reference'], 'head' => NOINDEX]);
 }
 
 function account_order_cancel(string $ref): void
@@ -183,7 +187,7 @@ function account_order_cancel(string $ref): void
     $o = account_order_for_user($ref);
     try {
         Orders::cancel($o);
-        flash('success', 'Votre engagement est annulé. Aucun montant ne sera prélevé.');
+        flash('success', 'Votre achat est annulé. Aucun montant ne sera prélevé.');
     } catch (DomainException $e) {
         flash('error', $e->getMessage());
     }
@@ -194,8 +198,7 @@ function account_invoice(string $ref): void
 {
     $o = account_order_for_user($ref);
     if (!$o['invoice_number']) abort(404, 'La facture sera disponible après le paiement.');
-    $items = array_filter(Orders::items((int)$o['id']), fn($it) => in_array($it['status'], ['validated', 'packed', 'collected'], true));
-    view('account/invoice', ['o' => $o, 'items' => $items, 'title' => 'Facture ' . $o['invoice_number'], 'head' => NOINDEX], 'layouts/print');
+    view('account/invoice', ['o' => $o, 'items' => Orders::items($o), 'title' => 'Facture ' . $o['invoice_number'], 'head' => NOINDEX], 'layouts/print');
 }
 
 function account_pay_form(string $ref): void
@@ -205,9 +208,9 @@ function account_pay_form(string $ref): void
     try {
         $pi = $o['stripe_payment_intent_id'] ? Stripe::retrievePaymentIntent($o['stripe_payment_intent_id']) : null;
         if ($pi && $pi['status'] === 'succeeded') { Orders::markPaid((int)$o['id']); redirect('/compte/commande/' . $ref); }
-        if (!$pi || in_array($pi['status'], ['canceled'], true) || (int)$pi['amount'] !== (int)round((float)$o['amount_final'] * 100)) {
+        if (!$pi || in_array($pi['status'], ['canceled'], true) || (int)$pi['amount'] !== (int)round((float)$o['amount'] * 100)) {
             $pi = Stripe::request('POST', 'payment_intents', [
-                'amount' => (int)round((float)$o['amount_final'] * 100), 'currency' => 'eur', 'customer' => $o['stripe_customer_id'] ?: Stripe::ensureCustomer(Auth::user()),
+                'amount' => (int)round((float)$o['amount'] * 100), 'currency' => 'eur', 'customer' => $o['stripe_customer_id'] ?: Stripe::ensureCustomer(Auth::user()),
                 'payment_method_types' => ['card'], 'setup_future_usage' => null,
                 'description' => 'Commande ' . $o['reference'], 'metadata' => ['order_ref' => $o['reference'], 'order_id' => $o['id']],
             ]);

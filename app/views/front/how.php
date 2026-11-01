@@ -1,51 +1,53 @@
-<div class="wrap page">
-  <div class="split" style="align-items:start">
-    <div class="prose">
-      <h1>Comment ça marche</h1>
-      <p style="font-size:1.15rem">Un semencier professionnel vend ses graines beaucoup moins cher au kilo qu'en sachet de jardinerie. Seul, personne n'a besoin d'un kilo de basilic. À cinquante voisins, si. L'association achète le gros sac, les bénévoles le divisent en sachets, et chacun paie sa part au prix de gros.</p>
-
-      <h2>Les paliers</h2>
-      <p>Chaque campagne affiche plusieurs paliers. Le premier est le seuil de validation : en dessous, l'association ne peut pas acheter et la campagne est annulée sans frais. Au-delà, chaque palier correspond à un conditionnement plus gros chez le fournisseur, donc à un prix plus bas.</p>
-
-      <h2>Le prix le plus bas pour tout le monde</h2>
-      <p>Si vous vous engagez au début, quand le prix affiché est celui du palier 1, et que la communauté atteint le palier 3 avant la clôture, <strong>vous payez le prix du palier 3</strong>. Le prix final est le même pour tous les participants, quelle que soit la date de leur engagement. C'est pour ça que partager une campagne à ses voisins fait baisser son propre prix.</p>
-
-      <h2>Le paiement</h2>
-      <p>À l'engagement, votre carte est enregistrée et vérifiée par notre prestataire de paiement Stripe, avec l'authentification de votre banque. <strong>Rien n'est débité.</strong> Le prélèvement a lieu automatiquement à la clôture, au prix final. Si la campagne n'atteint pas son premier palier, vous êtes libéré·e de votre engagement et rien n'est prélevé.</p>
-      <p>Vous pouvez annuler votre engagement depuis votre compte tant que la campagne est ouverte.</p>
-
-      <h2>Après la clôture</h2>
-      <ol>
-        <li>L'association passe la commande groupée au fournisseur.</li>
-        <li>À la réception, les bénévoles pèsent et ensachent lors d'ateliers, et collent sur chaque sachet une étiquette avec l'espèce, la variété, le numéro de lot d'origine et le poids.</li>
-        <li>Quand vos sachets sont prêts, vous recevez par email un Pass Retrait avec un QR code.</li>
-        <li>Vous passez à la permanence de distribution, un bénévole scanne le QR code et vous remet votre commande.</li>
-      </ol>
-
-      <h2>Pourquoi des bénévoles ?</h2>
-      <p>Le reconditionnement est le seul coût qui ne baisse pas avec le volume. En le faisant ensemble, on garde la contribution de l'association au strict minimum : sachets kraft, balance de précision, local, assurance.</p>
-      <p><a class="btn" href="/devenir-benevole">Rejoindre les bénévoles</a></p>
+<section class="section" style="padding-bottom:2rem">
+  <div class="wrap split" style="align-items:center">
+    <div>
+      <h1>Comment ça marche, côté jardinier</h1>
+      <p class="lede">Vous rejoignez le groupe de votre commune, vous votez pour un pack, et vous ne payez que lorsque le groupe a réuni assez d'achats pour commander. Pas d'abonnement, pas de frais d'inscription.</p>
+      <div class="row mt-3"><a class="btn btn--lg" href="/groupes">Trouver mon groupe</a></div>
     </div>
+    <?= ph('commons:Carrot_harvest.jpg|commons:Bunches_of_carrots.jpg', 'Récolte de carottes', '', 1200) ?>
+  </div>
+</section>
 
-    <div class="sticky-col">
-      <div class="slate">
-        <h2 class="chalk" style="font-size:2rem">Exemple : basilic Grand Vert</h2>
-        <ol class="tiers">
-          <li class="tier"><span class="t-name">Seul</span><span class="t-cond">sachet de jardinerie</span><span class="t-price"><span class="strike">4,50 €</span></span></li>
-          <li class="tier is-reached"><span class="t-name">Palier 1</span><span class="t-cond">20 parts · sac 250 g</span><span class="t-price">3,20 €</span></li>
-          <li class="tier is-reached is-active"><span class="t-name">Palier 2</span><span class="t-cond">50 parts · sac 500 g</span><span class="t-price">2,40 €</span></li>
-          <li class="tier"><span class="t-name">Palier 3</span><span class="t-cond">100 parts · sac 1 kg</span><span class="t-price">1,75 €</span></li>
-        </ol>
-        <p class="tier-note">64 parts réservées : tout le monde paie 2,40 €, et plus que 36 parts pour 1,75 €.</p>
-      </div>
-      <div class="panel">
-        <h3>La plante vous montre où on en est</h3>
-        <div class="row" style="justify-content:space-between">
-          <?php foreach ([1 => 'Graine semée', 2 => 'Jeune pousse', 3 => 'Validée', 4 => 'En fleurs', 5 => 'Récolte'] as $s => $l): ?>
-            <div class="center" style="width:18%"><?php partial('partials/plant', ['state' => $s, 'growth' => $s / 5, 'toT1' => $s === 2 ? .6 : 1, 'size' => 'sm']) ?><small><?= e($l) ?></small></div>
-          <?php endforeach; ?>
-        </div>
-      </div>
+<section class="section section--wash">
+  <div class="wrap">
+    <div class="section-head"><div><h2>Les trois étapes d'un groupe</h2></div></div>
+    <?php partial('partials/phases') ?>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap split">
+    <div>
+      <h2>Le paiement par lots de 10</h2>
+      <p>Pour commander au meilleur prix, l'association regroupe les achats par lots de 10 packs. Tant que votre lot n'est pas complet, <strong>rien n'est débité</strong> et vous pouvez annuler depuis votre compte.</p>
+      <p>Dès que le dixième achat arrive, le lot est commandé : chaque participant est débité de son pack (ou paie au retrait si le paiement en ligne n'est pas activé), et un nouveau lot de 10 s'ouvre pour les suivants.</p>
+      <p>Si la vente se termine alors que le dernier lot n'est pas complet, ce lot est annulé : <strong>0 € débité</strong>, et vous êtes prévenu·e par email.</p>
+    </div>
+    <div class="panel">
+      <h3>Exemple : vente de Pins-Justaret</h3>
+      <dl class="dl mt-2">
+        <dt>Lot n° 1</dt><dd>10 / 10 · commandé et débité</dd>
+        <dt>Lot n° 2</dt><dd>6 / 10 · en attente, rien de débité</dd>
+      </dl>
+      <div class="slots mt-3"><?php for ($i = 0; $i < 10; $i++): ?><span class="slot slot--big is-on"></span><?php endfor; ?></div>
+      <div class="slots mt-2"><?php for ($i = 0; $i < 10; $i++): ?><span class="slot slot--big<?= $i < 6 ? ' is-on' : '' ?>"></span><?php endfor; ?></div>
+      <p class="small muted mt-2 mb-0">Encore 4 achats et le lot n° 2 part en commande.</p>
     </div>
   </div>
-</div>
+</section>
+
+<section class="section section--wash">
+  <div class="wrap">
+    <h2>Questions fréquentes</h2>
+    <div class="faq mt-3">
+      <details open><summary>Que contient un pack ?</summary><div>Chaque pack détaille ses variétés, avec photo, et la quantité exacte : nombre de graines, de plants ou d'arbres. Les graines sont bio et reproductibles, conditionnées par les bénévoles avec le numéro de lot d'origine.</div></details>
+      <details><summary>Combien ça coûte ?</summary><div>Environ 30 € le pack, prix affiché avant le vote et identique pour tous. Le prix couvre les produits, le transport, les sachets et une petite contribution au fonctionnement de l'association.</div></details>
+      <details><summary>Dois-je voter pour acheter ?</summary><div>Non, mais c'est plus simple : à l'ouverture des ventes, le pack gagnant est déposé automatiquement dans le panier de chaque votant. Il suffit de confirmer. Les membres qui n'ont pas voté peuvent aussi l'acheter.</div></details>
+      <details><summary>Et si le pack que j'ai choisi ne gagne pas ?</summary><div>C'est le pack le plus demandé qui est mis en vente, et il arrive quand même dans votre panier. Vous restez libre de ne pas confirmer l'achat.</div></details>
+      <details><summary>Quand suis-je débité·e ?</summary><div>Uniquement quand votre lot de 10 achats est complet. Votre carte est enregistrée de façon sécurisée par Stripe au moment de l'achat, sans débit. Si votre lot n'est jamais complété, rien n'est prélevé.</div></details>
+      <details><summary>Où et quand je récupère mon pack ?</summary><div>Au lieu de retrait du groupe (salle municipale, local associatif, hall d'entreprise), lors de la distribution annoncée sur sa page. Vous recevez un QR code par email quand votre pack est prêt.</div></details>
+      <details><summary>Comment devenir bénévole ?</summary><div>Sur la page de votre groupe, cliquez sur « Je deviens bénévole ». Il faut deux bénévoles par groupe pour ouvrir le vote. Le rôle : préparer les packs une demi-journée et aider à la distribution.</div></details>
+    </div>
+  </div>
+</section>

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 define('APP_DIR', __DIR__);
 define('ROOT_DIR', dirname(__DIR__));
-define('APP_VERSION', '1.0.0');
+define('APP_VERSION', '2.0.0');
 
 date_default_timezone_set('Europe/Paris');
 mb_internal_encoding('UTF-8');
@@ -14,6 +14,7 @@ spl_autoload_register(function (string $class): void {
     if (is_file($f)) require $f;
 });
 require APP_DIR . '/lib/helpers.php';
+require APP_DIR . '/lib/Photo.php';
 
 $configFile = APP_DIR . '/config.php';
 $GLOBALS['CONFIG'] = is_file($configFile) ? require $configFile : null;

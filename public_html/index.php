@@ -22,6 +22,7 @@ if ($GLOBALS['CONFIG'] === null || !is_file(APP_DIR . '/storage/installed.lock')
 }
 
 start_session();
+Migrator::run();
 $_SESSION['_old_now'] = $_SESSION['_old'] ?? [];
 unset($_SESSION['_old']);
 

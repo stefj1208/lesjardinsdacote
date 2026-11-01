@@ -1,200 +1,158 @@
 <?php
 declare(strict_types=1);
 
-function front_active_campaigns(): array
-{
-    return Campaigns::hydrate(db()->all(Campaigns::SELECT . " WHERE c.status = 'active' AND c.start_at <= NOW() ORDER BY c.end_at"));
-}
-
 function front_home(): void
 {
-    $camps = front_active_campaigns();
-    $featured = null;
-    foreach ($camps as $c) if ($c['is_featured']) { $featured = $c; break; }
-    if (!$featured && $camps) {
-        $sorted = $camps;
-        usort($sorted, fn($a, $b) => $b['state']['to_next_pct'] <=> $a['state']['to_next_pct']);
-        $featured = $sorted[0];
-    }
-    $camps = array_values(array_filter($camps, fn($c) => !$featured || $c['id'] !== $featured['id']));
-    $stats = [
-        'neighbours' => (int)db()->val("SELECT COUNT(DISTINCT o.user_id) FROM orders o WHERE o.status <> 'cancelled'"),
-        'campaigns' => count($camps),
-        'saved' => (float)db()->val("SELECT COALESCE(SUM(GREATEST(0, ROUND(c.public_unit_price * oi.portion_qty, 2) * oi.packets - COALESCE(oi.line_total_final, ROUND(c.current_unit_price * oi.portion_qty, 2) * oi.packets))),0)
-            FROM order_items oi JOIN campaigns c ON c.id = oi.campaign_id WHERE oi.status NOT IN ('cancelled','failed')"),
-    ];
-    view('front/home', ['featured' => $featured, 'campaigns' => array_slice($camps, 0, 6), 'stats' => $stats, 'bodyClass' => 'home']);
+    $groups = Groups::listActive();
+    usort($groups, fn($a, $b) => array_search($a['public_status'], ['open', 'preopening', 'recruiting'], true) <=> array_search($b['public_status'], ['open', 'preopening', 'recruiting'], true));
+    // Les trois packs graines du moment : ceux de la vente la plus avancée, sinon le catalogue.
+    $packs = [];
+    $sid = db()->val("SELECT s.id FROM sales s JOIN `groups` g ON g.id = s.group_id WHERE g.status = 'active' AND s.category = 'seeds' AND s.status IN ('waiting','voting','open') ORDER BY FIELD(s.status,'voting','open','waiting'), s.id LIMIT 1");
+    if ($sid) $packs = Sales::packs((int)$sid);
+    if (!$packs) $packs = array_slice(Packs::all('seeds', true), 0, 3);
+    view('front/home', ['groups' => $groups, 'packs' => $packs]);
 }
 
-function front_catalogue(): void
+function front_groups(): void
 {
-    $camps = front_active_campaigns();
-    $upcoming = Campaigns::hydrate(db()->all(Campaigns::SELECT . " WHERE c.status = 'active' AND c.start_at > NOW() ORDER BY c.start_at LIMIT 6"));
-    $recent = Campaigns::hydrate(db()->all(Campaigns::SELECT . " WHERE c.status IN ('validated','receiving','packaging','ready_pickup') ORDER BY c.closed_at DESC LIMIT 6"));
-    view('front/catalogue', ['campaigns' => $camps, 'upcoming' => $upcoming, 'recent' => $recent, 'title' => 'Campagnes d\'achat groupé',
-        'description' => 'Toutes les campagnes en cours : semences bio Agrosemens, plantes, terreau vrac. Rejoignez un achat groupé et faites baisser le prix.']);
+    $q = trim((string)input('q', ''));
+    $st = (string)input('statut', '');
+    $all = Groups::listActive($q);
+    $counts = ['all' => count($all)] + array_fill_keys(array_keys(Cat::GROUP_STATUS), 0);
+    foreach ($all as $g) $counts[$g['public_status']]++;
+    $groups = isset(Cat::GROUP_STATUS[$st]) ? array_values(array_filter($all, fn($g) => $g['public_status'] === $st)) : $all;
+    view('front/groups', ['groups' => $groups, 'q' => $q, 'st' => isset(Cat::GROUP_STATUS[$st]) ? $st : '', 'counts' => $counts,
+        'title' => 'Les groupes inscrits', 'description' => 'Liste des groupes d\'achat « Les Jardins d\'à Côté » par commune, avec leur statut : bénévoles recherchés, pré-ouverture ou ventes ouvertes.']);
 }
 
-function front_campaign_payload(array $c): array
+function front_group(string $slug): void
 {
-    return [
-        'id' => (int)$c['id'], 'unit' => $c['unit'], 'unitShort' => Units::short($c['unit']), 'ref' => (float)$c['ref_portion'],
-        'refUnit' => Units::ALL[$c['unit']]['ref'] ?? 1, 'refLabel' => Units::ALL[$c['unit']]['ref_label'] ?? '',
-        'public' => (float)$c['public_unit_price'], 'reserved' => $c['state']['reserved'],
-        'tiers' => array_map(fn($t) => ['level' => (int)$t['tier_level'], 'min' => (float)$t['min_qty'], 'price' => (float)$t['unit_price_ttc']], $c['tiers']),
-        'pmg' => $c['pmg'] !== null ? (float)$c['pmg'] : null, 'open' => Campaigns::isOpen($c),
-    ];
-}
-
-function front_campaign(string $slug): void
-{
-    $c = Campaigns::findBySlug($slug);
-    if (!$c || ($c['status'] === 'draft' && !Auth::isAdmin())) abort(404, 'Cette campagne n\'existe pas ou n\'est plus en ligne.');
-    $c = Campaigns::hydrate([$c])[0];
-    $batch = $c['supplier_batch_id'] ? Campaigns::batchTotals((int)$c['supplier_batch_id']) : null;
-    $similar = Campaigns::hydrate(db()->all(Campaigns::SELECT . " WHERE c.status = 'active' AND c.id <> ? AND p.category = ? ORDER BY c.end_at LIMIT 3", [$c['id'], $c['category']]));
-    $st = $c['state'];
-    $priceStr = Units::refPrice($st['price'], $c['unit']);
-    $og = [
-        'type' => 'product',
-        'title' => $c['title'] . ' — ' . money(Pricing::packetPrice($st['price'], (float)$c['ref_portion'])) . ' les ' . Units::qty($c['ref_portion'], $c['unit']),
-        'description' => $st['next_tier']
-            ? 'Plus que ' . $st['parts_missing'] . ' ' . plural($st['parts_missing'], 'part', 'parts') . ' pour débloquer le palier ' . $st['next_tier'] . ' et faire baisser le prix pour tout le monde. Achat groupé solidaire à Toulouse.'
-            : 'Prix plancher débloqué ! Achat groupé solidaire à Toulouse.',
-        'image' => abs_url('/og/' . $c['slug'] . '-' . $st['tier'] . '-' . $st['parts_missing'] . '.png'),
-        'url' => abs_url('/campagne/' . $c['slug']),
-    ];
-    view('front/campaign', [
-        'c' => $c, 'batch' => $batch, 'similar' => $similar, 'title' => $c['title'], 'og' => $og, 'canonical' => abs_url('/campagne/' . $c['slug']),
-        'description' => $og['description'], 'priceStr' => $priceStr, 'payload' => front_campaign_payload($c),
+    $g = Groups::findBySlug($slug);
+    if (!$g || ($g['status'] !== 'active' && !Auth::isAdmin())) abort(404, 'Ce groupe n\'existe pas ou n\'est pas encore publié.');
+    $g = Groups::hydrate([$g])[0];
+    $uid = Auth::id();
+    $s = $g['sale'];
+    view('front/group', [
+        'g' => $g, 'title' => $g['name'], 'myRole' => Groups::role((int)$g['id'], $uid),
+        'myVote' => $s ? Sales::userVote((int)$s['id'], $uid) : null,
+        'inCart' => $s && $uid ? db()->one('SELECT * FROM cart_items WHERE user_id = ? AND sale_id = ?', [$uid, $s['id']]) : null,
+        'myOrder' => $s && $uid ? db()->one("SELECT * FROM orders WHERE user_id = ? AND sale_id = ? AND status <> 'cancelled' ORDER BY id DESC LIMIT 1", [$uid, $s['id']]) : null,
+        'description' => $g['name'] . ' : ' . Cat::GROUP_STATUS[$g['public_status']]['label'] . '. Groupe d\'achat de packs de graines et de plants à ' . $g['commune'] . '.',
+        'og' => ['image' => $g['photo'] ? (str_starts_with((string)Photo::url($g['photo']), '/') ? abs_url((string)Photo::url($g['photo'])) : Photo::url($g['photo'])) : null],
+        'scripts' => '',
     ]);
 }
 
-function front_api_campaign(string $id): void
+function front_group_join(string $slug): void
 {
-    $c = Campaigns::one((int)$id);
-    if (!$c || $c['status'] === 'draft') json_out(['error' => 'introuvable'], 404);
-    $st = $c['state'];
-    json_out([
-        'id' => (int)$c['id'], 'state' => $st, 'participants' => $c['participants'], 'status' => $c['status'],
-        'remaining' => remaining_fr($c['end_at']), 'open' => Campaigns::isOpen($c),
-        'priceRef' => Units::refPrice($st['price'], $c['unit']),
-        'pricePortion' => money(Pricing::packetPrice($st['price'], (float)$c['ref_portion'])),
-        'missingLabel' => Units::qty($st['missing'], $c['unit']),
+    $g = Groups::findBySlug($slug);
+    if (!$g || $g['status'] !== 'active') abort(404);
+    if (!Auth::check()) {
+        $_SESSION['intended'] = '/groupes/' . $slug;
+        $_SESSION['pending_join'] = ['group' => (int)$g['id'], 'role' => input('role') === 'volunteer' ? 'volunteer' : 'member'];
+        flash('info', 'Créez votre compte (30 secondes) ou connectez-vous pour rejoindre ' . $g['name'] . '.');
+        redirect('/inscription');
+    }
+    $role = input('role') === 'volunteer' ? 'volunteer' : 'member';
+    Groups::join((int)$g['id'], (int)Auth::id(), $role);
+    flash('success', $role === 'volunteer'
+        ? 'Merci ! Vous êtes bénévole de ' . $g['name'] . '. Un membre de l\'association vous contactera pour la préparation des packs.'
+        : 'Bienvenue dans ' . $g['name'] . ' ! Vous serez prévenu·e du vote et de l\'ouverture des ventes.');
+    redirect('/groupes/' . $slug);
+}
+
+/** Rejoindre automatiquement le groupe demandé avant la connexion. */
+function apply_pending_join(): void
+{
+    $p = $_SESSION['pending_join'] ?? null;
+    unset($_SESSION['pending_join']);
+    if ($p && Auth::id()) Groups::join((int)$p['group'], (int)Auth::id(), $p['role']);
+}
+
+function front_vote(string $saleId): void
+{
+    $s = Sales::find((int)$saleId);
+    if (!$s) abort(404);
+    if (!Auth::check()) {
+        $_SESSION['intended'] = '/groupes/' . $s['group_slug'];
+        flash('info', 'Connectez-vous ou créez un compte pour voter : le pack gagnant arrivera directement dans votre panier.');
+        redirect('/inscription');
+    }
+    try {
+        Sales::vote((int)$saleId, (int)Auth::id(), input_int('pack_id'));
+        $name = db()->val('SELECT name FROM packs WHERE id = ?', [input_int('pack_id')]);
+        flash('success', 'Vote enregistré pour « ' . $name . ' ». Résultat le ' . date_fr($s['vote_ends_at']) . '.');
+    } catch (DomainException $e) {
+        flash('error', $e->getMessage());
+    }
+    redirect('/groupes/' . $s['group_slug'] . '#pack-' . input_int('pack_id'));
+}
+
+function front_pack(string $slug): void
+{
+    $p = Packs::findBySlug($slug);
+    if (!$p) abort(404, 'Ce pack n\'existe pas.');
+    $groups = db()->all("SELECT g.name, g.slug, s.status AS sale_status FROM sale_packs sp JOIN sales s ON s.id = sp.sale_id JOIN `groups` g ON g.id = s.group_id
+        WHERE sp.pack_id = ? AND g.status = 'active' AND s.status IN ('waiting','voting','open') ORDER BY g.commune", [$p['id']]);
+    view('front/pack', ['p' => $p, 'groupsWithPack' => $groups, 'title' => $p['name'], 'description' => $p['tagline'] . ' — ' . $p['summary']]);
+}
+
+function front_organizers(): void
+{
+    $commune = trim((string)input('commune', ''));
+    $existing = $commune !== '' ? db()->one("SELECT name, slug, commune FROM `groups` WHERE status = 'active' AND commune = ?", [$commune]) : null;
+    view('front/organizers', ['commune' => $commune, 'existing' => $existing, 'u' => Auth::user(), 'title' => 'Collectivités, entreprises, associations',
+        'description' => 'Lancez « Les Jardins d\'à Côté » de votre commune ou de votre entreprise : des packs de graines et de plants à 30 € pour vos habitants ou salariés, sans stock ni budget.']);
+}
+
+function front_organizers_submit(): void
+{
+    $commune = mb_substr(trim((string)input('commune', '')), 0, 120);
+    $email = mb_strtolower(trim((string)input('contact_email', '')));
+    if ($commune === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || trim((string)input('contact_name')) === '') {
+        keep_old();
+        flash('error', 'Merci d\'indiquer la commune, votre nom et un email valide.');
+        redirect('/lancer-un-groupe#proposer');
+    }
+    $type = array_key_exists((string)input('organizer_type'), Cat::ORGANIZERS) ? (string)input('organizer_type') : 'habitants';
+    $name = Groups::defaultName($commune);
+    $id = db()->insert('groups', [
+        'slug' => Groups::uniqueSlug($name), 'name' => $name, 'commune' => $commune, 'postal_code' => mb_substr((string)input('postal_code', ''), 0, 10),
+        'organizer_type' => $type, 'organizer_name' => mb_substr((string)input('organizer_name', ''), 0, 160) ?: null,
+        'contact_name' => mb_substr((string)input('contact_name'), 0, 120), 'contact_email' => $email, 'contact_phone' => mb_substr((string)input('contact_phone', ''), 0, 30) ?: null,
+        'pickup_place' => mb_substr((string)input('pickup_place', ''), 0, 160) ?: null,
+        'description' => mb_substr((string)input('description', ''), 0, 2000) ?: null,
+        'status' => 'proposed', 'proposed_by' => Auth::id(),
     ]);
-}
-
-function front_api_campaigns(): void
-{
-    $out = [];
-    foreach (front_active_campaigns() as $c) {
-        $out[] = ['id' => (int)$c['id'], 'state' => $c['state'], 'participants' => $c['participants'],
-            'pricePortion' => money(Pricing::packetPrice($c['state']['price'], (float)$c['ref_portion']))];
+    if (input('volunteer') && Auth::id()) db()->exec("INSERT IGNORE INTO group_members (group_id, user_id, role) VALUES (?, ?, 'volunteer')", [$id, Auth::id()]);
+    foreach (db()->col("SELECT email FROM users WHERE role = 'admin'") as $a) {
+        Mailer::queue($a, 'Nouvelle proposition de groupe : ' . $commune, Mailer::layout('Proposition de groupe',
+            '<p><strong>' . e($name) . '</strong> proposé par ' . e((string)input('contact_name')) . ' (' . e(Cat::ORGANIZERS[$type]) . ($type && input('organizer_name') ? ' — ' . e((string)input('organizer_name')) : '') . ').</p>'
+            . '<p>' . e($email) . ' · ' . e((string)input('contact_phone')) . '</p><p>' . nl2br(e((string)input('description'))) . '</p>',
+            'Valider dans le back-office', abs_url('/admin/groupes/' . $id)));
     }
-    json_out($out);
-}
-
-function front_short_campaign(string $id): void
-{
-    $slug = db()->val('SELECT slug FROM campaigns WHERE id = ?', [(int)$id]);
-    if (!$slug) abort(404);
-    redirect('/campagne/' . $slug, 301);
-}
-
-/** Visuel de partage dynamique (OpenGraph) : ardoise avec le prix actuel. */
-function front_og_image(string $file): void
-{
-    if (!preg_match('/^(.+?)(?:-\d+-\d+)?\.png$/', $file, $m)) abort(404);
-    $c = Campaigns::findBySlug($m[1]);
-    if (!$c) abort(404);
-    $c = Campaigns::hydrate([$c])[0];
-    $st = $c['state'];
-    $dir = APP_DIR . '/storage/og';
-    if (!is_dir($dir)) @mkdir($dir, 0750, true);
-    $cache = $dir . '/' . $c['id'] . '-' . $st['tier'] . '-' . $st['parts_missing'] . '-' . substr(md5($c['title'] . $c['updated_at']), 0, 6) . '.png';
-    header('Content-Type: image/png');
-    header('Cache-Control: public, max-age=600');
-    if (is_file($cache)) { readfile($cache); exit; }
-
-    $w = 1200; $h = 630;
-    $im = imagecreatetruecolor($w, $h);
-    $col = fn($hex) => imagecolorallocate($im, hexdec(substr($hex, 1, 2)), hexdec(substr($hex, 3, 2)), hexdec(substr($hex, 5, 2)));
-    $wood = $col('#8B5A2B'); $woodL = $col('#A9774A'); $slate = $col('#232B2D'); $chalk = $col('#F8FAFC'); $dim = $col('#AAB5B8');
-    $yellow = $col('#FDE047'); $green = $col('#22C55E'); $kraft = $col('#E6D5B8');
-    imagefilledrectangle($im, 0, 0, $w, $h, $wood);
-    for ($y = 0; $y < $h; $y += 7) imageline($im, 0, $y, $w, $y + 3, $y % 21 === 0 ? $woodL : $wood);
-    imagefilledrectangle($im, 28, 28, $w - 28, $h - 28, $slate);
-    $caveat = APP_DIR . '/fonts/caveat-bold.ttf';
-    $sans = APP_DIR . '/fonts/jakarta-bold.ttf';
-    $sansM = APP_DIR . '/fonts/jakarta-medium.ttf';
-    $text = function (string $t, float $size, int $x, int $y, $color, string $font) use ($im) { imagettftext($im, $size, 0, $x, $y, $color, $font, $t); };
-    $title = mb_strimwidth($c['title'], 0, 34, '…');
-    $text($title, 64, 80, 150, $chalk, $caveat);
-    if ($c['latin_name']) $text($c['latin_name'], 22, 84, 195, $dim, $sansM);
-    $portion = Units::qty($c['ref_portion'], $c['unit']);
-    $now = money(Pricing::packetPrice($st['price'], (float)$c['ref_portion']));
-    $text($now, 110, 80, 360, $yellow, $caveat);
-    $text('les ' . $portion, 28, 84, 410, $chalk, $sansM);
-    if ($st['discount_pct'] > 0) {
-        $pub = money(Pricing::packetPrice($st['public_price'], (float)$c['ref_portion']));
-        $text($pub, 46, 560, 330, $dim, $caveat);
-        imagesetthickness($im, 5);
-        imageline($im, 552, 322, 560 + 150, 300, $chalk);
-        $text('−' . $st['discount_pct'] . ' %', 46, 560, 390, $green, $caveat);
-    }
-    // Jauge
-    imagefilledrectangle($im, 80, 460, 1120, 484, $col('#3A4649'));
-    $p = $st['next_tier'] ? max(0.02, $st['to_next_pct'] / 100) : 1;
-    imagefilledrectangle($im, 80, 460, 80 + (int)(1040 * $p), 484, $green);
-    $msg = $st['next_tier']
-        ? 'Plus que ' . $st['parts_missing'] . ' ' . plural($st['parts_missing'], 'part', 'parts') . ' pour débloquer le palier ' . $st['next_tier'] . ' !'
-        : 'Prix plancher débloqué — récolte abondante !';
-    $text($msg, 40, 80, 545, $yellow, $caveat);
-    $text("Les Jardins d'à Côté · achat groupé solidaire · Toulouse", 18, 80, 585, $kraft, $sans);
-    // Petite pousse
-    imagefilledellipse($im, 1040, 250, 150, 150, $col('#2E383B'));
-    imagesetthickness($im, 8);
-    imageline($im, 1040, 310, 1040, 230, $green);
-    imagefilledellipse($im, 1010, 225, 60, 30, $green);
-    imagefilledellipse($im, 1072, 210, 66, 32, $col('#4ADE80'));
-    imagefilledrectangle($im, 990, 305, 1090, 320, $kraft);
-    imagepng($im, $cache);
-    imagedestroy($im);
-    readfile($cache);
-    exit;
+    Mailer::queue($email, 'Votre proposition de groupe à ' . $commune, Mailer::layout('Merci pour votre proposition',
+        '<p>Bonjour ' . e((string)input('contact_name')) . ',</p><p>Nous avons bien reçu votre proposition pour <strong>' . e($name) . '</strong>. Nous vous recontactons très vite pour caler le lieu de retrait et le calendrier.</p>'
+        . '<p>Une fois validé, le groupe apparaîtra sur le site avec le statut « À la recherche de bénévoles ».</p>', 'Voir les groupes', abs_url('/groupes')));
+    audit('group.proposed', $name);
+    flash('success', 'Merci ! Votre proposition est envoyée. Nous vous recontactons sous quelques jours.');
+    redirect('/lancer-un-groupe');
 }
 
 function front_static(string $page): void
 {
-    $titles = ['how' => 'Comment ça marche', 'cgv' => 'Conditions générales & mandat d\'achat groupé', 'legal' => 'Mentions légales', 'privacy' => 'Données personnelles'];
+    $titles = ['how' => 'Comment ça marche', 'cgv' => 'Conditions générales', 'legal' => 'Mentions légales', 'privacy' => 'Données personnelles'];
     view('front/' . $page, ['title' => $titles[$page] ?? '']);
 }
 
-function front_volunteer_info(): void
+function front_credits(): void
 {
-    $shifts = db()->all("SELECT s.*, (SELECT COUNT(*) FROM shift_signups ss WHERE ss.shift_id = s.id) AS signed FROM shifts s WHERE s.starts_at > NOW() ORDER BY s.starts_at LIMIT 4");
-    view('front/volunteer', ['title' => 'Devenir bénévole', 'shifts' => $shifts]);
-}
-
-function front_volunteer_apply(): void
-{
-    $u = Auth::requireLogin();
-    if ($u['role'] === 'client') {
-        db()->exec('UPDATE users SET wants_volunteer = 1 WHERE id = ?', [$u['id']]);
-        $admins = db()->col("SELECT email FROM users WHERE role = 'admin'");
-        foreach ($admins as $a) {
-            Mailer::queue($a, 'Nouvelle candidature bénévole : ' . Auth::displayName($u),
-                Mailer::layout('Nouveau bénévole', '<p>' . e(Auth::displayName($u)) . ' (' . e($u['email']) . ') souhaite rejoindre l\'équipe des bénévoles.</p>', 'Valider dans le back-office', abs_url('/admin/utilisateurs?filtre=candidats')));
-        }
-    }
-    flash('success', 'Merci ! Un membre de l\'association va valider votre accès à l\'espace bénévoles très vite.');
-    redirect('/devenir-benevole');
+    view('front/credits', ['photos' => Photo::credits(), 'title' => 'Crédits photos']);
 }
 
 function front_qr_png(string $file): void
 {
-    $token = preg_replace('/\.png$/', '', $file);
-    $o = Orders::findByToken($token);
+    $o = Orders::findByToken(preg_replace('/\.png$/', '', $file));
     if (!$o) abort(404);
     header('Content-Type: image/png');
     header('Cache-Control: private, max-age=86400');
@@ -204,30 +162,29 @@ function front_qr_png(string $file): void
 
 function front_pass_redirect(string $token): void
 {
-    if (Auth::isVolunteer()) redirect('/benevoles/distribution/' . $token);
-    redirect('/retrait/' . $token);
+    redirect(Auth::isVolunteer() ? '/benevoles/distribution/' . $token : '/retrait/' . $token);
 }
 
 function front_pass(string $token): void
 {
     $o = Orders::findByToken($token);
     if (!$o) abort(404, 'Ce Pass Retrait est introuvable.');
-    view('front/pass', ['o' => $o, 'items' => Orders::items((int)$o['id']), 'title' => 'Pass Retrait ' . $o['reference'],
-        'head' => '<meta name="robots" content="noindex">']);
+    view('front/pass', ['o' => $o, 'title' => 'Pass Retrait ' . $o['reference'], 'head' => '<meta name="robots" content="noindex">']);
 }
 
 function front_robots(): void
 {
     header('Content-Type: text/plain; charset=utf-8');
-    echo "User-agent: *\nDisallow: /admin\nDisallow: /benevoles\nDisallow: /compte\nDisallow: /retrait\nDisallow: /panier\nDisallow: /engagement\nSitemap: " . abs_url('/sitemap.xml') . "\n";
+    echo "User-agent: *\nDisallow: /admin\nDisallow: /benevoles\nDisallow: /compte\nDisallow: /retrait\nDisallow: /panier\nDisallow: /commande\nSitemap: " . abs_url('/sitemap.xml') . "\n";
     exit;
 }
 
 function front_sitemap(): void
 {
     header('Content-Type: application/xml; charset=utf-8');
-    $urls = ['/', '/campagnes', '/comment-ca-marche', '/devenir-benevole'];
-    foreach (db()->col("SELECT slug FROM campaigns WHERE status <> 'draft'") as $s) $urls[] = '/campagne/' . $s;
+    $urls = ['/', '/groupes', '/comment-ca-marche', '/lancer-un-groupe'];
+    foreach (db()->col("SELECT slug FROM `groups` WHERE status = 'active'") as $s) $urls[] = '/groupes/' . $s;
+    foreach (db()->col('SELECT slug FROM packs WHERE is_active = 1') as $s) $urls[] = '/packs/' . $s;
     echo '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
     foreach ($urls as $u) echo '<url><loc>' . e(abs_url($u)) . '</loc></url>';
     echo '</urlset>';

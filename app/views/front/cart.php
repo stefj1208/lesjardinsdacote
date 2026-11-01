@@ -1,40 +1,40 @@
 <div class="wrap page">
-  <h1 class="page-title">Mon panier</h1>
-  <?php if (!$cart['lines']): ?>
-    <div class="empty"><h3>Votre panier est vide</h3><p>Choisissez un bac, une contenance, et la plante commencera à pousser.</p><a class="btn" href="/campagnes">Voir les campagnes</a></div>
+  <h1>Mon panier</h1>
+  <?php $valid = array_filter($items, fn($i) => $i['valid']); ?>
+  <?php if (!$items): ?>
+    <div class="empty mt-3"><h3>Votre panier est vide</h3><p>Quand un groupe dont vous êtes membre ouvre ses ventes, le pack gagnant arrive ici automatiquement si vous avez voté.</p><a class="btn" href="/groupes">Voir les groupes</a></div>
   <?php else: ?>
-  <div class="layout-aside">
-    <div>
-      <?php foreach ($cart['groups'] as $g): ?>
-      <section class="panel">
-        <h2><?= e($g['label']) ?></h2>
-        <?php foreach ($g['lines'] as $l): $c = $l['campaign']; ?>
+  <div class="layout-aside mt-3">
+    <section class="panel">
+      <?php foreach ($items as $it): ?>
         <div class="cart-line">
-          <div class="thumb"><?php if ($c['image_url']): ?><img src="<?= e($c['image_url']) ?>" alt=""><?php else: partial('partials/plant', ['state' => $c['state']['plant_state'], 'growth' => $c['state']['growth'], 'toT1' => $c['state']['to_t1_pct'] / 100, 'size' => 'sm']); endif; ?></div>
+          <?= ph($it['photo'], $it['pack_name'], '', 300) ?>
           <div>
-            <h3><a href="/campagne/<?= e($c['slug']) ?>"><?= e($c['title']) ?></a></h3>
-            <div class="meta">Sachet de <?= e(Units::qty($l['portion'], $c['unit'])) ?> · <?= money($l['packet_price']) ?> au palier actuel · clôture <?= e(date_fr($c['end_at'])) ?></div>
-            <form class="qty-form" method="post" action="/panier/modifier">
-              <?= csrf_field() ?><input type="hidden" name="key" value="<?= e($l['key']) ?>">
-              <label class="sr-only" for="q-<?= e($l['key']) ?>">Nombre de sachets</label>
-              <input id="q-<?= e($l['key']) ?>" type="number" name="packets" min="1" max="<?= (int)$c['max_packets_per_line'] ?>" value="<?= $l['packets'] ?>">
-              <button class="btn btn--ghost btn--sm" type="submit">Mettre à jour</button>
-              <button class="linkish small" type="submit" name="remove" value="1">Retirer</button>
-            </form>
+            <?php if ($it['source'] === 'vote'): ?><span class="chip chip--ok mb-2" style="margin-bottom:.4rem">Ajouté grâce à votre vote</span><?php endif; ?>
+            <h3 class="mb-0" style="font-size:1.15rem"><a href="/packs/<?= e($it['pack_slug']) ?>" style="color:inherit"><?= e($it['pack_name']) ?></a></h3>
+            <div class="small muted"><?= e($it['group_name']) ?> · <?= e($it['sale_title']) ?></div>
+            <?php if ($it['valid']): ?>
+              <div class="small mt-1">Lot n° <?= $it['batch']['no'] ?> : <?= $it['batch']['fill'] ?> / <?= $it['batch']['size'] ?> · vente ouverte jusqu'au <?= e(date_fr($it['sale_ends_at'])) ?></div>
+              <form class="row mt-1" method="post" action="/panier/modifier"><?= csrf_field() ?><input type="hidden" name="sale_id" value="<?= (int)$it['sale_id'] ?>">
+                <label class="sr-only" for="q<?= (int)$it['sale_id'] ?>">Quantité</label>
+                <select id="q<?= (int)$it['sale_id'] ?>" name="qty" style="width:auto" data-autosubmit><?php for ($q = 1; $q <= (int)$it['max_per_order']; $q++): ?><option value="<?= $q ?>"<?= $q === (int)$it['quantity'] ? ' selected' : '' ?>><?= $q ?> pack<?= $q > 1 ? 's' : '' ?></option><?php endfor; ?></select>
+                <button class="linkish small" type="submit" name="remove" value="1">Retirer</button>
+              </form>
+            <?php else: ?>
+              <p class="small error-text mt-1 mb-0">Cette vente n'est plus ouverte.</p>
+              <form method="post" action="/panier/modifier"><?= csrf_field() ?><input type="hidden" name="sale_id" value="<?= (int)$it['sale_id'] ?>"><button class="linkish small" name="remove" value="1">Retirer</button></form>
+            <?php endif; ?>
           </div>
-          <strong><?= money($l['total']) ?></strong>
+          <strong><?= money($it['total']) ?></strong>
         </div>
-        <?php endforeach; ?>
-      </section>
       <?php endforeach; ?>
-    </div>
+    </section>
     <aside class="panel summary">
       <h2>Récapitulatif</h2>
-      <div class="line"><span>Montant maximum</span><span><?= money($cart['total']) ?></span></div>
-      <p class="small muted">C'est le prix au palier actuel. Si d'autres voisins rejoignent les campagnes, il baisse pour vous aussi.</p>
+      <div class="line"><span>Total</span><span><?= money(array_sum(array_column($valid, 'total'))) ?></span></div>
       <div class="line total"><span>Débité aujourd'hui</span><span><?= money(0) ?></span></div>
-      <a class="btn btn--go btn--block btn--lg mt-4" href="/engagement">M'engager</a>
-      <a class="btn btn--ghost btn--block mt-4" href="/campagnes">Continuer mes achats</a>
+      <p class="small muted">Chaque pack n'est débité que lorsque son lot de 10 achats est complet. Si le lot n'est pas complété avant la fin de la vente, rien n'est prélevé.</p>
+      <?php if ($valid): ?><a class="btn btn--accent btn--lg btn--block" href="/commande">Confirmer mon achat</a><?php endif; ?>
     </aside>
   </div>
   <?php endif; ?>
