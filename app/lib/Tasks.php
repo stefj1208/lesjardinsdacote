@@ -13,7 +13,8 @@ final class Tasks
             $out['sales'] = Sales::tick();
             $out['pickup_reminders'] = Orders::remindLate((int)setting('pickup_reminder_hours', 48));
             $out['shift_reminders'] = self::shiftReminders();
-            $out['photos'] = Photo::cacheBatch(12);
+            Photo::registerAll();
+            $out['photos'] = Photo::cacheBatch(25);
             $out['emails'] = Mailer::processQueue(60);
             db()->exec('DELETE FROM login_attempts WHERE attempted_at < (NOW() - INTERVAL 1 DAY)');
             set_setting('last_cron_at', now());

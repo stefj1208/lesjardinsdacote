@@ -52,6 +52,31 @@ final class Photo
         return $c;
     }
 
+    /** Enregistre toutes les photos utilisées par le site pour qu'elles soient copiées sans attendre une visite. */
+    public static function registerAll(): void
+    {
+        $refs = array_merge(
+            db()->col("SELECT photo FROM packs WHERE photo IS NOT NULL"),
+            db()->col("SELECT photo FROM pack_items WHERE photo IS NOT NULL"),
+            db()->col("SELECT photo FROM `groups` WHERE photo IS NOT NULL"),
+            array_column(Cat::CATEGORIES, 'photo'),
+            [setting('hero_photo', Cat::HERO)],
+            self::STATIC_REFS
+        );
+        foreach ($refs as $ref) foreach (array_filter(array_map('trim', explode('|', (string)$ref))) as $c) {
+            if (str_starts_with($c, '/')) continue;
+            db()->exec('INSERT IGNORE INTO photos (ref, ref_hash) VALUES (?, ?)', [$c, md5($c)]);
+        }
+    }
+
+    /** Photos fixes des pages vitrine. */
+    public const STATIC_REFS = [
+        'commons:Tomates_anciennes.jpg|commons:Heirloom_tomatoes_2.jpg', 'commons:Raised_bed.jpg|commons:Vegetable_garden_detail.jpg',
+        'commons:Vegetable_garden_detail.jpg|commons:Vegetable_garden_1.JPG', 'commons:George_Washington_University_Community_Garden.jpg',
+        'commons:Raised_vegetable_bed_at_Boreham,_Essex,_England.jpg', 'commons:Seedling_planting.jpg|commons:Dar_cucumber_seedlings.jpg',
+        'commons:Beans_in_hand,_gene_bank.jpg|commons:Pumpkin_seeds_in_hand.jpg', 'commons:Carrot_harvest.jpg|commons:Bunches_of_carrots.jpg',
+    ];
+
     /** Copie locale + crédits (appelé par la tâche planifiée). */
     public static function cacheBatch(int $limit = 12): array
     {
