@@ -1,0 +1,8 @@
+# Configuration et données propres au serveur — jamais dans Git
+app/config.php
+app/storage/installed.lock
+app/storage/logs/*
+!app/storage/logs/.gitkeep
+app/storage/og/
+public_html/uploads/produits/
+.DS_Store

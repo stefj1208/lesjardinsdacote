@@ -1,0 +1,2 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Erreur</title><link rel="stylesheet" href="/assets/css/app.css"></head>
+<body><main class="wrap page center" style="max-width:640px"><h1>Une erreur est survenue</h1><p class="muted">Le problème a été enregistré. Réessayez dans un instant ; s'il persiste, écrivez-nous.</p><a class="btn" href="/">Retour à l'accueil</a></main></body></html>
