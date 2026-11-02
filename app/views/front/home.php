@@ -1,5 +1,5 @@
 <?php
-/** @var array $groups  @var array $packs  @var ?array $heroPack  @var array $varieties  @var int $bestPct  @var array $others */
+/** @var array $groups  @var ?array $heroPack  @var ?array $heroSale  @var array $catalog  @var array $varieties  @var int $bestPct */
 $nbVarieties = count($varieties);
 $open = count(array_filter($groups, fn($g) => $g['public_status'] === 'open'));
 ?>
@@ -9,7 +9,7 @@ $open = count(array_filter($groups, fn($g) => $g['public_status'] === 'open'));
     <div>
       <p class="eyebrow eyebrow--start eyebrow--light rise" style="--i:0">Achats groupés entre voisins</p>
       <h1 class="rise" style="--i:1">Des graines rares <?= $bestPct ? 'jusqu\'à <em>' . $bestPct . '&nbsp;% moins chères</em>' : '<em>moins chères</em>' ?> qu'en jardinerie.</h1>
-      <p class="lede rise" style="--i:2">Dans votre commune, les voisins votent pour un pack de variétés rares à <?= eur(setting('default_pack_price', '30')) ?>. On l'achète en gros, des bénévoles le préparent, vous le retirez à deux pas de chez vous.</p>
+      <p class="lede rise" style="--i:2">Dans votre commune, les voisins choisissent ensemble les variétés rares de leur pack à <?= eur(setting('default_pack_price', '30')) ?>. On les achète en gros, des bénévoles préparent les sachets, vous les retirez à deux pas de chez vous.</p>
       <form class="hero-search rise" style="--i:3" action="/groupes" method="get" role="search">
         <label class="sr-only" for="hq">Votre commune</label>
         <input id="hq" name="q" placeholder="Votre commune ou code postal" autocomplete="address-level2">
@@ -18,15 +18,16 @@ $open = count(array_filter($groups, fn($g) => $g['public_status'] === 'open'));
       <div class="hero-links rise" style="--i:4"><a href="/lancer-un-groupe">Mairie, entreprise, jardin partagé : lancez votre groupe</a></div>
       <div class="hero-stats rise" style="--i:5">
         <?php if ($bestPct): ?><div><b class="hl" data-count="<?= $bestPct ?>" data-prefix="−" data-suffix=" %">−<?= $bestPct ?> %</b><span>par rapport aux sachets en jardinerie</span></div><?php endif; ?>
-        <?php if ($nbVarieties): ?><div><b data-count="<?= $nbVarieties ?>"><?= $nbVarieties ?></b><span>variétés rares et bio</span></div><?php endif; ?>
+        <?php if ($nbVarieties): ?><div><b data-count="<?= $nbVarieties ?>"><?= $nbVarieties ?></b><span>variétés rares et bio au choix</span></div><?php endif; ?>
         <div><b>0&nbsp;€</b><span>débité avant que le lot de 10 soit complet</span></div>
       </div>
     </div>
     <?php if ($heroPack): ?>
-      <a class="hero-card rise" style="--i:3;text-decoration:none" href="/packs/<?= e($heroPack['slug']) ?>" aria-label="Voir le pack <?= e($heroPack['name']) ?>">
+      <a class="hero-card rise" style="--i:3;text-decoration:none" href="<?= e($heroPack['link'] ?? '/groupes') ?>" aria-label="Voir <?= e($heroPack['name']) ?>">
         <?= ph($heroPack['photo'], $heroPack['name'], '', 800, true) ?>
         <?php partial('partials/save_badge', ['p' => $heroPack]) ?>
         <div class="hero-card-body">
+          <?php if ($heroSale && $heroSale['status'] === 'voting'): ?><span class="status status--leaf" style="margin-bottom:.5rem">Composition en direct</span><?php endif; ?>
           <h3><?= e($heroPack['name']) ?></h3>
           <div class="muted"><?= e($heroPack['summary']) ?></div>
           <div class="mini-items">
@@ -44,7 +45,7 @@ $open = count(array_filter($groups, fn($g) => $g['public_status'] === 'open'));
 <?php if ($varieties): ?>
 <div class="ticker" aria-label="Quelques variétés des packs">
   <div class="ticker-track">
-    <?php for ($k = 0; $k < 2; $k++): ?><div style="display:flex"<?= $k ? ' aria-hidden="true"' : '' ?>><?php foreach ($varieties as [$n, $v]): ?><span><em><?= e($n) ?></em> <?= e($v) ?></span><?php endforeach; ?></div><?php endfor; ?>
+    <?php for ($k = 0; $k < 2; $k++): ?><div style="display:flex"<?= $k ? ' aria-hidden="true"' : '' ?>><?php foreach ($varieties as $v): ?><span><em><?= e($v['name']) ?></em> <?= e($v['variety']) ?></span><?php endforeach; ?></div><?php endfor; ?>
   </div>
 </div>
 <?php endif; ?>
@@ -62,8 +63,8 @@ $open = count(array_filter($groups, fn($g) => $g['public_status'] === 'open'));
           <h3>Je jardine et je veux acheter</h3>
           <ul class="ticks">
             <li>Je rejoins le groupe de ma commune, gratuitement.</li>
-            <li>Je vote pour le pack de saison qui me plaît.</li>
-            <li>Le pack gagnant arrive dans mon panier. Rien n'est débité tant que le lot de 10 achats n'est pas complet.</li>
+            <li>Je choisis les variétés que je veux voir dans le pack.</li>
+            <li>Le pack composé par le vote arrive dans mon panier. Rien n'est débité tant que le lot de 10 achats n'est pas complet.</li>
             <li>Je retire mon pack préparé par les bénévoles, près de chez moi, et je paie <strong>bien moins cher qu'en jardinerie</strong>.</li>
           </ul>
           <div class="row mt-1"><a class="btn" href="/groupes">Trouver mon groupe <span class="arr" aria-hidden="true">→</span></a><a class="btn btn--ghost" href="/comment-ca-marche">Tout comprendre</a></div>
@@ -87,15 +88,17 @@ $open = count(array_filter($groups, fn($g) => $g['public_status'] === 'open'));
   </div>
 </section>
 
-<?php if ($heroPack && $heroPack['save'] > 0): $h = $heroPack; $pctGroup = (int)round($h['price'] / $h['market'] * 100); ?>
+<?php if ($heroPack && $heroPack['save'] > 0): $h = $heroPack; $pctGroup = (int)round($h['price'] / $h['market'] * 100);
+  $ex = null; foreach ($catalog as $v) if ($v['unit_cost'] !== null && (!$ex || $v['variety'] === 'Belmonte')) $ex = $v; ?>
 <section class="section section--ink">
   <div class="wrap savings">
     <div data-reveal="left">
       <p class="eyebrow eyebrow--start eyebrow--light">Ce que vous économisez</p>
       <h2>Les mêmes variétés bio, <?= $h['save_pct'] ?>&nbsp;% moins cher.</h2>
       <p class="lede">Pour semer <?= count($h['items']) ?> variétés, il faut acheter <?= count($h['items']) ?> sachets en jardinerie. En groupe, l'association achète les grands conditionnements du semencier et les bénévoles répartissent les graines : environ 10 par variété, de quoi garnir un potager familial.</p>
+      <?php if ($ex && $ex['market_price']): ?><p class="lede" style="font-size:1.05rem">Exemple : <?= e(mb_strtolower($ex['name'])) ?> <?= e($ex['variety']) ?>, <?= eur($ex['purchase_price']) ?> TTC les <?= e(Cat::qty($ex['purchase_qty'], $ex['unit'])) ?> chez le semencier, soit <strong><?= money($ex['unit_cost']) ?> les <?= e($ex['portion']) ?></strong>, contre <?= money($ex['market_price']) ?> le sachet en jardinerie.</p><?php endif; ?>
       <div class="reasons">
-        <div class="reason" data-reveal style="--i:1"><span class="reason-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 12l9 4 9-4M3 17l9 4 9-4"/></svg></span><div><h4>Achat en gros conditionnement</h4><p>Les graines sont achetées par 1 000 ou au kilo directement au semencier bio, au prix professionnel.</p></div></div>
+        <div class="reason" data-reveal style="--i:1"><span class="reason-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 12l9 4 9-4M3 17l9 4 9-4"/></svg></span><div><h4>Achat en gros conditionnement</h4><p>Les graines sont achetées par 100, par 1 000 ou au gramme directement au semencier bio, au tarif professionnel.</p></div></div>
         <div class="reason" data-reveal style="--i:2"><span class="reason-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M15 20c0-2.5 1.2-4.5 3-5"/></svg></span><div><h4>Préparé par des bénévoles</h4><p>Pas de magasin, pas d'emballage marketing : des sachets simples, étiquetés avec la variété et le lot.</p></div></div>
         <div class="reason" data-reveal style="--i:3"><span class="reason-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-4.5-7-11a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 6.5-7 11-7 11z"/></svg></span><div><h4>Rien n'est perdu</h4><p>On commande par lots de 10 achats : pas de stock, pas d'invendus à rattraper sur le prix.</p></div></div>
       </div>
@@ -117,24 +120,22 @@ $open = count(array_filter($groups, fn($g) => $g['public_status'] === 'open'));
 </section>
 <?php endif; ?>
 
-<?php if ($packs): ?>
+<?php if ($catalog): $sample = array_slice($catalog, 0, 8); ?>
 <section class="section">
   <div class="wrap">
     <div class="section-head" data-reveal>
-      <div><p class="eyebrow eyebrow--start">Les packs du moment</p><h2>Trois packs de variétés rares, soumis au vote</h2><p>Chaque pack détaille ses variétés, le nombre de graines et sa valeur en jardinerie. Dans chaque groupe, le pack qui recueille le plus de voix est mis en vente.</p></div>
-      <a class="btn btn--ghost" href="/comment-ca-marche">Comment se passe le vote</a>
+      <div><p class="eyebrow eyebrow--start">Vous choisissez</p><h2>Vous votez pour les variétés, le pack se compose tout seul</h2><p>Chaque membre coche jusqu'à 10 variétés parmi <?= count($catalog) ?> raretés bio. Les plus demandées entrent dans le pack, dans l'ordre des voix, jusqu'à atteindre son prix. Plus le groupe achète en gros, plus le pack est riche.</p></div>
+      <?php if ($heroSale && $heroSale['status'] === 'voting'): ?><a class="btn" href="/groupes/<?= e($heroSale['group_slug']) ?>#voter">Voir un vote en cours <span class="arr" aria-hidden="true">→</span></a><?php else: ?><a class="btn btn--ghost" href="/comment-ca-marche">Comment se passe le vote</a><?php endif; ?>
     </div>
-    <div class="packs"><?php foreach (array_values($packs) as $k => $p) partial('partials/pack_card', ['p' => $p, 'mode' => 'show', 'maxItems' => 4, 'i' => $k]); ?></div>
-    <?php foreach ($others as $o): ?>
-      <a class="cta-band on-photo mt-4" href="/packs/<?= e($o['slug']) ?>" style="text-decoration:none" data-reveal>
-        <?= ph($o['photo'], '', '', 1600) ?>
-        <span class="chip" style="justify-self:start;background:var(--sun);color:var(--navy)">Bientôt · <?= e(Cat::label($o['category'])) ?></span>
-        <h2><?= e($o['name']) ?></h2>
-        <p><?= e($o['tagline']) ?></p>
-        <?php if ($o['save']): ?><p style="font:800 1.2rem var(--f-display);color:#fff"><?= eur($o['price']) ?> <span style="color:#B8C4D4;font-weight:500">au lieu de <span class="strike"><?= eur($o['market']) ?></span></span> · −<?= $o['save_pct'] ?>&nbsp;%</p><?php endif; ?>
-        <span class="btn btn--light" style="justify-self:start">Découvrir le pack <span class="arr" aria-hidden="true">→</span></span>
-      </a>
-    <?php endforeach; ?>
+    <div class="vgrid vgrid--show">
+      <?php foreach ($sample as $k => $v): ?>
+        <div class="vcard" data-reveal style="--i:<?= $k % 4 ?>">
+          <span class="vcard-photo"><?= ph($v['photo'], $v['name'] . ' ' . $v['variety'], '', 500) ?></span>
+          <span class="vcard-body"><b><?= e($v['variety'] ?: $v['name']) ?></b><small><?= e($v['name']) ?> · <?= e($v['portion']) ?></small><?php if ($v['note']): ?><span class="vnote"><?= e($v['note']) ?></span><?php endif; ?></span>
+        </div>
+      <?php endforeach; ?>
+    </div>
+    <p class="center mt-3 muted">… et <?= max(0, count($catalog) - count($sample)) ?> autres variétés à découvrir dans votre groupe.</p>
   </div>
 </section>
 <?php endif; ?>

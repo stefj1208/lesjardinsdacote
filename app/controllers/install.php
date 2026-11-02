@@ -53,6 +53,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && !$errors) {
                     'first_name' => $defaults['admin_first'], 'last_name' => $defaults['admin_last'], 'role' => 'admin']);
             }
             set_setting('contact_email', $email);
+            Demo::seedCatalog();
             if (!empty($_POST['demo']) && !db()->val("SELECT id FROM `groups` LIMIT 1")) Demo::seed();
 
             $export = "<?php\n// Généré par l'assistant d'installation le " . date('d/m/Y H:i') . "\nreturn " . var_export($GLOBALS['CONFIG'], true) . ";\n";

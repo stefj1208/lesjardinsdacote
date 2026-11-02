@@ -13,7 +13,7 @@
       <?php if ($o['notes']): ?><dt>Note</dt><dd><?= e($o['notes']) ?></dd><?php endif; ?>
       <?php if ($o['collected_at']): ?><dt>Remise</dt><dd><?= e(date_fr($o['collected_at'], true)) ?></dd><?php endif; ?>
     </dl>
-    <ul class="items mt-3"><?php foreach ($items as $it): ?><li class="item"><?= ph($it['photo'], '', '', 200) ?><span><b><?= e($it['name']) ?></b><small><?= e($it['variety']) ?></small></span><span class="qty"><?= e(Cat::qty((int)$it['quantity'] * (int)$o['quantity'], $it['unit'])) ?></span></li><?php endforeach; ?></ul>
+    <ul class="items mt-3"><?php foreach ($items as $it): ?><li class="item"><?= ph($it['photo'], '', '', 200) ?><span><b><?= e($it['name']) ?></b><small><?= e($it['variety']) ?></small></span><span class="qty"><?= e(Cat::qty((float)$it['quantity'] * (int)$o['quantity'], $it['unit'])) ?></span></li><?php endforeach; ?></ul>
   </section>
   <aside class="stack">
     <div class="panel summary"><h2>Paiement</h2>

@@ -4,7 +4,7 @@ $s = $g['sale'];
 $needed = (int)$g['volunteers_needed'];
 $steps = [
   'recruiting' => ['Recherche de bénévoles', $g['volunteers'] >= $needed ? $g['volunteers'] . ' bénévoles engagés' : $g['volunteers'] . ' / ' . $needed . ' bénévoles'],
-  'preopening' => ['Pré-ouverture', $s && $s['status'] === 'voting' ? 'Vote jusqu\'au ' . date_fr($s['vote_ends_at']) : 'Vote des packs'],
+  'preopening' => ['Pré-ouverture', $s && $s['status'] === 'voting' ? 'Vote jusqu\'au ' . date_fr($s['vote_ends_at']) : 'Vote des variétés'],
   'open'       => ['Ventes ouvertes', $s && $s['status'] === 'open' ? 'Jusqu\'au ' . date_fr($s['sale_ends_at']) : 'Achats par lots de 10'],
 ];
 $order = array_keys($steps);
@@ -31,39 +31,54 @@ $curIdx = array_search($ps, $order, true);
       <?php if ($ps === 'recruiting'): ?>
         <div class="callout" data-reveal>
           <h2 style="font-size:1.6rem">Il manque <?= $needed - $g['volunteers'] ?> <?= plural($needed - $g['volunteers'], 'bénévole', 'bénévoles') ?> pour ouvrir le groupe</h2>
-          <p>Le rôle : aider à préparer les packs (une demi-journée) et à les distribuer (une matinée). Dès que <?= $needed ?> bénévoles sont inscrits, le vote des packs commence automatiquement.</p>
+          <p>Le rôle : aider à préparer les packs (une demi-journée) et à les distribuer (une matinée). Dès que <?= $needed ?> bénévoles sont inscrits, le vote des variétés commence automatiquement.</p>
           <div class="slots mb-2"><?php for ($i = 0; $i < $needed; $i++): ?><span class="slot slot--big<?= $i < $g['volunteers'] ? ' is-person' : '' ?>" style="--i:<?= $i ?>"></span><?php endfor; ?></div>
           <?php if ($myRole === 'volunteer'): ?><p class="mb-0"><strong>Merci, vous êtes bénévole de ce groupe.</strong></p>
           <?php else: ?><form method="post" action="/groupes/<?= e($g['slug']) ?>/rejoindre"><?= csrf_field() ?><input type="hidden" name="role" value="volunteer"><button class="btn" type="submit">Je deviens bénévole</button></form><?php endif; ?>
         </div>
-        <?php if ($s && $s['packs']): ?>
-          <h2 class="mt-6">Les packs qui seront soumis au vote</h2>
-          <p class="muted">Rejoignez le groupe pour être prévenu·e dès l'ouverture du vote. Chaque pack affiche sa valeur en jardinerie.</p>
-          <div class="packs"><?php foreach ($s['packs'] as $p) partial('partials/pack_card', ['p' => $p, 'mode' => 'show', 'sale' => $s, 'wide' => true]); ?></div>
+        <?php if ($s && $s['varieties']): $pj = $s['projection']; ?>
+          <h2 class="mt-6">Les <?= count($s['varieties']) ?> variétés qui seront proposées</h2>
+          <p class="muted">Dès l'ouverture du vote, chaque membre choisit jusqu'à <?= (int)$s['max_choices'] ?> variétés. Les plus demandées composent le pack à <?= eur($s['price']) ?><?= $pj && $pj['save'] ? ' : environ ' . count($pj['items']) . ' variétés, d\'une valeur de ' . eur($pj['market']) . ' en jardinerie' : '' ?>.</p>
+          <?php partial('partials/variety_picker', ['s' => $s, 'myChoices' => [], 'readonly' => true]); ?>
         <?php endif; ?>
 
-      <?php elseif ($s && $s['status'] === 'voting'): ?>
-        <div class="row row--between mb-2" style="align-items:end">
-          <div><h2 class="mb-0">Votez pour votre pack</h2><p class="muted mb-0 mt-1"><?= e($s['title']) ?> · <?= $s['votes_total'] ?> <?= plural($s['votes_total'], 'voix', 'voix') ?> · vote ouvert jusqu'au <?= e(date_fr($s['vote_ends_at'], true, true)) ?></p></div>
-        </div>
-        <?php if (!Auth::check()): ?><div class="notice mb-2" style="margin-bottom:1rem"><a href="/connexion">Connectez-vous</a> ou <a href="/inscription">créez un compte</a> pour voter : le pack gagnant arrivera directement dans votre panier.</div><?php endif; ?>
-        <?php if ($myVote): ?><div class="callout callout--leaf mb-2" style="margin-bottom:1rem"><strong>Votre vote est enregistré.</strong> Vous pouvez en changer jusqu'à la fin du vote. Le pack gagnant arrivera dans votre panier à l'ouverture des ventes.</div><?php endif; ?>
-        <div class="packs"><?php foreach ($s['packs'] as $p) partial('partials/pack_card', ['p' => $p, 'mode' => 'vote', 'sale' => $s, 'myVote' => $myVote, 'wide' => true]); ?></div>
+      <?php elseif ($s && $s['status'] === 'voting'): $pj = $s['projection']; ?>
+        <p class="eyebrow eyebrow--start">Pré-ouverture</p>
+        <h2 class="mb-0">Composez le pack de votre groupe</h2>
+        <p class="lede mt-1" style="font-size:1.08rem">Choisissez jusqu'à <strong><?= (int)$s['max_choices'] ?> variétés</strong> parmi les <?= count($s['varieties']) ?> proposées. Les plus demandées entrent dans le pack, dans l'ordre des voix, jusqu'à atteindre son prix de <?= eur($s['price']) ?>. Vote ouvert jusqu'au <?= e(date_fr($s['vote_ends_at'], true, true)) ?>.</p>
+        <?php if (!Auth::check()): ?><div class="notice mb-2" style="margin-bottom:1rem"><a href="/connexion">Connectez-vous</a> ou <a href="/inscription">créez un compte</a> pour enregistrer vos choix : le pack composé arrivera directement dans votre panier.</div><?php endif; ?>
+        <?php if ($myChoices): ?><div class="callout callout--leaf mb-2" style="margin-bottom:1rem"><strong>Vos <?= count($myChoices) ?> choix sont enregistrés.</strong> Vous pouvez les modifier jusqu'à la fin du vote. Le pack composé arrivera dans votre panier à l'ouverture des ventes.</div><?php endif; ?>
+        <?php if ($pj): ?>
+          <div class="projection" data-reveal>
+            <div class="projection-head">
+              <div><span class="status status--leaf">En direct · <?= $s['voters'] ?> <?= plural($s['voters'], 'votant', 'votants') ?></span><h3 class="mt-1 mb-0">Si le vote s'arrêtait maintenant</h3></div>
+              <?php partial('partials/save_badge', ['p' => $pj]) ?>
+            </div>
+            <div class="projection-stats">
+              <div><b data-count="<?= count($pj['items']) ?>"><?= count($pj['items']) ?></b><span>variétés dans le pack</span></div>
+              <div><b><?= eur($pj['price']) ?></b><span>le pack</span></div>
+              <?php if ($pj['save']): ?><div><b class="strike-soft"><?= eur($pj['market']) ?></b><span>en jardinerie</span></div><div><b class="hl" data-count="<?= e(number_format($pj['save'], 2, '.', '')) ?>" data-decimals="2" data-suffix=" €"><?= eur($pj['save']) ?></b><span>d'économie</span></div><?php endif; ?>
+            </div>
+            <div class="projection-items"><?php foreach ($pj['items'] as $it): ?><span class="pi"><?= ph($it['photo'], '', '', 120) ?><?= e($it['variety'] ?: $it['name']) ?></span><?php endforeach; ?></div>
+            <?php if ($pj['out']): ?><p class="small muted mb-0 mt-2">Hors budget pour l'instant : <?= e(implode(', ', array_map(fn($v) => $v['variety'] ?: $v['name'], array_slice($pj['out'], 0, 8)))) ?><?= count($pj['out']) > 8 ? '…' : '' ?></p><?php endif; ?>
+          </div>
+        <?php endif; ?>
+        <?php partial('partials/variety_picker', ['s' => $s, 'myChoices' => $myChoices]); ?>
         <p class="source-note mt-2"><?= e(setting('market_price_note', Packs::DEFAULT_MARKET_NOTE)) ?></p>
 
       <?php elseif ($s && $s['status'] === 'open'): $b = $s['batch']; $w = $s['winner']; ?>
         <h2>En vente : <?= e($w['name']) ?></h2>
-        <p class="muted">Choisi par le groupe avec <?= (int)$w['votes'] ?> <?= plural((int)$w['votes'], 'voix', 'voix') ?> sur <?= $s['votes_total'] ?>. Vente ouverte jusqu'au <?= e(date_fr($s['sale_ends_at'], true, true)) ?>.</p>
+        <p class="muted"><?= count($w['items']) ?> variétés choisies par <?= $s['voters'] ?> <?= plural($s['voters'], 'membre', 'membres') ?> du groupe. Vente ouverte jusqu'au <?= e(date_fr($s['sale_ends_at'], true, true)) ?>.</p>
         <div class="panel mb-4" style="margin-bottom:1.5rem" data-reveal>
           <div class="row row--between"><h3 class="mb-0">Lot n° <?= $b['no'] ?> : <?= $b['fill'] ?> / <?= $b['size'] ?> achats</h3><?php if ($b['complete']): ?><span class="chip chip--ok"><?= $b['complete'] ?> <?= plural($b['complete'], 'lot complet', 'lots complets') ?> · <?= $b['sold'] ?> packs commandés</span><?php endif; ?></div>
           <div class="slots mt-2"><?php for ($i = 0; $i < $b['size']; $i++): ?><span class="slot slot--big<?= $i < $b['fill'] ? ' is-on' : '' ?>" style="--i:<?= $i ?>"></span><?php endfor; ?></div>
           <p class="mt-2 mb-0 muted">Encore <strong><?= $b['missing'] ?></strong> <?= plural($b['missing'], 'achat', 'achats') ?> pour compléter ce lot. Quand il est complet, les packs sont commandés et débités, puis un nouveau lot de <?= $b['size'] ?> s'ouvre. Si la vente se termine avant, le lot incomplet est annulé et rien n'est débité.</p>
         </div>
-        <?php partial('partials/pack_card', ['p' => $w, 'mode' => 'show', 'sale' => $s, 'maxItems' => 20, 'wide' => true]); ?>
+        <?php partial('partials/pack_card', ['p' => $w, 'mode' => 'show', 'sale' => $s, 'maxItems' => 8, 'wide' => true]); ?>
         <p class="source-note mt-2"><?= e(setting('market_price_note', Packs::DEFAULT_MARKET_NOTE)) ?></p>
 
       <?php else: ?>
-        <div class="callout callout--leaf"><h2 style="font-size:1.6rem">Bénévoles au complet !</h2><p class="mb-0">Le prochain vote de packs sera annoncé aux membres du groupe par email. Rejoignez le groupe pour ne pas le manquer.</p></div>
+        <div class="callout callout--leaf"><h2 style="font-size:1.6rem">Bénévoles au complet !</h2><p class="mb-0">Le prochain vote des variétés sera annoncé aux membres du groupe par email. Rejoignez le groupe pour ne pas le manquer.</p></div>
       <?php endif; ?>
     </div>
 

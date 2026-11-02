@@ -1,7 +1,7 @@
 <?php
 $siteName = setting('association_name', "Les Jardins d'à Côté");
 $pageTitle = isset($title) && $title ? $title . ' · ' . $siteName : $siteName . ' — Achats groupés de graines et de plants entre voisins';
-$desc = $description ?? 'Dans votre commune, un groupe de voisins vote pour un pack de saison (graines, plants, fruitiers, aromatiques), achète en gros et le prépare avec des bénévoles.';
+$desc = $description ?? 'Dans votre commune, un groupe de voisins choisit les variétés rares de son pack de saison, les achète en gros et les prépare avec des bénévoles.';
 $og = $og ?? [];
 $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 $cur = fn(string $p) => ($p === '/' ? $path === '/' : str_starts_with($path, $p)) ? ' aria-current="page"' : '';

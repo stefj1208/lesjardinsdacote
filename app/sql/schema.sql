@@ -1,5 +1,5 @@
 -- =====================================================================
--- Les Jardins d'à Côté — schéma v3 (groupes locaux, votes, packs, lots, prix marché)
+-- Les Jardins d'à Côté — schéma v4 (groupes locaux, vote des variétés, packs composés, lots, prix marché)
 -- MySQL / MariaDB, InnoDB, utf8mb4
 -- =====================================================================
 SET NAMES utf8mb4;
@@ -95,13 +95,38 @@ CREATE TABLE IF NOT EXISTS pack_items (
   name VARCHAR(120) NOT NULL,
   variety VARCHAR(120) NULL,
   latin_name VARCHAR(160) NULL,
-  quantity INT UNSIGNED NOT NULL DEFAULT 1,
+  quantity DECIMAL(10,2) NOT NULL DEFAULT 1,
   unit ENUM('graines','g','plants','godets','arbre','pieds') NOT NULL DEFAULT 'graines',
   market_price DECIMAL(8,2) NULL,
+  unit_cost DECIMAL(8,3) NULL,
+  variety_id INT UNSIGNED NULL,
   note VARCHAR(255) NULL,
   photo VARCHAR(500) NULL,
   KEY idx_items_pack (pack_id, position),
   CONSTRAINT fk_items_pack FOREIGN KEY (pack_id) REFERENCES packs(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Catalogue des variétés proposées au vote (prix d'achat en gros et prix public en jardinerie)
+CREATE TABLE IF NOT EXISTS varieties (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  category ENUM('seeds','vegetables','fruit_trees','aromatics') NOT NULL DEFAULT 'seeds',
+  name VARCHAR(120) NOT NULL,
+  variety VARCHAR(120) NULL,
+  latin_name VARCHAR(160) NULL,
+  note VARCHAR(255) NULL,
+  photo VARCHAR(500) NULL,
+  portion_qty DECIMAL(10,2) NOT NULL DEFAULT 10,
+  unit ENUM('graines','g','plants','godets','arbre','pieds') NOT NULL DEFAULT 'graines',
+  purchase_price DECIMAL(8,2) NULL,
+  purchase_qty DECIMAL(10,2) NULL,
+  market_price DECIMAL(8,2) NULL,
+  supplier VARCHAR(120) NULL,
+  supplier_ref VARCHAR(60) NULL,
+  position SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+  is_active TINYINT(1) NOT NULL DEFAULT 1,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY idx_varieties_cat (category, is_active, position)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Ventes d'un groupe (une par univers et par saison)
@@ -115,6 +140,9 @@ CREATE TABLE IF NOT EXISTS sales (
   sale_days SMALLINT UNSIGNED NOT NULL DEFAULT 21,
   batch_size SMALLINT UNSIGNED NOT NULL DEFAULT 10,
   max_per_order TINYINT UNSIGNED NOT NULL DEFAULT 3,
+  price DECIMAL(8,2) NOT NULL DEFAULT 30.00,
+  max_choices TINYINT UNSIGNED NOT NULL DEFAULT 10,
+  max_varieties SMALLINT UNSIGNED NULL,
   vote_starts_at DATETIME NULL,
   vote_ends_at DATETIME NULL,
   opened_at DATETIME NULL,
@@ -132,25 +160,26 @@ CREATE TABLE IF NOT EXISTS sales (
   CONSTRAINT fk_sales_winner FOREIGN KEY (winning_pack_id) REFERENCES packs(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS sale_packs (
+-- Variétés soumises au vote d'une vente
+CREATE TABLE IF NOT EXISTS sale_varieties (
   sale_id INT UNSIGNED NOT NULL,
-  pack_id INT UNSIGNED NOT NULL,
-  position TINYINT UNSIGNED NOT NULL DEFAULT 1,
-  PRIMARY KEY (sale_id, pack_id),
-  CONSTRAINT fk_sp_sale FOREIGN KEY (sale_id) REFERENCES sales(id) ON DELETE CASCADE,
-  CONSTRAINT fk_sp_pack FOREIGN KEY (pack_id) REFERENCES packs(id)
+  variety_id INT UNSIGNED NOT NULL,
+  PRIMARY KEY (sale_id, variety_id),
+  CONSTRAINT fk_sv_sale FOREIGN KEY (sale_id) REFERENCES sales(id) ON DELETE CASCADE,
+  CONSTRAINT fk_sv_variety FOREIGN KEY (variety_id) REFERENCES varieties(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS votes (
+-- Un membre choisit plusieurs variétés (max_choices)
+CREATE TABLE IF NOT EXISTS variety_votes (
   sale_id INT UNSIGNED NOT NULL,
   user_id INT UNSIGNED NOT NULL,
-  pack_id INT UNSIGNED NOT NULL,
+  variety_id INT UNSIGNED NOT NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (sale_id, user_id),
-  KEY idx_votes_pack (sale_id, pack_id),
-  CONSTRAINT fk_votes_sale FOREIGN KEY (sale_id) REFERENCES sales(id) ON DELETE CASCADE,
-  CONSTRAINT fk_votes_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-  CONSTRAINT fk_votes_pack FOREIGN KEY (pack_id) REFERENCES packs(id)
+  PRIMARY KEY (sale_id, user_id, variety_id),
+  KEY idx_vv_variety (sale_id, variety_id),
+  CONSTRAINT fk_vv_sale FOREIGN KEY (sale_id) REFERENCES sales(id) ON DELETE CASCADE,
+  CONSTRAINT fk_vv_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  CONSTRAINT fk_vv_variety FOREIGN KEY (variety_id) REFERENCES varieties(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Panier enregistré : le pack gagnant y est déposé pour chaque votant
@@ -300,4 +329,6 @@ INSERT IGNORE INTO settings (k, v) VALUES
  ('default_sale_days', '21'),
  ('default_batch_size', '10'),
  ('default_pack_price', '30'),
+ ('sachet_cost', '0.10'),
+ ('pack_fixed_costs', '0'),
  ('market_price_note', 'Prix marché : prix public d''un sachet de la même variété en jardinerie.');

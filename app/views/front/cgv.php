@@ -8,7 +8,7 @@
   <p>Les présentes conditions encadrent la participation aux groupes d'achat « Les Jardins d'à Côté » organisés par <?= $asso ?> (« l'association ») sur ce site. L'association est à but non lucratif : elle mutualise les achats de packs (graines, plants, arbres fruitiers, aromatiques) des membres de chaque groupe local, puis les fait préparer et distribuer par des bénévoles.</p>
 
   <h2>2. Groupes, votes et mandat d'achat groupé</h2>
-  <p>Chaque groupe local passe par trois étapes : recherche de bénévoles, pré-ouverture (vote parmi trois packs) puis ouverture des ventes du pack ayant recueilli le plus de voix. Voter n'engage pas à acheter : le pack gagnant est déposé dans le panier du votant, qui reste libre de confirmer ou non.</p>
+  <p>Chaque groupe local passe par trois étapes : recherche de bénévoles, pré-ouverture (chaque membre choisit les variétés qu'il souhaite) puis ouverture des ventes du pack composé des variétés les plus demandées, dans la limite de son prix. Voter n'engage pas à acheter : le pack composé est déposé dans le panier du votant, qui reste libre de confirmer ou non.</p>
   <p>En confirmant un achat, le membre donne mandat à l'association d'acheter en son nom et pour son compte le pack choisi, dans le cadre d'un groupement d'achat. Ce mandat prend fin à la remise du pack.</p>
 
   <h2>3. Lots et déclenchement de la commande</h2>

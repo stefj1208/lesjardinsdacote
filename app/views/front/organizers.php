@@ -47,7 +47,7 @@
         </ul></div>
       <div class="panel" data-reveal="right"><h3>L'association Les jardins d'à côté</h3>
         <ul class="ticks">
-          <li>Sélectionne trois packs de saison à 30 € de variétés rares (graines bio, plants, fruitiers, aromatiques), avec leur valeur en jardinerie affichée.</li>
+          <li>Sélectionne un catalogue de variétés rares (graines bio, plants, fruitiers, aromatiques) que vos membres choisissent par vote, avec leur valeur en jardinerie affichée.</li>
           <li>Fournit la page du groupe, les votes, les paiements sécurisés et les emails.</li>
           <li>Commande auprès des fournisseurs par lots de 10 : aucun stock, aucun risque d'invendus.</li>
           <li>Forme les bénévoles : fiche de préparation, étiquettes, QR codes de retrait.</li>

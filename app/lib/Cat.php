@@ -34,7 +34,7 @@ final class Cat
     /** Statuts publics d'un groupe (cahier : 3 statuts). */
     public const GROUP_STATUS = [
         'recruiting' => ['label' => 'À la recherche de bénévoles', 'short' => 'Bénévoles recherchés', 'tone' => 'sun'],
-        'preopening' => ['label' => 'Pré-ouverture : vote des packs', 'short' => 'Pré-ouverture', 'tone' => 'leaf'],
+        'preopening' => ['label' => 'Pré-ouverture : vote des variétés', 'short' => 'Pré-ouverture', 'tone' => 'leaf'],
         'open'       => ['label' => 'Ventes ouvertes', 'short' => 'Ventes ouvertes', 'tone' => 'tomato'],
     ];
 
@@ -48,10 +48,11 @@ final class Cat
         return self::CATEGORIES[$cat]['label'] ?? $cat;
     }
 
-    public static function qty(int $q, string $unit): string
+    public static function qty(float|int|string $q, string $unit): string
     {
+        $q = (float)$q;
         $u = self::UNITS[$unit] ?? [$unit, $unit];
-        if ($unit === 'g') return num($q, 0) . "\u{00A0}g";
-        return num($q, 0) . "\u{00A0}" . ($q >= 2 ? $u[1] : $u[0]);
+        if ($unit === 'g') return num($q, 2) . "\u{00A0}g";
+        return num($q, 2) . "\u{00A0}" . ($q >= 2 ? $u[1] : $u[0]);
     }
 }

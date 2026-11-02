@@ -58,7 +58,7 @@ final class Packs
     {
         if (!$items) return '';
         $byUnit = [];
-        foreach ($items as $it) $byUnit[$it['unit']] = ($byUnit[$it['unit']] ?? 0) + (int)$it['quantity'];
+        foreach ($items as $it) $byUnit[$it['unit']] = ($byUnit[$it['unit']] ?? 0) + (float)$it['quantity'];
         $parts = [count($items) . ' ' . plural(count($items), 'variété', 'variétés')];
         foreach ($byUnit as $u => $q) $parts[] = Cat::qty($q, $u);
         return implode(' · ', $parts);

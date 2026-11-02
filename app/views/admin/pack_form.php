@@ -28,7 +28,7 @@
           <td><input name="item_name[<?= $i ?>]" value="<?= e($it['name']) ?>" placeholder="Tomate"></td>
           <td><input name="item_variety[<?= $i ?>]" value="<?= e($it['variety']) ?>" placeholder="Cœur de bœuf"></td>
           <td><input name="item_latin[<?= $i ?>]" value="<?= e($it['latin_name']) ?>"></td>
-          <td style="width:90px"><input name="item_qty[<?= $i ?>]" type="number" min="1" value="<?= e($it['quantity']) ?>"></td>
+          <td style="width:90px"><input name="item_qty[<?= $i ?>]" inputmode="decimal" value="<?= e(num($it['quantity'] ?: 0, 2)) ?>"></td>
           <td><select name="item_unit[<?= $i ?>]"><?php foreach (Cat::UNITS as $k => $u): ?><option value="<?= $k ?>"<?= $it['unit'] === $k ? ' selected' : '' ?>><?= e($u[1]) ?></option><?php endforeach; ?></select></td>
           <td style="width:100px"><input name="item_market[<?= $i ?>]" inputmode="decimal" value="<?= ($it['market_price'] ?? null) !== null && $it['market_price'] !== '' ? e(number_format((float)$it['market_price'], 2, ',', '')) : '' ?>" placeholder="3,30"></td>
           <td><input name="item_note[<?= $i ?>]" value="<?= e($it['note']) ?>"></td>

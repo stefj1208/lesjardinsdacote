@@ -2,7 +2,7 @@
   <h1>Mon panier</h1>
   <?php $valid = array_filter($items, fn($i) => $i['valid']); ?>
   <?php if (!$items): ?>
-    <div class="empty mt-3"><h3>Votre panier est vide</h3><p>Quand un groupe dont vous êtes membre ouvre ses ventes, le pack gagnant arrive ici automatiquement si vous avez voté.</p><a class="btn" href="/groupes">Voir les groupes</a></div>
+    <div class="empty mt-3"><h3>Votre panier est vide</h3><p>Quand un groupe dont vous êtes membre ouvre ses ventes, le pack composé par le vote arrive ici automatiquement si vous avez choisi des variétés.</p><a class="btn" href="/groupes">Voir les groupes</a></div>
   <?php else: ?>
   <div class="layout-aside mt-3">
     <section class="panel">

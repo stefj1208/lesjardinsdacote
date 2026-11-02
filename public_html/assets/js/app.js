@@ -85,6 +85,32 @@
     });
   });
 
+
+  /* Vote des variétés : compteur, limite, filtres */
+  $$('[data-vpick]').forEach(function (form) {
+    var max = parseInt(form.getAttribute('data-max') || '10', 10), counter = $('[data-vcount]', form), bar = $('.vbar', form);
+    function sync(changed) {
+      var boxes = $$('input[type=checkbox]', form), n = boxes.filter(function (b) { return b.checked; }).length;
+      if (n > max && changed) { changed.checked = false; n--; toast('<p>Vous pouvez choisir ' + max + ' variétés au maximum. Décochez-en une pour en ajouter une autre.</p>', 3500); }
+      boxes.forEach(function (b) { b.closest('.vcard').classList.toggle('is-on', b.checked); });
+      if (counter) counter.textContent = n;
+      if (bar) bar.classList.toggle('is-full', n >= max);
+    }
+    form.addEventListener('change', function (e) { if (e.target.matches('input[type=checkbox]')) sync(e.target); });
+    sync(null);
+    $$('[data-fam]', form).forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        var fam = chip.getAttribute('data-fam');
+        $$('[data-fam]', form).forEach(function (c) { c.classList.toggle('is-on', c === chip); });
+        $$('.vcard', form).forEach(function (card) {
+          var show = !fam || card.getAttribute('data-family') === fam;
+          card.hidden = !show;
+          if (show) card.classList.add('is-in');
+        });
+      });
+    });
+  });
+
   /* Partage */
   $$('[data-share]').forEach(function (b) {
     b.addEventListener('click', function () {

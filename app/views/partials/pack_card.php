@@ -14,16 +14,16 @@ $maxItems = $maxItems ?? 5;
   </div>
   <div class="pack-body">
     <div>
-      <?php if ($isWinner): ?><span class="status status--tomato" style="margin-bottom:.6rem">Pack choisi par le groupe</span><?php endif; ?>
-      <h3><a href="/packs/<?= e($p['slug']) ?>"><?= e($p['name']) ?></a></h3>
+      <?php if ($isWinner): ?><span class="status status--tomato" style="margin-bottom:.6rem">Pack composé par le groupe</span><?php endif; ?>
+      <h3><?php if ($p['slug']): ?><a href="/packs/<?= e($p['slug']) ?>"><?= e($p['name']) ?></a><?php else: ?><?= e($p['name']) ?><?php endif; ?></h3>
       <?php if ($p['tagline']): ?><p class="tagline mt-1"><?= e($p['tagline']) ?></p><?php endif; ?>
     </div>
     <div class="pack-price"><?php partial('partials/price', ['p' => $p]) ?></div>
     <ul class="items">
       <?php foreach (array_slice($p['items'], 0, $maxItems) as $it): ?>
-        <li class="item"><?= ph($it['photo'], $it['name'], '', 200) ?><span><b><?= e($it['variety'] ?: $it['name']) ?></b><small><?= e($it['name']) ?></small></span><span class="qty"><?= e(Cat::qty((int)$it['quantity'], $it['unit'])) ?></span></li>
+        <li class="item"><?= ph($it['photo'], $it['name'], '', 200) ?><span><b><?= e($it['variety'] ?: $it['name']) ?></b><small><?= e($it['name']) ?></small></span><span class="qty"><?= e(Cat::qty($it['quantity'], $it['unit'])) ?></span></li>
       <?php endforeach; ?>
-      <?php if (count($p['items']) > $maxItems): ?><li class="items-more"><a href="/packs/<?= e($p['slug']) ?>">+ <?= count($p['items']) - $maxItems ?> autres variétés : voir tout le pack <span aria-hidden="true">→</span></a></li><?php endif; ?>
+      <?php if (count($p['items']) > $maxItems): ?><li class="items-more"><?php if ($p['slug']): ?><a href="/packs/<?= e($p['slug']) ?>">+ <?= count($p['items']) - $maxItems ?> autres variétés : voir tout le pack <span aria-hidden="true">→</span></a><?php else: ?>+ <?= count($p['items']) - $maxItems ?> autres variétés<?php endif; ?></li><?php endif; ?>
     </ul>
     <?php if ($mode === 'vote' || $mode === 'result'): $tot = max(1, (int)($sale['votes_total'] ?? 0)); $pct = (int)round((int)$p['votes'] / $tot * 100); ?>
       <div class="vote-bar">

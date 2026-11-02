@@ -21,6 +21,12 @@
       <div class="field"><label for="dp">Prix d'un pack (€)</label><input id="dp" name="default_pack_price" inputmode="decimal" value="<?= e($s['default_pack_price']) ?>"></div>
       <div class="field"><label for="prh">Relance des retardataires (heures)</label><input id="prh" name="pickup_reminder_hours" type="number" value="<?= e($s['pickup_reminder_hours']) ?>"></div>
     </div>
+    <h2 class="mt-4">Composition des packs</h2>
+    <div class="grid-2">
+      <div class="field"><label for="sachet_cost">Coût d'un sachet + étiquette (€ par variété)</label><input id="sachet_cost" name="sachet_cost" inputmode="decimal" value="<?= e($s['sachet_cost']) ?>"></div>
+      <div class="field"><label for="pack_fixed_costs">Frais fixes par pack (€ : port, fonctionnement)</label><input id="pack_fixed_costs" name="pack_fixed_costs" inputmode="decimal" value="<?= e($s['pack_fixed_costs']) ?>"></div>
+    </div>
+    <p class="hint">À la clôture du vote, les variétés les plus demandées entrent dans le pack tant que leurs coûts, plus ces frais, restent sous le prix du pack.</p>
     <h2 class="mt-4">Communication</h2>
     <div class="field"><label for="market_price_note">Source du « prix marché » (affichée sous les économies)</label><textarea id="market_price_note" name="market_price_note" style="min-height:80px"><?= e($s['market_price_note']) ?></textarea>
       <span class="hint">Les prix marché se saisissent variété par variété dans chaque pack. Le site affiche alors la valeur du pack en jardinerie et l'économie réalisée.</span></div>

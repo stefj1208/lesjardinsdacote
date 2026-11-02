@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-/** Panier enregistré en base (le pack gagnant y est déposé pour chaque votant). */
+/** Panier enregistré en base (le pack composé par le vote y est déposé pour chaque votant). */
 final class Cart
 {
     public static function items(int $userId): array

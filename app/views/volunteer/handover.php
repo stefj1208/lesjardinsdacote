@@ -12,7 +12,7 @@
   <?php elseif ($o['status'] === 'confirmed'): ?><div class="flash flash--info mt-3">Ce pack n'a pas encore été marqué « prêt ». Vérifiez qu'il est bien préparé.</div><?php endif; ?>
   <h2 class="mt-4"><?= (int)$o['quantity'] ?> × <?= e($o['pack_name']) ?></h2>
   <div class="handover">
-    <?php foreach ($items as $it): ?><div class="handover-item"><?= ph($it['photo'], $it['name'], '', 200) ?><div><strong><?= e($it['name']) ?></strong> <?= e($it['variety']) ?></div><strong><?= e(Cat::qty((int)$it['quantity'] * (int)$o['quantity'], $it['unit'])) ?></strong></div><?php endforeach; ?>
+    <?php foreach ($items as $it): ?><div class="handover-item"><?= ph($it['photo'], $it['name'], '', 200) ?><div><strong><?= e($it['name']) ?></strong> <?= e($it['variety']) ?></div><strong><?= e(Cat::qty((float)$it['quantity'] * (int)$o['quantity'], $it['unit'])) ?></strong></div><?php endforeach; ?>
     <?php if ($o['notes']): ?><div class="notice">Note du membre : « <?= e($o['notes']) ?> »</div><?php endif; ?>
   </div>
   <?php if (in_array($o['status'], ['ready', 'confirmed'], true)): ?>

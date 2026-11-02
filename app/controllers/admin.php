@@ -162,16 +162,17 @@ function admin_sale_form(?string $id = null): void
     if ($id && !$s) abort(404);
     $s ??= ['id' => null, 'group_id' => input_int('groupe'), 'category' => 'seeds', 'title' => 'Graines potagères — printemps ' . (date('n') > 6 ? date('Y') + 1 : date('Y')), 'status' => 'waiting',
         'vote_days' => (int)setting('default_vote_days', 10), 'sale_days' => (int)setting('default_sale_days', 21), 'batch_size' => (int)setting('default_batch_size', 10),
-        'max_per_order' => 3, 'pickup_at' => null, 'pickup_place' => '', 'pickup_address' => '', 'notes' => '', 'packs' => []];
+        'max_per_order' => 3, 'pickup_at' => null, 'pickup_place' => '', 'pickup_address' => '', 'notes' => '', 'packs' => [], 'winner' => null,
+        'price' => (float)setting('default_pack_price', 30), 'max_choices' => 10, 'max_varieties' => null, 'varieties' => [], 'projection' => null, 'voters' => 0, 'votes_total' => 0];
     admin_view('sale_form', ['title' => $s['id'] ? 'Vente : ' . $s['title'] : 'Nouvelle vente', 's' => $s, 'groups' => db()->all("SELECT id, name FROM `groups` WHERE status <> 'archived' ORDER BY commune"),
-        'catalog' => Packs::all(null, true), 'section' => 'sales']);
+        'catalog' => Varieties::all(null, true), 'section' => 'sales']);
 }
 
 function admin_sale_save(): void
 {
     Auth::requireAdmin();
     $id = input_int('id');
-    $packs = array_values(array_filter(array_map('intval', (array)($_POST['packs'] ?? []))));
+    $vids = array_values(array_filter(array_map('intval', (array)($_POST['varieties'] ?? []))));
     $data = [
         'group_id' => input_int('group_id'), 'category' => array_key_exists((string)input('category'), Cat::CATEGORIES) ? (string)input('category') : 'seeds',
         'title' => mb_substr(trim((string)input('title', '')), 0, 160), 'vote_days' => max(1, input_int('vote_days', 10)), 'sale_days' => max(1, input_int('sale_days', 21)),
@@ -179,16 +180,19 @@ function admin_sale_save(): void
         'pickup_at' => input('pickup_at') ? date('Y-m-d H:i:s', strtotime((string)input('pickup_at'))) : null,
         'pickup_place' => mb_substr((string)input('pickup_place', ''), 0, 160) ?: null, 'pickup_address' => mb_substr((string)input('pickup_address', ''), 0, 255) ?: null,
         'notes' => (string)input('notes', '') ?: null,
+        'price' => max(1, (float)input_dec('price', 30)), 'max_choices' => max(1, min(50, input_int('max_choices', 10))),
+        'max_varieties' => input_int('max_varieties') ?: null,
     ];
     if (!$data['group_id'] || $data['title'] === '') { flash('error', 'Groupe et titre obligatoires.'); back('/admin/ventes'); }
-    if (count($packs) < 2 || count($packs) > 3) { flash('error', 'Choisissez 3 packs à soumettre au vote (2 au minimum).'); back('/admin/ventes'); }
+    if (count($vids) < 2) { flash('error', 'Cochez au moins 2 variétés à soumettre au vote.'); back('/admin/ventes'); }
     if ($id) {
         $cur = Sales::find($id);
+        if (!in_array($cur['status'], ['waiting', 'voting'], true)) unset($data['price'], $data['max_varieties']);
         db()->update('sales', $data, 'id = ?', [$id]);
-        if (in_array($cur['status'], ['waiting', 'voting'], true)) Sales::setPacks($id, $packs);
+        if (in_array($cur['status'], ['waiting', 'voting'], true)) Varieties::setForSale($id, $vids);
     } else {
         $id = db()->insert('sales', $data);
-        Sales::setPacks($id, $packs);
+        Varieties::setForSale($id, $vids);
     }
     Sales::checkGroup((int)$data['group_id']);
     flash('success', 'Vente enregistrée.' . (Sales::find($id)['status'] === 'voting' ? ' Le groupe a ses bénévoles : le vote est ouvert.' : ''));
@@ -202,10 +206,11 @@ function admin_sale_action(string $id): void
     if (!$s) abort(404);
     switch ((string)input('action')) {
         case 'start_vote':
-            flash(Sales::startVoting((int)$id) ? 'success' : 'error', Sales::find((int)$id)['status'] === 'voting' ? 'Vote ouvert, les membres sont prévenus.' : 'Impossible : il faut au moins 2 packs.'); break;
+            flash(Sales::startVoting((int)$id) ? 'success' : 'error', Sales::find((int)$id)['status'] === 'voting' ? 'Vote ouvert, les membres sont prévenus.' : 'Impossible : il faut au moins 2 variétés.'); break;
         case 'open':
             if ($s['status'] === 'waiting') Sales::startVoting((int)$id);
-            flash(Sales::open((int)$id) ? 'success' : 'error', 'Ventes ouvertes : le pack gagnant est dans le panier des votants.'); break;
+            $ok = Sales::open((int)$id);
+            flash($ok ? 'success' : 'error', $ok ? 'Ventes ouvertes : le pack composé par le vote est dans le panier des votants.' : 'Impossible de composer le pack : vérifiez les variétés et leurs prix d\'achat.'); break;
         case 'close':
             flash(Sales::close((int)$id) ? 'success' : 'error', 'Vente clôturée. Le lot incomplet éventuel est annulé sans débit.'); break;
         case 'extend':
@@ -237,6 +242,58 @@ function admin_sale_csv(string $id): void
 }
 
 /* ------------------------------ Packs ------------------------------ */
+/* ----------------------------- Variétés ----------------------------- */
+function admin_varieties(): void
+{
+    Auth::requireAdmin();
+    $cat = array_key_exists((string)input('univers'), Cat::CATEGORIES) ? (string)input('univers') : null;
+    admin_view('varieties', ['title' => 'Variétés', 'varieties' => Varieties::all($cat), 'cat' => $cat, 'section' => 'varieties']);
+}
+
+function admin_variety_form(?string $id = null): void
+{
+    Auth::requireAdmin();
+    $v = $id ? Varieties::find((int)$id) : null;
+    if ($id && !$v) abort(404);
+    $cat = array_key_exists((string)input('univers'), Cat::CATEGORIES) ? (string)input('univers') : 'seeds';
+    $v ??= Varieties::decorate(['id' => null, 'category' => $cat, 'name' => '', 'variety' => '', 'latin_name' => '', 'note' => '', 'photo' => '', 'portion_qty' => $cat === 'aromatics' ? 0.5 : 10,
+        'unit' => $cat === 'aromatics' ? 'g' : 'graines', 'purchase_price' => null, 'purchase_qty' => 100, 'market_price' => 3.30, 'supplier' => 'Agrosemens', 'supplier_ref' => '', 'position' => 0, 'is_active' => 1]);
+    admin_view('variety_form', ['title' => $v['id'] ? 'Variété : ' . $v['name'] . ' ' . $v['variety'] : 'Nouvelle variété', 'v' => $v, 'section' => 'varieties']);
+}
+
+function admin_variety_save(): void
+{
+    Auth::requireAdmin();
+    $id = input_int('id');
+    $name = mb_substr(trim((string)input('name', '')), 0, 120);
+    if ($name === '') { flash('error', 'Le nom de la plante est obligatoire.'); back('/admin/varietes'); }
+    $data = ['category' => array_key_exists((string)input('category'), Cat::CATEGORIES) ? (string)input('category') : 'seeds', 'name' => $name,
+        'variety' => mb_substr(trim((string)input('variety', '')), 0, 120) ?: null, 'latin_name' => mb_substr(trim((string)input('latin_name', '')), 0, 160) ?: null,
+        'note' => mb_substr(trim((string)input('note', '')), 0, 255) ?: null, 'photo' => trim((string)input('photo', '')) ?: null,
+        'portion_qty' => admin_dec(input('portion_qty')) ?: 10, 'unit' => array_key_exists((string)input('unit'), Cat::UNITS) ? (string)input('unit') : 'graines',
+        'purchase_price' => admin_dec(input('purchase_price')), 'purchase_qty' => admin_dec(input('purchase_qty')), 'market_price' => admin_dec(input('market_price')),
+        'supplier' => mb_substr(trim((string)input('supplier', '')), 0, 120) ?: null, 'supplier_ref' => mb_substr(trim((string)input('supplier_ref', '')), 0, 60) ?: null,
+        'position' => input_int('position'), 'is_active' => input('is_active') ? 1 : 0];
+    if ($up = admin_upload('photo_file', $name . ' ' . $data['variety'])) $data['photo'] = $up;
+    if ($id) db()->update('varieties', $data, 'id = ?', [$id]);
+    else $id = db()->insert('varieties', $data);
+    flash('success', 'Variété enregistrée.');
+    redirect(input('next') === 'new' ? '/admin/varietes/nouvelle?univers=' . $data['category'] : '/admin/varietes?univers=' . $data['category']);
+}
+
+function admin_variety_delete(string $id): void
+{
+    Auth::requireAdmin();
+    if (db()->val('SELECT COUNT(*) FROM sale_varieties sv JOIN sales s ON s.id = sv.sale_id WHERE sv.variety_id = ? AND s.status IN (\'waiting\',\'voting\')', [(int)$id])) {
+        db()->exec('UPDATE varieties SET is_active = 0 WHERE id = ?', [(int)$id]);
+        flash('info', 'Cette variété est proposée dans un vote en cours : elle a été désactivée pour les prochaines ventes.');
+    } else {
+        db()->exec('DELETE FROM varieties WHERE id = ?', [(int)$id]);
+        flash('success', 'Variété supprimée.');
+    }
+    redirect('/admin/varietes');
+}
+
 function admin_packs(): void
 {
     Auth::requireAdmin();
@@ -276,7 +333,7 @@ function admin_pack_save(): void
             $db->insert('pack_items', ['pack_id' => $id, 'position' => (int)$i, 'name' => mb_substr($n, 0, 120),
                 'variety' => mb_substr(trim((string)($_POST['item_variety'][$i] ?? '')), 0, 120) ?: null,
                 'latin_name' => mb_substr(trim((string)($_POST['item_latin'][$i] ?? '')), 0, 160) ?: null,
-                'quantity' => max(1, (int)($_POST['item_qty'][$i] ?? 1)),
+                'quantity' => max(0.01, admin_dec($_POST['item_qty'][$i] ?? null) ?? 1),
                 'unit' => array_key_exists((string)($_POST['item_unit'][$i] ?? ''), Cat::UNITS) ? (string)$_POST['item_unit'][$i] : 'graines',
                 'market_price' => admin_dec($_POST['item_market'][$i] ?? null),
                 'note' => mb_substr(trim((string)($_POST['item_note'][$i] ?? '')), 0, 255) ?: null, 'photo' => $photo]);
@@ -296,7 +353,7 @@ function admin_dec($v): ?float
 function admin_pack_delete(string $id): void
 {
     Auth::requireAdmin();
-    if (db()->val('SELECT COUNT(*) FROM sale_packs WHERE pack_id = ?', [(int)$id]) || db()->val('SELECT COUNT(*) FROM orders WHERE pack_id = ?', [(int)$id])) {
+    if (db()->val('SELECT COUNT(*) FROM sales WHERE winning_pack_id = ?', [(int)$id]) || db()->val('SELECT COUNT(*) FROM orders WHERE pack_id = ?', [(int)$id])) {
         db()->exec('UPDATE packs SET is_active = 0 WHERE id = ?', [(int)$id]);
         flash('info', 'Ce pack est utilisé par une vente : il a été désactivé plutôt que supprimé.');
     } else {
@@ -420,7 +477,7 @@ function admin_user_role(string $id): void
     back('/admin/utilisateurs');
 }
 
-const SETTING_KEYS = ['market_price_note', 'logo_path', 'association_name', 'association_legal', 'association_address', 'contact_email', 'publication_director', 'host_info',
+const SETTING_KEYS = ['sachet_cost', 'pack_fixed_costs', 'market_price_note', 'logo_path', 'association_name', 'association_legal', 'association_address', 'contact_email', 'publication_director', 'host_info',
     'vat_mention', 'pickup_reminder_hours', 'default_vote_days', 'default_sale_days', 'default_batch_size', 'default_pack_price', 'hero_photo'];
 
 function admin_settings(): void

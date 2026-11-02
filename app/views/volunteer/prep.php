@@ -6,12 +6,12 @@
   <h2>1. À commander et à répartir</h2>
   <p class="muted">Quantités totales pour les <?= count($orders) ?> commandes des lots complets.</p>
   <?php foreach ($needs as $n): ?>
-    <div class="need-row"><span class="n"><?= e(Cat::qty((int)$n['total'], $n['unit'])) ?></span><span><strong><?= e($n['name']) ?></strong> <?= e($n['variety']) ?><br><small style="color:#B9C7BE"><?= e($n['latin_name']) ?></small></span></div>
+    <div class="need-row"><span class="n"><?= e(Cat::qty($n['total'], $n['unit'])) ?></span><span><strong><?= e($n['name']) ?></strong> <?= e($n['variety']) ?><br><small style="color:#B9C7BE"><?= e($n['latin_name']) ?></small></span></div>
   <?php endforeach; ?>
   <?php if (!$needs): ?><p class="muted">Aucun lot complet pour l'instant.</p><?php endif; ?>
 
   <h2 class="mt-6">2. Composition d'un pack</h2>
-  <div class="panel"><ul class="items"><?php foreach ($w['items'] ?? [] as $it): ?><li class="item"><?= ph($it['photo'], $it['name'], '', 200) ?><span><b><?= e($it['name']) ?></b><small><?= e($it['variety']) ?></small></span><span class="qty"><?= e(Cat::qty((int)$it['quantity'], $it['unit'])) ?></span></li><?php endforeach; ?></ul></div>
+  <div class="panel"><ul class="items"><?php foreach ($w['items'] ?? [] as $it): ?><li class="item"><?= ph($it['photo'], $it['name'], '', 200) ?><span><b><?= e($it['name']) ?></b><small><?= e($it['variety']) ?></small></span><span class="qty"><?= e(Cat::qty($it['quantity'], $it['unit'])) ?></span></li><?php endforeach; ?></ul></div>
   <form class="row mt-2" method="get" action="/benevoles/preparation/<?= (int)$s['id'] ?>/etiquettes" target="_blank">
     <label class="label" for="lot">N° de lot fournisseur (pour les étiquettes)</label>
     <input id="lot" name="lot" style="max-width:220px" placeholder="Ex. AG-204">

@@ -35,7 +35,7 @@ final class Groups
             $counts[(int)$r['group_id']] = $r;
         }
         $sales = [];
-        foreach (db()->all("SELECT * FROM sales WHERE group_id IN ($ids) AND status IN ('waiting','voting','open') ORDER BY FIELD(status,'open','voting','waiting'), id") as $s) {
+        foreach (db()->all("SELECT s.*, g.name AS group_name, g.slug AS group_slug FROM sales s JOIN `groups` g ON g.id = s.group_id WHERE s.group_id IN ($ids) AND s.status IN ('waiting','voting','open') ORDER BY FIELD(s.status,'open','voting','waiting'), s.id") as $s) {
             $sales[(int)$s['group_id']] ??= $s;
         }
         foreach ($groups as &$g) {

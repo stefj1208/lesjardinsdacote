@@ -4,14 +4,15 @@ Plateforme complète (Phase 1 du cahier des charges JDC-2026-V3 : semences & gra
 
 ---
 
-## 1. Fonctionnement (version 3)
+## 1. Fonctionnement (version 4)
 
 - **Groupes locaux** : « Les Jardins d'à Côté de Pins-Justaret », « … de Pinsaguel ». Mairies, entreprises, associations, jardins partagés ou habitants les proposent via le formulaire « Lancer un groupe » ; l'administrateur les valide.
-- **3 statuts publics** : *À la recherche de bénévoles* → *Pré-ouverture* (dès 2 bénévoles, vote parmi 3 packs) → *Ventes ouvertes*.
-- **Packs** : 3 packs par vente (graines, plants potagers, fruitiers, aromatiques), chacun avec ses variétés, quantités, photos et un prix total (≈ 30 €).
-- **Prix marché et économies** : chaque variété d'un pack a un « prix marché » (prix public d'un sachet ou d'un plant équivalent en jardinerie), saisi dans *Back-office → Packs*. Le site additionne ces prix et affiche partout la valeur du pack en jardinerie, l'économie en euros et en % (cartes de pack, page pack, page groupe, panier, accueil). La source des prix s'édite dans *Paramètres → Communication*. Les packs de démonstration reprennent des variétés rares du catalogue Agrosemens (10 graines par variété, aromatiques au gramme) et le prix public de 3,30 € le sachet (La Semence Bio, relevé de novembre 2026).
+- **3 statuts publics** : *À la recherche de bénévoles* → *Pré-ouverture* (dès 2 bénévoles, vote des variétés) → *Ventes ouvertes*.
+- **Catalogue de variétés** (*Back-office → Variétés*) : pour chaque variété, la portion mise dans le pack (ex. 10 graines, 0,5 g), le prix d'achat en gros TTC (ex. 9,92 € les 100 graines) et le prix d'un sachet en jardinerie. Le coût d'une portion est calculé automatiquement.
+- **Vote des variétés** : chaque vente propose une liste de variétés ; chaque membre en coche jusqu'à 10 (réglable). À la fin du vote, les variétés sont classées par nombre de voix et ajoutées au pack une à une tant que leurs coûts, plus le sachet (0,10 € par défaut) et d'éventuels frais fixes (*Paramètres*), tiennent dans le prix du pack (30 €). Un aperçu « si le vote s'arrêtait maintenant » s'affiche en direct sur la page du groupe. Le pack ainsi composé est enregistré (*Packs composés*) et déposé dans le panier des votants.
+- **Prix des démos** : seul le prix des 100 graines de la tomate Belmonte (9,40 € HT) est relevé ; les autres prix d'achat sont estimés à partir des prix des sachets de 10 graines. Remplacez-les par vos tarifs réels dans *Variétés*.
+- **Prix marché et économies** : chaque variété a un « prix marché » (prix public d'un sachet ou d'un plant équivalent en jardinerie), saisi dans *Back-office → Variétés*. Le site additionne ces prix et affiche partout la valeur du pack en jardinerie, l'économie en euros et en % (cartes de pack, page pack, page groupe, panier, accueil). La source des prix s'édite dans *Paramètres → Communication*. Le catalogue de démonstration reprend 41 variétés potagères rares et 11 aromatiques du catalogue Agrosemens et le prix public de 3,30 € le sachet (La Semence Bio, relevé de novembre 2026).
 - **Charte graphique** : celle de lesjardinsdacote.fr (vert sauge #6A9E6D, bleu nuit #0F172B, polices Nunito, Heebo et Pacifico). Le logo dessiné peut être remplacé par le vôtre dans *Paramètres → Logo*.
-- **Vote** : à la date de fin du vote, le pack en tête est mis en vente et déposé automatiquement dans le panier de chaque votant.
 - **Lots de 10** : rien n'est débité tant que le lot n'a pas 10 achats ; un lot complet est commandé et débité, puis un nouveau lot s'ouvre. À la fin de la vente, le lot incomplet est annulé (0 € débité).
 - **Bénévoles** : préparation (quantités totales par variété, composition d'un pack, étiquettes A4), puis remise des packs par scan du QR code.
 - **Photos** : référence Wikimedia Commons (`commons:Fichier.jpg`), adresse web ou envoi depuis le back-office. Les photos distantes sont copiées sur le serveur par la tâche planifiée, avec leurs crédits (page « Crédits photos »).

@@ -8,7 +8,7 @@
       <div class="l-name"><?= e($it['name']) ?></div>
       <div class="l-var"><?= e($it['variety']) ?></div>
       <div class="l-latin"><?= e($it['latin_name']) ?></div>
-      <div class="l-qty"><?= e(Cat::qty((int)$it['quantity'], $it['unit'])) ?></div>
+      <div class="l-qty"><?= e(Cat::qty($it['quantity'], $it['unit'])) ?></div>
       <div class="l-meta"><?= $lot !== '' ? 'Lot ' . e($lot) . ' · ' : '' ?>cond. <?= date('Y') ?><?= $it['unit'] === 'graines' || $it['unit'] === 'g' ? '<br>Semences destinées aux jardiniers amateurs' : '' ?></div>
     </div>
     <div><div class="l-qr"><?= $qr[$l['token']] ?></div><div class="l-buyer"><?= e($l['buyer']) ?></div></div>
