@@ -7,3 +7,4 @@ app/storage/og/
 public_html/uploads/produits/
 .DS_Store
 public_html/uploads/photos/
+app/storage/export/
