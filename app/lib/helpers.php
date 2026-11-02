@@ -247,6 +247,13 @@ function money($amount, bool $symbol = true): string
     return $symbol ? $s . "\u{00A0}€" : $s;
 }
 
+/** Montant sans centimes quand ils sont nuls : « 30 € », « 46,20 € ». */
+function eur($amount): string
+{
+    $a = round((float)$amount, 2);
+    return ($a == floor($a) ? number_format($a, 0, ',', "\u{202F}") : number_format($a, 2, ',', "\u{202F}")) . "\u{00A0}€";
+}
+
 function num($v, int $maxDecimals = 2): string
 {
     $v = round((float)$v, $maxDecimals);

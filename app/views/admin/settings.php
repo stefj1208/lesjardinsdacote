@@ -21,6 +21,15 @@
       <div class="field"><label for="dp">Prix d'un pack (€)</label><input id="dp" name="default_pack_price" inputmode="decimal" value="<?= e($s['default_pack_price']) ?>"></div>
       <div class="field"><label for="prh">Relance des retardataires (heures)</label><input id="prh" name="pickup_reminder_hours" type="number" value="<?= e($s['pickup_reminder_hours']) ?>"></div>
     </div>
+    <h2 class="mt-4">Communication</h2>
+    <div class="field"><label for="market_price_note">Source du « prix marché » (affichée sous les économies)</label><textarea id="market_price_note" name="market_price_note" style="min-height:80px"><?= e($s['market_price_note']) ?></textarea>
+      <span class="hint">Les prix marché se saisissent variété par variété dans chaque pack. Le site affiche alors la valeur du pack en jardinerie et l'économie réalisée.</span></div>
+    <h2 class="mt-4">Logo</h2>
+    <div class="row" style="align-items:center">
+      <div class="logo-preview"><?php partial('partials/logo') ?></div>
+      <div class="grow"><div class="field"><label for="logo_file">Remplacer le logo (PNG ou WebP transparent, 400 px de large)</label><input id="logo_file" name="logo_file" type="file" accept="image/png,image/webp,image/jpeg"></div>
+        <div class="field"><label for="logo_path">ou adresse de l'image</label><input id="logo_path" name="logo_path" value="<?= e($s['logo_path']) ?>" placeholder="Vide = logo dessiné par défaut"></div></div>
+    </div>
     <h2 class="mt-4">Photo d'accueil</h2>
     <div class="row" style="align-items:flex-start">
       <?= ph($s['hero_photo'] ?: Cat::HERO, '', 'thumb-preview', 400) ?>

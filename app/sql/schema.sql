@@ -1,5 +1,5 @@
 -- =====================================================================
--- Les Jardins d'à Côté — schéma v2 (groupes locaux, votes, packs, lots)
+-- Les Jardins d'à Côté — schéma v3 (groupes locaux, votes, packs, lots, prix marché)
 -- MySQL / MariaDB, InnoDB, utf8mb4
 -- =====================================================================
 SET NAMES utf8mb4;
@@ -97,6 +97,7 @@ CREATE TABLE IF NOT EXISTS pack_items (
   latin_name VARCHAR(160) NULL,
   quantity INT UNSIGNED NOT NULL DEFAULT 1,
   unit ENUM('graines','g','plants','godets','arbre','pieds') NOT NULL DEFAULT 'graines',
+  market_price DECIMAL(8,2) NULL,
   note VARCHAR(255) NULL,
   photo VARCHAR(500) NULL,
   KEY idx_items_pack (pack_id, position),
@@ -298,4 +299,5 @@ INSERT IGNORE INTO settings (k, v) VALUES
  ('default_vote_days', '10'),
  ('default_sale_days', '21'),
  ('default_batch_size', '10'),
- ('default_pack_price', '30');
+ ('default_pack_price', '30'),
+ ('market_price_note', 'Prix marché : prix public d''un sachet de la même variété en jardinerie.');

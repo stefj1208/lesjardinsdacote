@@ -3,23 +3,27 @@
 $mode = $mode ?? 'show';
 $votedThis = isset($myVote) && $myVote === (int)$p['id'];
 $isWinner = !empty($sale['winning_pack_id']) && (int)$sale['winning_pack_id'] === (int)$p['id'];
-$maxItems = $maxItems ?? 6;
+$maxItems = $maxItems ?? 5;
 ?>
-<article class="pack<?= !empty($wide) ? ' pack--wide' : '' ?><?= $votedThis ? ' is-voted' : '' ?><?= $isWinner ? ' is-winner' : '' ?>" id="pack-<?= (int)$p['id'] ?>">
-  <?= ph($p['photo'], $p['name'], '', 900) ?>
-  <span class="pack-price"><?= money($p['price']) ?></span>
+<article class="pack<?= !empty($wide) ? ' pack--wide' : '' ?><?= $votedThis ? ' is-voted' : '' ?><?= $isWinner ? ' is-winner' : '' ?>" id="pack-<?= (int)$p['id'] ?>" data-reveal style="--i:<?= (int)($i ?? 0) ?>">
+  <div class="pack-photo">
+    <?= ph($p['photo'], $p['name'], '', 900) ?>
+    <span class="chip"><?= e(Cat::label($p['category'])) ?></span>
+    <?php partial('partials/save_badge', ['p' => $p]) ?>
+    <span class="pack-count"><?= e($p['summary']) ?></span>
+  </div>
   <div class="pack-body">
     <div>
-      <?php if ($isWinner): ?><span class="status status--tomato mb-2" style="margin-bottom:.6rem">Pack choisi par le groupe</span><?php endif; ?>
-      <h3><a href="/packs/<?= e($p['slug']) ?>" style="color:inherit;text-decoration:none"><?= e($p['name']) ?></a></h3>
-      <p class="small muted mt-1 mb-0"><?= e($p['summary']) ?></p>
+      <?php if ($isWinner): ?><span class="status status--tomato" style="margin-bottom:.6rem">Pack choisi par le groupe</span><?php endif; ?>
+      <h3><a href="/packs/<?= e($p['slug']) ?>"><?= e($p['name']) ?></a></h3>
+      <?php if ($p['tagline']): ?><p class="tagline mt-1"><?= e($p['tagline']) ?></p><?php endif; ?>
     </div>
-    <?php if ($p['tagline']): ?><p class="tagline"><?= e($p['tagline']) ?></p><?php endif; ?>
+    <div class="pack-price"><?php partial('partials/price', ['p' => $p]) ?></div>
     <ul class="items">
       <?php foreach (array_slice($p['items'], 0, $maxItems) as $it): ?>
-        <li class="item"><?= ph($it['photo'], $it['name'], '', 200) ?><span><b><?= e($it['name']) ?></b><small><?= e($it['variety']) ?></small></span><span class="qty"><?= e(Cat::qty((int)$it['quantity'], $it['unit'])) ?></span></li>
+        <li class="item"><?= ph($it['photo'], $it['name'], '', 200) ?><span><b><?= e($it['variety'] ?: $it['name']) ?></b><small><?= e($it['name']) ?></small></span><span class="qty"><?= e(Cat::qty((int)$it['quantity'], $it['unit'])) ?></span></li>
       <?php endforeach; ?>
-      <?php if (count($p['items']) > $maxItems): ?><li class="small muted">+ <?= count($p['items']) - $maxItems ?> autres variétés</li><?php endif; ?>
+      <?php if (count($p['items']) > $maxItems): ?><li class="items-more"><a href="/packs/<?= e($p['slug']) ?>">+ <?= count($p['items']) - $maxItems ?> autres variétés : voir tout le pack <span aria-hidden="true">→</span></a></li><?php endif; ?>
     </ul>
     <?php if ($mode === 'vote' || $mode === 'result'): $tot = max(1, (int)($sale['votes_total'] ?? 0)); $pct = (int)round((int)$p['votes'] / $tot * 100); ?>
       <div class="vote-bar">

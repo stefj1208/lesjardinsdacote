@@ -29,6 +29,18 @@ final class Sales
         return Packs::withItems($packs);
     }
 
+    /** Économie totale des membres du groupe sur cette vente (packs commandés × économie du pack). */
+    public static function groupSaved(array $s): float
+    {
+        $total = 0.0;
+        $byPack = [];
+        foreach ($s['packs'] ?? [] as $p) $byPack[(int)$p['id']] = (float)$p['save'];
+        foreach (db()->all("SELECT pack_id, SUM(quantity) AS q FROM orders WHERE sale_id = ? AND status <> 'cancelled' GROUP BY pack_id", [$s['id']]) as $r) {
+            $total += ($byPack[(int)$r['pack_id']] ?? 0) * (int)$r['q'];
+        }
+        return round($total, 2);
+    }
+
     public static function hydrate(array $s): array
     {
         $s['packs'] = self::packs((int)$s['id']);

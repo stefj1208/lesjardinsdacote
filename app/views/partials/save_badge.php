@@ -1,0 +1,1 @@
+<?php if (!empty($p['save_pct'])): ?><span class="save-badge" aria-label="<?= (int)$p['save_pct'] ?> % moins cher qu'en jardinerie">−<?= (int)$p['save_pct'] ?> %<small>vs jardinerie</small></span><?php endif; ?>

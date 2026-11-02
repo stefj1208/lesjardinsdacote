@@ -34,6 +34,7 @@
     <aside class="panel summary">
       <h2>Récapitulatif</h2>
       <div class="line"><span>Total</span><span><?= money($total) ?></span></div>
+      <?php $saved = array_sum(array_column($items, 'saved')); if ($saved > 0): ?><div class="line line--save"><span>Votre économie vs jardinerie</span><span><?= money($saved) ?></span></div><?php endif; ?>
       <div class="line total"><span>Débité aujourd'hui</span><span><?= money(0) ?></span></div>
       <label class="check mt-3"><input type="checkbox" name="cgv" value="1" required><span>J'accepte les <a href="/cgv" target="_blank">conditions générales</a> et donne mandat à l'association pour acheter ce pack en mon nom, dans le cadre d'un groupement d'achat.</span></label>
       <button class="btn btn--accent btn--lg btn--block mt-3" type="submit" id="checkout-submit">Confirmer mon achat</button>

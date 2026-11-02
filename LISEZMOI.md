@@ -4,11 +4,13 @@ Plateforme complète (Phase 1 du cahier des charges JDC-2026-V3 : semences & gra
 
 ---
 
-## 1. Fonctionnement (version 2)
+## 1. Fonctionnement (version 3)
 
 - **Groupes locaux** : « Les Jardins d'à Côté de Pins-Justaret », « … de Pinsaguel ». Mairies, entreprises, associations, jardins partagés ou habitants les proposent via le formulaire « Lancer un groupe » ; l'administrateur les valide.
 - **3 statuts publics** : *À la recherche de bénévoles* → *Pré-ouverture* (dès 2 bénévoles, vote parmi 3 packs) → *Ventes ouvertes*.
 - **Packs** : 3 packs par vente (graines, plants potagers, fruitiers, aromatiques), chacun avec ses variétés, quantités, photos et un prix total (≈ 30 €).
+- **Prix marché et économies** : chaque variété d'un pack a un « prix marché » (prix public d'un sachet ou d'un plant équivalent en jardinerie), saisi dans *Back-office → Packs*. Le site additionne ces prix et affiche partout la valeur du pack en jardinerie, l'économie en euros et en % (cartes de pack, page pack, page groupe, panier, accueil). La source des prix s'édite dans *Paramètres → Communication*. Les packs de démonstration reprennent des variétés rares du catalogue Agrosemens (10 graines par variété, aromatiques au gramme) et le prix public de 3,30 € le sachet (La Semence Bio, relevé de novembre 2026).
+- **Charte graphique** : celle de lesjardinsdacote.fr (vert sauge #6A9E6D, bleu nuit #0F172B, polices Nunito, Heebo et Pacifico). Le logo dessiné peut être remplacé par le vôtre dans *Paramètres → Logo*.
 - **Vote** : à la date de fin du vote, le pack en tête est mis en vente et déposé automatiquement dans le panier de chaque votant.
 - **Lots de 10** : rien n'est débité tant que le lot n'a pas 10 achats ; un lot complet est commandé et débité, puis un nouveau lot s'ouvre. À la fin de la vente, le lot incomplet est annulé (0 € débité).
 - **Bénévoles** : préparation (quantités totales par variété, composition d'un pack, étiquettes A4), puis remise des packs par scan du QR code.

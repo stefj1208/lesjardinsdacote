@@ -1,4 +1,4 @@
-<?php $rows = $p['items'] ?: [['name' => '', 'variety' => '', 'latin_name' => '', 'quantity' => '', 'unit' => $p['category'] === 'seeds' ? 'graines' : 'plants', 'note' => '', 'photo' => '']]; ?>
+<?php $rows = $p['items'] ?: [['name' => '', 'variety' => '', 'latin_name' => '', 'quantity' => '', 'unit' => $p['category'] === 'seeds' ? 'graines' : 'plants', 'note' => '', 'photo' => '', 'market_price' => null]]; ?>
 <div class="admin-head"><h1><?= $p['id'] ? e($p['name']) : 'Nouveau pack' ?></h1><?php if ($p['id']): ?><a class="btn btn--ghost btn--sm" href="/packs/<?= e($p['slug']) ?>" target="_blank">Voir la page</a><?php endif; ?></div>
 <form method="post" action="/admin/packs/enregistrer" enctype="multipart/form-data">
   <?= csrf_field() ?><input type="hidden" name="id" value="<?= (int)$p['id'] ?>">
@@ -20,7 +20,7 @@
   <section class="panel">
     <h2>Contenu : variétés et quantités</h2>
     <div class="table-wrap"><table class="table editor" id="items">
-      <thead><tr><th>Photo</th><th>Plante</th><th>Variété</th><th>Nom latin</th><th>Quantité</th><th>Unité</th><th>Conseil</th><th></th></tr></thead>
+      <thead><tr><th>Photo</th><th>Plante</th><th>Variété</th><th>Nom latin</th><th>Quantité</th><th>Unité</th><th title="Prix public d'un sachet ou d'un plant équivalent en jardinerie">Prix marché</th><th>Conseil</th><th></th></tr></thead>
       <tbody>
       <?php foreach ($rows as $i => $it): ?>
         <tr>
@@ -30,6 +30,7 @@
           <td><input name="item_latin[<?= $i ?>]" value="<?= e($it['latin_name']) ?>"></td>
           <td style="width:90px"><input name="item_qty[<?= $i ?>]" type="number" min="1" value="<?= e($it['quantity']) ?>"></td>
           <td><select name="item_unit[<?= $i ?>]"><?php foreach (Cat::UNITS as $k => $u): ?><option value="<?= $k ?>"<?= $it['unit'] === $k ? ' selected' : '' ?>><?= e($u[1]) ?></option><?php endforeach; ?></select></td>
+          <td style="width:100px"><input name="item_market[<?= $i ?>]" inputmode="decimal" value="<?= ($it['market_price'] ?? null) !== null && $it['market_price'] !== '' ? e(number_format((float)$it['market_price'], 2, ',', '')) : '' ?>" placeholder="3,30"></td>
           <td><input name="item_note[<?= $i ?>]" value="<?= e($it['note']) ?>"></td>
           <td><button class="btn btn--danger btn--sm" type="button" data-remove-row aria-label="Retirer">×</button></td>
         </tr>
@@ -37,6 +38,10 @@
       </tbody>
     </table></div>
     <button class="btn btn--ghost btn--sm mt-2" type="button" data-add-row="#items">Ajouter une variété</button>
+    <?php if ($p['id'] && !empty($p['market'])): ?>
+      <p class="mt-3 mb-0"><strong>Valeur au prix du marché : <?= eur($p['market']) ?></strong> pour <?= eur($p['price']) ?><?= $p['save'] > 0 ? ' · économie affichée : ' . eur($p['save']) . ' (−' . $p['save_pct'] . ' %)' : ' · aucune économie affichée (prix marché inférieur au prix du pack)' ?></p>
+    <?php endif; ?>
+    <p class="hint mt-1 mb-0">Le prix marché est le prix public d'un sachet (ou d'un plant) de la même variété en jardinerie. La source est indiquée sur le site : <a href="/admin/parametres">Paramètres</a>.</p>
   </section>
   <div class="row mt-3"><button class="btn btn--lg" type="submit">Enregistrer le pack</button></div>
 </form>

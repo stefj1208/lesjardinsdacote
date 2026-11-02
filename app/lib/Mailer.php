@@ -147,17 +147,17 @@ final class Mailer
         $name = e(setting('association_name', "Les Jardins d'à Côté"));
         $addr = e(setting('association_address', ''));
         $cta = $ctaLabel && $ctaUrl
-            ? '<p style="margin:28px 0 8px"><a href="' . e($ctaUrl) . '" style="background:#1E5B3A;color:#ffffff;text-decoration:none;padding:13px 22px;border-radius:999px;font-weight:700;display:inline-block">' . e($ctaLabel) . '</a></p>'
+            ? '<p style="margin:28px 0 8px"><a href="' . e($ctaUrl) . '" style="background:#4A7D4F;color:#ffffff;text-decoration:none;padding:13px 22px;border-radius:999px;font-weight:700;display:inline-block">' . e($ctaLabel) . '</a></p>'
             : '';
         return '<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>' . e($title) . '</title></head>'
-            . '<body style="margin:0;background:#F3F5F1;font-family:Helvetica,Arial,sans-serif;color:#152820">'
+            . '<body style="margin:0;background:#F1F8FF;font-family:Helvetica,Arial,sans-serif;color:#0F172B">'
             . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F3F5F1;padding:24px 12px"><tr><td align="center">'
             . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px">'
-            . '<tr><td style="background:#1E5B3A;border-radius:14px 14px 0 0;padding:22px 26px;border-bottom:5px solid #F1B33C">'
+            . '<tr><td style="background:#0F172B;border-radius:14px 14px 0 0;padding:22px 26px;border-bottom:5px solid #6A9E6D">'
             . '<div style="color:#BFE0C7;font-size:14px">' . $name . '</div>'
             . '<div style="color:#F8FAFC;font-size:22px;font-weight:700;margin-top:6px;font-family:Helvetica,Arial,sans-serif">' . e($title) . '</div></td></tr>'
             . '<tr><td style="background:#ffffff;padding:26px;border-radius:0 0 14px 14px;font-size:15px;line-height:1.6">' . $bodyHtml . $cta . '</td></tr>'
-            . '<tr><td style="padding:18px 8px;font-size:12px;color:#5D6E64;text-align:center">' . $name . ' · ' . $addr . '<br>Achats groupés solidaires · <a href="' . e(base_url()) . '" style="color:#1E5B3A">' . e(parse_url(base_url(), PHP_URL_HOST) ?: '') . '</a></td></tr>'
+            . '<tr><td style="padding:18px 8px;font-size:12px;color:#5B6676;text-align:center">' . $name . ' · ' . $addr . '<br>Achats groupés solidaires · <a href="' . e(base_url()) . '" style="color:#4A7D4F">' . e(parse_url(base_url(), PHP_URL_HOST) ?: '') . '</a></td></tr>'
             . '</table></td></tr></table></body></html>';
     }
 }

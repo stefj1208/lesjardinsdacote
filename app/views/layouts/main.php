@@ -14,10 +14,12 @@ $cartCount = Cart::count(Auth::id());
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><?= e($pageTitle) ?></title>
 <meta name="description" content="<?= e($desc) ?>">
-<meta name="theme-color" content="#1E5B3A">
+<meta name="theme-color" content="#0F172B">
 <link rel="icon" href="<?= asset('img/favicon.svg') ?>" type="image/svg+xml">
-<link rel="preload" href="/assets/fonts/bricolage-grotesque-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/assets/fonts/figtree-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/nunito-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/heebo-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/pacifico-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<script>document.documentElement.classList.add('js')</script>
 <link rel="stylesheet" href="<?= asset('css/app.css') ?>">
 <meta property="og:site_name" content="<?= e($siteName) ?>">
 <meta property="og:locale" content="fr_FR">
@@ -31,17 +33,17 @@ $cartCount = Cart::count(Auth::id());
 </head>
 <body class="<?= e($bodyClass ?? '') ?>">
 <a class="sr-only" href="#main">Aller au contenu</a>
-<?php if (setting('demo_data') === '1'): ?><div class="demo-bar">Site de démonstration : les groupes, votes et achats affichés sont fictifs.</div><?php endif; ?>
 <header class="site-head">
+  <?php if (setting('demo_data') === '1'): ?><div class="demo-bar">Site de démonstration<span class="hide-sm"> : les groupes, votes et achats affichés sont fictifs</span>.</div><?php endif; ?>
   <div class="wrap">
-    <a class="brand" href="/" aria-label="<?= e($siteName) ?> — accueil"><?php partial('partials/logo') ?><span class="brand-name">Les Jardins d'à Côté</span></a>
+    <a class="brand" href="/" aria-label="<?= e($siteName) ?> — accueil"><?php partial('partials/logo') ?><span class="brand-name">Les jardins d'à côté</span></a>
     <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav" data-nav-toggle>
       <svg width="18" height="14" viewBox="0 0 18 14" aria-hidden="true"><path d="M1 1h16M1 7h16M1 13h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Menu
     </button>
     <nav class="nav" id="nav" aria-label="Navigation principale">
       <a href="/groupes"<?= $cur('/groupes') ?>>Les groupes</a>
       <a href="/comment-ca-marche"<?= $cur('/comment-ca-marche') ?>>Comment ça marche</a>
-      <a href="/lancer-un-groupe"<?= $cur('/lancer-un-groupe') ?>>Collectivités & entreprises</a>
+      <a href="/lancer-un-groupe"<?= $cur('/lancer-un-groupe') ?>>Lancer un groupe</a>
       <?php if (Auth::isVolunteer()): ?><a href="/benevoles"<?= $cur('/benevoles') ?>>Bénévoles</a><?php endif; ?>
       <?php if (Auth::isAdmin()): ?><a href="/admin"<?= $cur('/admin') ?>>Back-office</a><?php endif; ?>
       <?php if ($user): ?><a href="/compte"<?= $cur('/compte') ?>>Mon compte</a><?php else: ?><a href="/connexion"<?= $cur('/connexion') ?>>Connexion</a><?php endif; ?>
@@ -60,8 +62,8 @@ $cartCount = Cart::count(Auth::id());
   <div class="wrap">
     <div class="foot-grid">
       <div>
-        <h4><?= e($siteName) ?></h4>
-        <p>Des groupes d'achat de voisins, commune par commune. On choisit ensemble un pack de saison, on commande en gros, des bénévoles le préparent.</p>
+        <span class="foot-brand">Les jardins d'à côté</span>
+        <p>Des groupes d'achat de voisins, commune par commune. On choisit ensemble un pack de variétés rares, on l'achète en gros et on le paie bien moins cher qu'en jardinerie.</p>
         <p class="small"><?= e(setting('association_address')) ?><br><a href="mailto:<?= e(setting('contact_email')) ?>"><?= e(setting('contact_email')) ?></a></p>
       </div>
       <div>
@@ -82,7 +84,7 @@ $cartCount = Cart::count(Auth::id());
         </ul>
       </div>
     </div>
-    <div class="foot-base"><span>© <?= date('Y') ?> <?= e($siteName) ?> — <?= e(setting('association_legal')) ?></span><span>Hébergé en Europe</span></div>
+    <div class="foot-base"><span>© <?= date('Y') ?> <?= e($siteName) ?> — <?= e(setting('association_legal')) ?></span><span><a href="https://www.lesjardinsdacote.fr/">lesjardinsdacote.fr</a></span></div>
   </div>
 </footer>
 <script src="<?= asset('js/app.js') ?>" defer></script>

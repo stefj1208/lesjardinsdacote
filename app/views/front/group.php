@@ -10,12 +10,12 @@ $steps = [
 $order = array_keys($steps);
 $curIdx = array_search($ps, $order, true);
 ?>
-<section class="g-hero">
+<section class="g-hero on-photo">
   <?= ph($g['photo'], 'Jardin à ' . $g['commune'], '', 1800, true) ?>
   <div class="wrap">
-    <?php partial('partials/status', ['s' => $ps, 'long' => true]) ?>
-    <h1 class="mt-2"><?= e($g['name']) ?></h1>
-    <p class="meta mb-0"><?= e($g['commune']) ?> (<?= e($g['postal_code']) ?>) · <?= e($g['organizer_name'] ?: Cat::ORGANIZERS[$g['organizer_type']]) ?> · <?= $g['members'] ?> <?= plural($g['members'], 'membre', 'membres') ?></p>
+    <div class="rise" style="--i:0"><?php partial('partials/status', ['s' => $ps, 'long' => true]) ?></div>
+    <h1 class="mt-2 rise" style="--i:1"><?= e($g['name']) ?></h1>
+    <p class="meta mb-0 rise" style="--i:2"><?= e($g['commune']) ?> (<?= e($g['postal_code']) ?>) · <?= e($g['organizer_name'] ?: Cat::ORGANIZERS[$g['organizer_type']]) ?> · <?= $g['members'] ?> <?= plural($g['members'], 'membre', 'membres') ?></p>
   </div>
 </section>
 
@@ -29,16 +29,16 @@ $curIdx = array_search($ps, $order, true);
   <div class="g-layout" style="padding-bottom:5rem">
     <div>
       <?php if ($ps === 'recruiting'): ?>
-        <div class="callout">
+        <div class="callout" data-reveal>
           <h2 style="font-size:1.6rem">Il manque <?= $needed - $g['volunteers'] ?> <?= plural($needed - $g['volunteers'], 'bénévole', 'bénévoles') ?> pour ouvrir le groupe</h2>
           <p>Le rôle : aider à préparer les packs (une demi-journée) et à les distribuer (une matinée). Dès que <?= $needed ?> bénévoles sont inscrits, le vote des packs commence automatiquement.</p>
-          <div class="slots mb-2"><?php for ($i = 0; $i < $needed; $i++): ?><span class="slot slot--big<?= $i < $g['volunteers'] ? ' is-person' : '' ?>"></span><?php endfor; ?></div>
+          <div class="slots mb-2"><?php for ($i = 0; $i < $needed; $i++): ?><span class="slot slot--big<?= $i < $g['volunteers'] ? ' is-person' : '' ?>" style="--i:<?= $i ?>"></span><?php endfor; ?></div>
           <?php if ($myRole === 'volunteer'): ?><p class="mb-0"><strong>Merci, vous êtes bénévole de ce groupe.</strong></p>
           <?php else: ?><form method="post" action="/groupes/<?= e($g['slug']) ?>/rejoindre"><?= csrf_field() ?><input type="hidden" name="role" value="volunteer"><button class="btn" type="submit">Je deviens bénévole</button></form><?php endif; ?>
         </div>
         <?php if ($s && $s['packs']): ?>
           <h2 class="mt-6">Les packs qui seront soumis au vote</h2>
-          <p class="muted">Rejoignez le groupe pour être prévenu·e dès l'ouverture du vote.</p>
+          <p class="muted">Rejoignez le groupe pour être prévenu·e dès l'ouverture du vote. Chaque pack affiche sa valeur en jardinerie.</p>
           <div class="packs"><?php foreach ($s['packs'] as $p) partial('partials/pack_card', ['p' => $p, 'mode' => 'show', 'sale' => $s, 'wide' => true]); ?></div>
         <?php endif; ?>
 
@@ -49,16 +49,18 @@ $curIdx = array_search($ps, $order, true);
         <?php if (!Auth::check()): ?><div class="notice mb-2" style="margin-bottom:1rem"><a href="/connexion">Connectez-vous</a> ou <a href="/inscription">créez un compte</a> pour voter : le pack gagnant arrivera directement dans votre panier.</div><?php endif; ?>
         <?php if ($myVote): ?><div class="callout callout--leaf mb-2" style="margin-bottom:1rem"><strong>Votre vote est enregistré.</strong> Vous pouvez en changer jusqu'à la fin du vote. Le pack gagnant arrivera dans votre panier à l'ouverture des ventes.</div><?php endif; ?>
         <div class="packs"><?php foreach ($s['packs'] as $p) partial('partials/pack_card', ['p' => $p, 'mode' => 'vote', 'sale' => $s, 'myVote' => $myVote, 'wide' => true]); ?></div>
+        <p class="source-note mt-2"><?= e(setting('market_price_note', Packs::DEFAULT_MARKET_NOTE)) ?></p>
 
       <?php elseif ($s && $s['status'] === 'open'): $b = $s['batch']; $w = $s['winner']; ?>
         <h2>En vente : <?= e($w['name']) ?></h2>
         <p class="muted">Choisi par le groupe avec <?= (int)$w['votes'] ?> <?= plural((int)$w['votes'], 'voix', 'voix') ?> sur <?= $s['votes_total'] ?>. Vente ouverte jusqu'au <?= e(date_fr($s['sale_ends_at'], true, true)) ?>.</p>
-        <div class="panel mb-4" style="margin-bottom:1.5rem">
+        <div class="panel mb-4" style="margin-bottom:1.5rem" data-reveal>
           <div class="row row--between"><h3 class="mb-0">Lot n° <?= $b['no'] ?> : <?= $b['fill'] ?> / <?= $b['size'] ?> achats</h3><?php if ($b['complete']): ?><span class="chip chip--ok"><?= $b['complete'] ?> <?= plural($b['complete'], 'lot complet', 'lots complets') ?> · <?= $b['sold'] ?> packs commandés</span><?php endif; ?></div>
-          <div class="slots mt-2"><?php for ($i = 0; $i < $b['size']; $i++): ?><span class="slot slot--big<?= $i < $b['fill'] ? ' is-on' : '' ?>"></span><?php endfor; ?></div>
+          <div class="slots mt-2"><?php for ($i = 0; $i < $b['size']; $i++): ?><span class="slot slot--big<?= $i < $b['fill'] ? ' is-on' : '' ?>" style="--i:<?= $i ?>"></span><?php endfor; ?></div>
           <p class="mt-2 mb-0 muted">Encore <strong><?= $b['missing'] ?></strong> <?= plural($b['missing'], 'achat', 'achats') ?> pour compléter ce lot. Quand il est complet, les packs sont commandés et débités, puis un nouveau lot de <?= $b['size'] ?> s'ouvre. Si la vente se termine avant, le lot incomplet est annulé et rien n'est débité.</p>
         </div>
         <?php partial('partials/pack_card', ['p' => $w, 'mode' => 'show', 'sale' => $s, 'maxItems' => 20, 'wide' => true]); ?>
+        <p class="source-note mt-2"><?= e(setting('market_price_note', Packs::DEFAULT_MARKET_NOTE)) ?></p>
 
       <?php else: ?>
         <div class="callout callout--leaf"><h2 style="font-size:1.6rem">Bénévoles au complet !</h2><p class="mb-0">Le prochain vote de packs sera annoncé aux membres du groupe par email. Rejoignez le groupe pour ne pas le manquer.</p></div>
@@ -68,7 +70,7 @@ $curIdx = array_search($ps, $order, true);
     <aside class="side">
       <?php if ($s && $s['status'] === 'open'): $w = $s['winner']; ?>
         <div class="panel buy-box" id="acheter">
-          <div class="row row--between"><span class="big-num"><?= money($w['price']) ?></span><span class="muted small">le pack</span></div>
+          <?php partial('partials/price', ['p' => $w]) ?>
           <?php if ($inCart): ?>
             <div class="callout callout--leaf" style="padding:1rem"><strong>Ce pack est dans votre panier<?= $inCart['source'] === 'vote' ? ' (grâce à votre vote)' : '' ?>.</strong></div>
             <a class="btn btn--accent btn--lg btn--block" href="/panier">Confirmer mon achat</a>
@@ -83,6 +85,12 @@ $curIdx = array_search($ps, $order, true);
             </form>
           <?php endif; ?>
           <p class="small muted mb-0">Rien n'est débité tant que votre lot de <?= (int)$s['batch_size'] ?> achats n'est pas complet. Annulable jusque-là.</p>
+        </div>
+      <?php endif; ?>
+      <?php if (!empty($groupSaved) && $groupSaved > 0): ?>
+        <div class="panel panel--navy group-savings" data-reveal>
+          <b data-count="<?= e(number_format($groupSaved, 0, '.', '')) ?>" data-suffix=" €"><?= eur(round($groupSaved)) ?></b>
+          <span>déjà économisés par les membres du groupe par rapport aux prix en jardinerie</span>
         </div>
       <?php endif; ?>
 
@@ -108,12 +116,12 @@ $curIdx = array_search($ps, $order, true);
       <?php if ($g['description']): ?><div class="panel"><h3>À propos</h3><div class="muted"><?= nl2p($g['description']) ?></div></div><?php endif; ?>
       <div class="panel">
         <h3>Faire grandir le groupe</h3>
-        <?php $shareText = $g['name'] . ' : on achète ensemble des packs de graines et de plants à 30 €. Rejoignez-nous !'; $shareUrl = abs_url('/groupes/' . $g['slug']); ?>
+        <?php $shareText = $g['name'] . ' : on achète ensemble des packs de graines rares, bien moins cher qu\'en jardinerie. Rejoignez-nous !'; $shareUrl = abs_url('/groupes/' . $g['slug']); ?>
         <div class="row"><a class="btn btn--sm" target="_blank" rel="noopener" href="https://wa.me/?text=<?= rawurlencode($shareText . ' ' . $shareUrl) ?>">WhatsApp</a><a class="btn btn--ghost btn--sm" target="_blank" rel="noopener" href="https://www.facebook.com/sharer/sharer.php?u=<?= rawurlencode($shareUrl) ?>">Facebook</a><button class="btn btn--ghost btn--sm" type="button" data-share data-share-text="<?= e($shareText) ?>" data-share-url="<?= e($shareUrl) ?>">Copier le lien</button></div>
       </div>
     </aside>
   </div>
 </div>
 <?php if ($s && $s['status'] === 'open' && !$myOrder): ?>
-<a class="mobile-cta" href="<?= $inCart ? '/panier' : '#acheter' ?>"><span><strong><?= money($s['winner']['price']) ?></strong> · lot <?= $s['batch']['fill'] ?>/<?= $s['batch']['size'] ?></span><span class="btn btn--accent btn--sm"><?= $inCart ? 'Confirmer' : 'Acheter' ?></span></a>
+<a class="mobile-cta" href="<?= $inCart ? '/panier' : '#acheter' ?>"><span><strong><?= eur($s['winner']['price']) ?></strong><?= $s['winner']['save'] ? ' <s>' . eur($s['winner']['market']) . '</s>' : '' ?> · lot <?= $s['batch']['fill'] ?>/<?= $s['batch']['size'] ?></span><span class="btn btn--accent btn--sm"><?= $inCart ? 'Confirmer' : 'Acheter' ?></span></a>
 <?php endif; ?>

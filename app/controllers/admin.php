@@ -278,11 +278,19 @@ function admin_pack_save(): void
                 'latin_name' => mb_substr(trim((string)($_POST['item_latin'][$i] ?? '')), 0, 160) ?: null,
                 'quantity' => max(1, (int)($_POST['item_qty'][$i] ?? 1)),
                 'unit' => array_key_exists((string)($_POST['item_unit'][$i] ?? ''), Cat::UNITS) ? (string)$_POST['item_unit'][$i] : 'graines',
+                'market_price' => admin_dec($_POST['item_market'][$i] ?? null),
                 'note' => mb_substr(trim((string)($_POST['item_note'][$i] ?? '')), 0, 255) ?: null, 'photo' => $photo]);
         }
     });
     flash('success', 'Pack enregistré.');
     redirect('/admin/packs/' . $id);
+}
+
+/** Montant saisi (« 3,30 ») ou null si vide. */
+function admin_dec($v): ?float
+{
+    $v = str_replace([' ', "\u{202F}", "\u{00A0}", ',', '€'], ['', '', '', '.', ''], trim((string)$v));
+    return $v !== '' && is_numeric($v) && (float)$v >= 0 ? round((float)$v, 2) : null;
 }
 
 function admin_pack_delete(string $id): void
@@ -412,7 +420,7 @@ function admin_user_role(string $id): void
     back('/admin/utilisateurs');
 }
 
-const SETTING_KEYS = ['association_name', 'association_legal', 'association_address', 'contact_email', 'publication_director', 'host_info',
+const SETTING_KEYS = ['market_price_note', 'logo_path', 'association_name', 'association_legal', 'association_address', 'contact_email', 'publication_director', 'host_info',
     'vat_mention', 'pickup_reminder_hours', 'default_vote_days', 'default_sale_days', 'default_batch_size', 'default_pack_price', 'hero_photo'];
 
 function admin_settings(): void
@@ -441,6 +449,7 @@ function admin_settings_save(): void
         set_setting($k, mb_substr(trim((string)$_POST[$k]), 0, 2000));
     }
     if ($up = admin_upload('hero_file', 'accueil')) set_setting('hero_photo', $up);
+    if ($up = admin_upload('logo_file', 'logo')) set_setting('logo_path', $up);
     flash('success', 'Paramètres enregistrés.');
     redirect('/admin/parametres');
 }

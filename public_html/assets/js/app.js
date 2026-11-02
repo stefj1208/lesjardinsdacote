@@ -16,6 +16,55 @@
   }, true);
   $$('[data-autosubmit]').forEach(function (el) { el.addEventListener('change', function () { el.form.submit(); }); });
 
+
+  /* ---------- Animations ---------- */
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // En-tête : se densifie au défilement
+  var head = $('.site-head');
+  function onScroll() { if (head) head.classList.toggle('is-scrolled', window.scrollY > 40); }
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  // Compteurs : 0 → valeur
+  function fmt(n, dec) {
+    return n.toFixed(dec).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  }
+  function count(el) {
+    if (el._done) return; el._done = true;
+    var to = parseFloat(el.getAttribute('data-count')), dec = parseInt(el.getAttribute('data-decimals') || '0', 10);
+    var pre = el.getAttribute('data-prefix') || '', suf = el.getAttribute('data-suffix') || '';
+    if (isNaN(to)) return;
+    if (reduce) { el.textContent = pre + fmt(to, dec) + suf; return; }
+    var t0 = null, dur = 1400;
+    function step(t) {
+      if (!t0) t0 = t;
+      var k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+      el.textContent = pre + fmt(to * e, dec) + suf;
+      if (k < 1) requestAnimationFrame(step);
+    }
+    el.textContent = pre + fmt(0, dec) + suf;
+    requestAnimationFrame(step);
+  }
+
+  var targets = $$('[data-reveal], .meter, .slots, .compare, [data-count]');
+  function show(el) {
+    el.classList.add('is-in');
+    if (el.hasAttribute('data-count')) count(el);
+    $$('[data-count]', el).forEach(count);
+  }
+  if (!('IntersectionObserver' in window) || reduce) {
+    targets.forEach(show);
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) { if (en.isIntersecting) { show(en.target); io.unobserve(en.target); } });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
+    targets.forEach(function (el) { io.observe(el); });
+    // Filet de sécurité : rien ne reste caché si l'observateur ne se déclenche pas (impression, captures).
+    setTimeout(function () { targets.forEach(function (el) { var r = el.getBoundingClientRect(); if (r.top < window.innerHeight) show(el); }); }, 1200);
+    window.addEventListener('beforeprint', function () { targets.forEach(show); });
+  }
+
   var toastEl;
   function toast(html, ms) {
     if (!toastEl) { toastEl = document.createElement('div'); toastEl.className = 'toast'; toastEl.setAttribute('role', 'status'); document.body.appendChild(toastEl); }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 /** Mise à jour automatique de la base au premier passage après un déploiement. */
 final class Migrator
 {
-    public const VERSION = 2;
+    public const VERSION = 3;
 
     public static function execFile(string $file): void
     {
@@ -23,6 +23,7 @@ final class Migrator
         try {
             $v = (int)(db()->val("SELECT v FROM settings WHERE k = 'schema_version'") ?? 0);
             if ($v < 2) self::to2();
+            if ($v < 3) self::to3();
         } finally {
             db()->val("SELECT RELEASE_LOCK('jdc_migrate')");
         }
@@ -47,5 +48,16 @@ final class Migrator
         set_setting('schema_version', '2');
         if ($hasV1 && setting('demo_data') === '1') Demo::seed();
         audit('migrate', 'schéma v2');
+    }
+
+    /** v2 → v3 : prix marché par variété (affichage des économies), nouveaux packs de démonstration. */
+    private static function to3(): void
+    {
+        $has = (bool)db()->val("SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'pack_items' AND column_name = 'market_price'");
+        if (!$has) db()->pdo->exec('ALTER TABLE pack_items ADD COLUMN market_price DECIMAL(8,2) NULL AFTER unit');
+        db()->exec("INSERT IGNORE INTO settings (k, v) VALUES ('market_price_note', ?)", [Packs::DEFAULT_MARKET_NOTE]);
+        set_setting('schema_version', '3');
+        if (setting('demo_data') === '1') { Demo::purge(); Demo::seed(); }
+        audit('migrate', 'schéma v3');
     }
 }

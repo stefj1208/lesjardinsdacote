@@ -1,25 +1,25 @@
 <div class="phases">
-  <div class="phase">
+  <div class="phase" data-reveal style="--i:0">
     <span class="phase-num" aria-hidden="true">1</span>
     <?php partial('partials/status', ['s' => 'recruiting']) ?>
     <h3>Deux bénévoles se lancent</h3>
     <p>Un groupe démarre dans votre commune. Dès que deux voisins acceptent d'aider à préparer et distribuer les packs, il peut ouvrir.</p>
-    <div class="phase-visual slots"><span class="slot slot--big is-person"></span><span class="slot slot--big"></span></div>
+    <div class="phase-visual slots"><span class="slot slot--big is-person" style="--i:1"></span><span class="slot slot--big is-person" style="--i:3"></span></div>
   </div>
-  <div class="phase">
+  <div class="phase" data-reveal style="--i:1">
     <span class="phase-num" aria-hidden="true">2</span>
     <?php partial('partials/status', ['s' => 'preopening']) ?>
     <h3>On vote pour un pack</h3>
-    <p>Trois packs de saison sont proposés, avec leurs variétés, leurs quantités et leur prix. Chacun vote pour celui qu'il veut.</p>
+    <p>Trois packs de saison sont proposés, avec leurs variétés, leurs quantités, leur prix et leur valeur en jardinerie. Chacun vote pour celui qu'il préfère.</p>
     <div class="phase-visual" style="display:grid;gap:6px">
       <div class="meter"><span style="--p:62"></span></div><div class="meter"><span style="--p:25"></span></div><div class="meter"><span style="--p:13"></span></div>
     </div>
   </div>
-  <div class="phase">
+  <div class="phase" data-reveal style="--i:2">
     <span class="phase-num" aria-hidden="true">3</span>
     <?php partial('partials/status', ['s' => 'open']) ?>
     <h3>Le pack gagnant est mis en vente</h3>
     <p>Il arrive dans le panier de chaque votant. Les achats sont regroupés par lots de 10 : un lot complet est commandé et débité, puis le suivant s'ouvre.</p>
-    <div class="phase-visual slots"><?php for ($i = 0; $i < 10; $i++): ?><span class="slot<?= $i < 7 ? ' is-on' : '' ?>"></span><?php endfor; ?></div>
+    <div class="phase-visual slots"><?php for ($k = 0; $k < 10; $k++): ?><span class="slot<?= $k < 7 ? ' is-on' : '' ?>" style="--i:<?= $k ?>"></span><?php endfor; ?></div>
   </div>
 </div>

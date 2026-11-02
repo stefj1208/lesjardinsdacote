@@ -10,7 +10,15 @@ function front_home(): void
     $sid = db()->val("SELECT s.id FROM sales s JOIN `groups` g ON g.id = s.group_id WHERE g.status = 'active' AND s.category = 'seeds' AND s.status IN ('waiting','voting','open') ORDER BY FIELD(s.status,'voting','open','waiting'), s.id LIMIT 1");
     if ($sid) $packs = Sales::packs((int)$sid);
     if (!$packs) $packs = array_slice(Packs::all('seeds', true), 0, 3);
-    view('front/home', ['groups' => $groups, 'packs' => $packs]);
+    $catalog = Packs::all(null, true);
+    // Le pack mis en avant dans le héros : la plus forte économie.
+    $hero = null;
+    foreach ($packs ?: $catalog as $p) if (!$hero || $p['save'] > $hero['save']) $hero = $p;
+    $varieties = [];
+    foreach ($catalog as $p) foreach ($p['items'] as $it) $varieties[$it['name'] . ' ' . $it['variety']] = [$it['name'], (string)$it['variety']];
+    $others = array_values(array_filter($catalog, fn($p) => $p['category'] !== 'seeds'));
+    view('front/home', ['groups' => $groups, 'packs' => $packs, 'heroPack' => $hero, 'varieties' => array_values($varieties),
+        'bestPct' => Packs::bestSavingPct($catalog), 'others' => $others, 'bodyClass' => 'has-hero']);
 }
 
 function front_groups(): void
@@ -39,7 +47,8 @@ function front_group(string $slug): void
         'myOrder' => $s && $uid ? db()->one("SELECT * FROM orders WHERE user_id = ? AND sale_id = ? AND status <> 'cancelled' ORDER BY id DESC LIMIT 1", [$uid, $s['id']]) : null,
         'description' => $g['name'] . ' : ' . Cat::GROUP_STATUS[$g['public_status']]['label'] . '. Groupe d\'achat de packs de graines et de plants à ' . $g['commune'] . '.',
         'og' => ['image' => $g['photo'] ? (str_starts_with((string)Photo::url($g['photo']), '/') ? abs_url((string)Photo::url($g['photo'])) : Photo::url($g['photo'])) : null],
-        'scripts' => '',
+        'scripts' => '', 'bodyClass' => 'has-hero',
+        'groupSaved' => $s ? Sales::groupSaved($s) : 0.0,
     ]);
 }
 
@@ -102,6 +111,7 @@ function front_organizers(): void
     $commune = trim((string)input('commune', ''));
     $existing = $commune !== '' ? db()->one("SELECT name, slug, commune FROM `groups` WHERE status = 'active' AND commune = ?", [$commune]) : null;
     view('front/organizers', ['commune' => $commune, 'existing' => $existing, 'u' => Auth::user(), 'title' => 'Collectivités, entreprises, associations',
+        'bodyClass' => 'has-hero', 'bestPct' => Packs::bestSavingPct(Packs::all(null, true)),
         'description' => 'Lancez « Les Jardins d\'à Côté » de votre commune ou de votre entreprise : des packs de graines et de plants à 30 € pour vos habitants ou salariés, sans stock ni budget.']);
 }
 
