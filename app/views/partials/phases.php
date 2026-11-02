@@ -10,7 +10,7 @@
     <span class="phase-num" aria-hidden="true">2</span>
     <?php partial('partials/status', ['s' => 'preopening']) ?>
     <h3>On choisit les variétés</h3>
-    <p>Une quarantaine de variétés rares sont proposées. Chacun coche ses préférées : les plus demandées entrent dans le pack, jusqu'à atteindre son prix.</p>
+    <p>Le catalogue de la saison est proposé : plants, arbres, aromatiques ou graines. Chacun coche ses préférés ; les plus demandés entrent dans le pack, jusqu'à atteindre son prix.</p>
     <div class="phase-visual" style="display:grid;gap:6px">
       <div class="meter"><span style="--p:62"></span></div><div class="meter"><span style="--p:25"></span></div><div class="meter"><span style="--p:13"></span></div>
     </div>

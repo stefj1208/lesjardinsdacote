@@ -4,7 +4,7 @@ declare(strict_types=1);
 /** Mise à jour automatique de la base au premier passage après un déploiement. */
 final class Migrator
 {
-    public const VERSION = 4;
+    public const VERSION = 5;
     private static bool $reseed = false;
 
     public static function execFile(string $file): void
@@ -26,6 +26,7 @@ final class Migrator
             if ($v < 2) self::to2();
             if ($v < 3) self::to3();
             if ($v < 4) self::to4();
+            if ($v < 5) self::to5();
             if (self::$reseed) Demo::seedCatalog();
             if (self::$reseed && setting('demo_data') === '1') { Demo::purge(); Demo::seed(); }
         } finally {
@@ -68,6 +69,17 @@ final class Migrator
     private static function hasColumn(string $table, string $col): bool
     {
         return (bool)db()->val('SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = ? AND column_name = ?', [$table, $col]);
+    }
+
+    /** v4 → v5 : univers « Fleurs & vivaces », aromatiques en pot (les graines aromatiques rejoignent les graines). */
+    private static function to5(): void
+    {
+        $enum = "ENUM('seeds','vegetables','fruit_trees','aromatics','plants') NOT NULL DEFAULT 'seeds'";
+        foreach (['packs', 'varieties', 'sales'] as $t) db()->pdo->exec("ALTER TABLE `$t` MODIFY category $enum");
+        db()->exec("UPDATE varieties SET category = 'seeds' WHERE category = 'aromatics' AND unit = 'g'");
+        set_setting('schema_version', '5');
+        self::$reseed = true;
+        audit('migrate', 'schéma v5');
     }
 
     /** v3 → v4 : catalogue de variétés, vote des variétés (le pack est composé par le vote dans la limite du prix). */

@@ -18,8 +18,6 @@ final class Tasks
             $out['emails'] = Mailer::processQueue(60);
             db()->exec('DELETE FROM login_attempts WHERE attempted_at < (NOW() - INTERVAL 1 DAY)');
             set_setting('last_cron_at', now());
-            // Export ponctuel des miniatures pour contrôle visuel (une seule fois, retiré à la prochaine version).
-            if (!is_file(APP_DIR . '/storage/export/done')) { include APP_DIR . '/cron/export_photos.php'; @touch(APP_DIR . '/storage/export/done'); }
         } finally {
             db()->val("SELECT RELEASE_LOCK('jdc_tasks')");
         }

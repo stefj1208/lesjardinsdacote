@@ -1,7 +1,7 @@
 <?php
 $siteName = setting('association_name', "Les Jardins d'à Côté");
-$pageTitle = isset($title) && $title ? $title . ' · ' . $siteName : $siteName . ' — Achats groupés de graines et de plants entre voisins';
-$desc = $description ?? 'Dans votre commune, un groupe de voisins choisit les variétés rares de son pack de saison, les achète en gros et les prépare avec des bénévoles.';
+$pageTitle = isset($title) && $title ? $title . ' · ' . $siteName : $siteName . ' — Plants, arbres fruitiers et graines en achat groupé entre voisins';
+$desc = $description ?? 'Dans votre commune, un groupe de voisins achète en gros plants potagers, arbres fruitiers, aromatiques et graines, et les prépare avec des bénévoles.';
 $og = $og ?? [];
 $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 $cur = fn(string $p) => ($p === '/' ? $path === '/' : str_starts_with($path, $p)) ? ' aria-current="page"' : '';
@@ -41,6 +41,7 @@ $cartCount = Cart::count(Auth::id());
       <svg width="18" height="14" viewBox="0 0 18 14" aria-hidden="true"><path d="M1 1h16M1 7h16M1 13h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Menu
     </button>
     <nav class="nav" id="nav" aria-label="Navigation principale">
+      <a href="/univers"<?= $cur('/univers') ?>>Ce qu'on achète</a>
       <a href="/groupes"<?= $cur('/groupes') ?>>Les groupes</a>
       <a href="/comment-ca-marche"<?= $cur('/comment-ca-marche') ?>>Comment ça marche</a>
       <a href="/lancer-un-groupe"<?= $cur('/lancer-un-groupe') ?>>Lancer un groupe</a>
@@ -63,7 +64,7 @@ $cartCount = Cart::count(Auth::id());
     <div class="foot-grid">
       <div>
         <span class="foot-brand">Les jardins d'à côté</span>
-        <p>Des groupes d'achat de voisins, commune par commune. On choisit ensemble un pack de variétés rares, on l'achète en gros et on le paie bien moins cher qu'en jardinerie.</p>
+        <p>Des groupes d'achat de voisins, commune par commune : plants potagers, arbres fruitiers, aromatiques, graines. On choisit ensemble, on achète en gros, on paie bien moins cher qu'en jardinerie.</p>
         <p class="small"><?= e(setting('association_address')) ?><br><a href="mailto:<?= e(setting('contact_email')) ?>"><?= e(setting('contact_email')) ?></a></p>
       </div>
       <div>

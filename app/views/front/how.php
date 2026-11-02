@@ -48,8 +48,8 @@
       <p class="source-note" style="color:#93A1B5"><?= e(setting('market_price_note', Packs::DEFAULT_MARKET_NOTE)) ?></p>
     </div>
     <ul class="ticks" data-reveal="right">
-      <li>Les graines sont achetées en grand conditionnement (1 000 graines, 100 g…) au semencier bio, au tarif professionnel.</li>
-      <li>Les bénévoles les répartissent en sachets d'environ 10 graines par variété, ou quelques grammes pour les aromatiques : de quoi garnir un potager familial.</li>
+      <li>L'association achète directement aux producteurs, au tarif professionnel : plants chez les horticulteurs, arbres chez les pépiniéristes, graines en grand conditionnement chez le semencier bio.</li>
+      <li>Les bénévoles préparent les packs : plants étiquetés, arbres en racines nues, sachets d'environ 10 graines par variété.</li>
       <li>Le prix du pack couvre les semences, les sachets, les étiquettes et une petite participation au fonctionnement de l'association.</li>
     </ul>
   </div>
@@ -62,7 +62,7 @@
     <div class="faq mt-3">
       <details open><summary>Que contient un pack ?</summary><div>Chaque pack détaille ses variétés, avec photo, et la quantité exacte : nombre de graines, de plants ou d'arbres. Les graines sont bio et reproductibles, conditionnées par les bénévoles avec le numéro de lot d'origine.</div></details>
       <details><summary>Combien ça coûte ?</summary><div>30 € le pack, prix affiché avant le vote et identique pour tous. Chaque pack indique aussi sa valeur en jardinerie et l'économie réalisée. Le prix couvre les semences, les sachets, les étiquettes et une petite contribution au fonctionnement de l'association.</div></details>
-      <details><summary>Pourquoi c'est moins cher qu'en jardinerie ?</summary><div>En jardinerie, chaque variété se vend dans son propre sachet. Le groupe achète en gros au semencier et les bénévoles répartissent les graines : vous obtenez une dizaine de graines de chaque variété, pour le prix de quelques sachets seulement.</div></details>
+      <details><summary>Pourquoi c'est moins cher qu'en jardinerie ?</summary><div>La jardinerie paie un magasin, du personnel, des invendus et des emballages, et vend à l'unité. Le groupe achète en gros directement aux producteurs, ne garde aucun stock et confie la préparation aux bénévoles : le prix paie les plantes.</div></details>
       <details><summary>Comment se compose le pack ?</summary><div>Pendant la pré-ouverture, chaque membre coche jusqu'à 10 variétés. À la fin du vote, les variétés sont classées par nombre de voix et ajoutées au pack une à une, tant que leur coût d'achat (plus le sachet et l'étiquette) tient dans le prix du pack. Un aperçu « si le vote s'arrêtait maintenant » est affiché en direct sur la page du groupe.</div></details>
       <details><summary>Dois-je voter pour acheter ?</summary><div>Non, mais c'est plus simple : à l'ouverture des ventes, le pack composé est déposé automatiquement dans le panier de chaque votant. Il suffit de confirmer. Les membres qui n'ont pas voté peuvent aussi l'acheter.</div></details>
       <details><summary>Et si une variété que j'ai choisie n'entre pas dans le pack ?</summary><div>Le pack réunit les variétés les plus demandées par l'ensemble du groupe. Si une de vos variétés n'a pas assez de voix, elle n'y sera pas ; le pack arrive quand même dans votre panier et vous restez libre de ne pas confirmer l'achat.</div></details>

@@ -47,9 +47,12 @@
     requestAnimationFrame(step);
   }
 
+  // Les images à révéler (clip-path) sont observées via leur parent : un élément entièrement découpé n'est jamais « visible ».
   var targets = $$('[data-reveal], .meter, .slots, .compare, [data-count]');
+  $$('.reveal-img').forEach(function (img) { var p = img.parentNode; p._revealKids = true; if (targets.indexOf(p) < 0) targets.push(p); });
   function show(el) {
     el.classList.add('is-in');
+    if (el._revealKids) $$(':scope > .reveal-img', el).forEach(function (k) { k.classList.add('is-in'); });
     if (el.hasAttribute('data-count')) count(el);
     $$('[data-count]', el).forEach(count);
   }
@@ -63,6 +66,63 @@
     // Filet de sécurité : rien ne reste caché si l'observateur ne se déclenche pas (impression, captures).
     setTimeout(function () { targets.forEach(function (el) { var r = el.getBoundingClientRect(); if (r.top < window.innerHeight) show(el); }); }, 1200);
     window.addEventListener('beforeprint', function () { targets.forEach(show); });
+  }
+
+
+  /* Filtre du catalogue (page univers) */
+  $$('[data-vfilter]').forEach(function (bar) {
+    var grid = bar.parentNode.querySelector('[data-vgrid]');
+    $$('[data-fam]', bar).forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        var fam = chip.getAttribute('data-fam');
+        $$('[data-fam]', bar).forEach(function (c) { c.classList.toggle('is-on', c === chip); });
+        $$('.vcard', grid).forEach(function (card) { var show = !fam || card.getAttribute('data-family') === fam; card.hidden = !show; if (show) card.classList.add('is-in'); });
+      });
+    });
+  });
+
+  if (!reduce) {
+    /* Parallaxe douce de la mosaïque */
+    var par = $$('[data-speed]');
+    /* Défilement horizontal piloté par le défilement vertical */
+    var hs = $('[data-hscroll]'), track = hs && $('.hs-track', hs), bar = hs && $('.hs-progress span', hs);
+    var pin = false;
+    function layoutHs() {
+      if (!hs) return;
+      pin = window.innerWidth > 900 && window.innerHeight > 620;
+      hs.classList.toggle('is-pinned', pin);
+      if (!pin) { hs.style.height = ''; track.style.transform = ''; return; }
+      var dist = Math.max(0, track.scrollWidth - window.innerWidth);
+      hs.style.height = (window.innerHeight + dist) + 'px';
+      hs._dist = dist;
+    }
+    var ticking = false;
+    function frame() {
+      ticking = false;
+      var y = window.scrollY;
+      par.forEach(function (el) { var r = el.getBoundingClientRect(); if (r.bottom > 0 && r.top < window.innerHeight) el.style.transform = 'translate3d(0,' + (y * parseFloat(el.getAttribute('data-speed'))).toFixed(1) + 'px,0)'; });
+      if (hs && pin) {
+        var top = hs.getBoundingClientRect().top, p = Math.min(1, Math.max(0, -top / (hs._dist || 1)));
+        track.style.transform = 'translate3d(' + (-p * hs._dist).toFixed(1) + 'px,0,0)';
+        if (bar) bar.style.setProperty('--hp', Math.max(.08, p));
+      }
+    }
+    function onScrollFx() { if (!ticking) { ticking = true; requestAnimationFrame(frame); } }
+    if (hs) { layoutHs(); window.addEventListener('resize', function () { layoutHs(); frame(); }); window.addEventListener('load', function () { layoutHs(); frame(); }); }
+    if (hs || par.length) { window.addEventListener('scroll', onScrollFx, { passive: true }); frame(); }
+    if (hs && !pin && track && bar) track.addEventListener('scroll', function () { bar.style.setProperty('--hp', Math.max(.08, track.scrollLeft / Math.max(1, track.scrollWidth - track.clientWidth))); }, { passive: true });
+
+    /* Cartes : inclinaison 3D et halo qui suit le curseur */
+    if (window.matchMedia('(hover: hover)').matches) {
+      $$('[data-tilt]').forEach(function (card) {
+        card.addEventListener('mousemove', function (e) {
+          var r = card.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+          card.style.setProperty('--mx', (x * 100) + '%'); card.style.setProperty('--my', (y * 100) + '%');
+          card.style.transform = 'perspective(900px) rotateX(' + ((.5 - y) * 5).toFixed(2) + 'deg) rotateY(' + ((x - .5) * 6).toFixed(2) + 'deg) translateY(-4px)';
+        });
+        card.addEventListener('mouseleave', function () { card.style.transform = ''; });
+      });
+    }
   }
 
   var toastEl;

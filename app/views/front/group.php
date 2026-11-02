@@ -10,21 +10,23 @@ $steps = [
 $order = array_keys($steps);
 $curIdx = array_search($ps, $order, true);
 ?>
-<section class="g-hero on-photo">
-  <?= ph($g['photo'], 'Jardin à ' . $g['commune'], '', 1800, true) ?>
-  <div class="wrap">
-    <div class="rise" style="--i:0"><?php partial('partials/status', ['s' => $ps, 'long' => true]) ?></div>
-    <h1 class="mt-2 rise" style="--i:1"><?= e($g['name']) ?></h1>
-    <p class="meta mb-0 rise" style="--i:2"><?= e($g['commune']) ?> (<?= e($g['postal_code']) ?>) · <?= e($g['organizer_name'] ?: Cat::ORGANIZERS[$g['organizer_type']]) ?> · <?= $g['members'] ?> <?= plural($g['members'], 'membre', 'membres') ?></p>
-  </div>
-</section>
+<section class="g-banner reveal-img"><?= ph($g['photo'], 'Jardin à ' . $g['commune'], '', 1800, true) ?></section>
 
 <div class="wrap">
-  <ol class="stepper" aria-label="Étapes du groupe">
-    <?php foreach ($steps as $k => [$label, $sub]): $i = array_search($k, $order, true); ?>
-      <li class="step<?= $i < $curIdx ? ' is-done' : '' ?><?= $i === $curIdx ? ' is-current' : '' ?>" style="list-style:none"<?= $i === $curIdx ? ' aria-current="step"' : '' ?>><b><?= $i < $curIdx ? '✓ ' : '' ?><?= e($label) ?></b><small><?= e($sub) ?></small></li>
-    <?php endforeach; ?>
-  </ol>
+  <header class="g-head" data-reveal>
+    <div class="row row--between" style="align-items:flex-start">
+      <div>
+        <div class="row"><?php partial('partials/status', ['s' => $ps, 'long' => true]) ?><?php if ($s): ?><span class="chip"><?= e(Cat::label($s['category'])) ?></span><?php endif; ?></div>
+        <h1 class="mt-2"><?= e($g['name']) ?></h1>
+        <p class="muted mb-0"><?= e($g['commune']) ?> (<?= e($g['postal_code']) ?>) · <?= e($g['organizer_name'] ?: Cat::ORGANIZERS[$g['organizer_type']]) ?> · <?= $g['members'] ?> <?= plural($g['members'], 'membre', 'membres') ?></p>
+      </div>
+    </div>
+    <ol class="stepper" aria-label="Étapes du groupe">
+      <?php foreach ($steps as $k => [$label, $sub]): $i = array_search($k, $order, true); ?>
+        <li class="step<?= $i < $curIdx ? ' is-done' : '' ?><?= $i === $curIdx ? ' is-current' : '' ?>" style="list-style:none"<?= $i === $curIdx ? ' aria-current="step"' : '' ?>><b><?= $i < $curIdx ? '✓ ' : '' ?><?= e($label) ?></b><small><?= e($sub) ?></small></li>
+      <?php endforeach; ?>
+    </ol>
+  </header>
 
   <div class="g-layout" style="padding-bottom:5rem">
     <div>

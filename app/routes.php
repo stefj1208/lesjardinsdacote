@@ -8,6 +8,8 @@ require APP_DIR . '/controllers/admin.php';
 
 /* Vitrine & groupes */
 $router->get('/', 'front_home');
+$router->get('/univers', 'front_universes');
+$router->get('/univers/{slug}', 'front_univers');
 $router->get('/groupes', 'front_groups');
 $router->get('/groupes/{slug}', 'front_group');
 $router->post('/groupes/{slug}/rejoindre', 'front_group_join');

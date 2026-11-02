@@ -1,10 +1,12 @@
-<section class="g-hero on-photo" style="min-height:520px">
-  <?= ph('commons:Raised_vegetable_bed_at_Boreham,_Essex,_England.jpg|commons:Raised_bed.jpg', 'Potager partagé', '', 1800, true) ?>
-  <div class="wrap">
-    <p class="eyebrow eyebrow--start eyebrow--light rise" style="--i:0">Collectivités, entreprises, associations</p>
-    <h1 class="rise" style="max-width:16ch;--i:1">Offrez un potager à votre commune ou à vos salariés.</h1>
-    <p class="meta rise" style="max-width:60ch;font-size:1.15rem;--i:2">Vous lancez « Les Jardins d'à Côté » de votre commune ou de votre entreprise. Nous fournissons les packs, le site, les paiements et l'organisation. Vous offrez un lieu et un relais.</p>
-    <div class="row mt-3 rise" style="--i:3"><a class="btn btn--lg" href="#proposer">Proposer un groupe <span class="arr" aria-hidden="true">→</span></a><a class="btn btn--outline-light btn--lg" href="/comment-ca-marche">Comment ça marche</a></div>
+<section class="page-hero">
+  <div class="wrap split split--center">
+    <div>
+      <p class="eyebrow eyebrow--start rise" style="--i:0">Mairies, CCAS, entreprises, associations</p>
+      <h1 class="rise" style="--i:1">Offrez des achats groupés de jardin à votre commune ou à vos salariés.</h1>
+      <p class="lede rise" style="--i:2">Vous lancez « Les jardins d'à côté » de votre commune ou de votre entreprise : plants potagers, arbres fruitiers, aromatiques, graines. Nous fournissons les catalogues, le site, les paiements et l'organisation. Vous offrez un lieu et un relais.</p>
+      <div class="row mt-3 rise" style="--i:3"><a class="btn btn--lg" href="#proposer">Proposer un groupe <span class="arr" aria-hidden="true">→</span></a><a class="btn btn--ghost btn--lg" href="/comment-ca-marche">Comment ça marche</a></div>
+    </div>
+    <div class="photo-stack reveal-img"><?= ph('commons:Raised_vegetable_bed_at_Boreham,_Essex,_England.jpg|commons:Raised_bed.jpg', 'Potager partagé', '', 1400, true) ?></div>
   </div>
 </section>
 
@@ -47,7 +49,7 @@
         </ul></div>
       <div class="panel" data-reveal="right"><h3>L'association Les jardins d'à côté</h3>
         <ul class="ticks">
-          <li>Sélectionne un catalogue de variétés rares (graines bio, plants, fruitiers, aromatiques) que vos membres choisissent par vote, avec leur valeur en jardinerie affichée.</li>
+          <li>Sélectionne les producteurs et les catalogues de chaque saison (plants, arbres fruitiers, aromatiques, graines, fleurs) que vos membres choisissent par vote, avec leur prix en jardinerie affiché.</li>
           <li>Fournit la page du groupe, les votes, les paiements sécurisés et les emails.</li>
           <li>Commande auprès des fournisseurs par lots de 10 : aucun stock, aucun risque d'invendus.</li>
           <li>Forme les bénévoles : fiche de préparation, étiquettes, QR codes de retrait.</li>

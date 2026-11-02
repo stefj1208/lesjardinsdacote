@@ -16,8 +16,27 @@ function front_home(): void
         $hero['link'] = '/groupes';
     }
     $allVarieties = Varieties::all(null, true);
+    $univers = Varieties::overview();
+    $best = max(array_map(fn($u) => (int)($u['example']['save_pct'] ?? 0), $univers) ?: [0]);
     view('front/home', ['groups' => $groups, 'heroPack' => $hero, 'heroSale' => $sale, 'catalog' => $catalog, 'varieties' => $allVarieties,
-        'bestPct' => (int)($hero['save_pct'] ?? 0), 'bodyClass' => 'has-hero']);
+        'univers' => $univers, 'bestPct' => $best]);
+}
+
+function front_universes(): void
+{
+    view('front/universes', ['univers' => Varieties::overview(), 'title' => 'Ce que l\'on achète ensemble',
+        'description' => 'Plants potagers, arbres fruitiers, aromatiques, graines rares, fleurs : tout ce qu\'un groupe de voisins peut acheter en gros, et l\'économie réalisée.']);
+}
+
+function front_univers(string $slug): void
+{
+    $cat = Cat::bySlug($slug);
+    if (!$cat) abort(404, 'Cet univers n\'existe pas.');
+    $all = Varieties::overview();
+    $u = $all[$cat];
+    $groups = array_values(array_filter(Groups::listActive(), fn($g) => ($g['sale']['category'] ?? null) === $cat));
+    view('front/univers', ['u' => $u, 'others' => array_diff_key($all, [$cat => 1]), 'groups' => $groups, 'title' => $u['label'],
+        'description' => $u['intro']]);
 }
 
 function front_groups(): void
@@ -46,7 +65,7 @@ function front_group(string $slug): void
         'myOrder' => $s && $uid ? db()->one("SELECT * FROM orders WHERE user_id = ? AND sale_id = ? AND status <> 'cancelled' ORDER BY id DESC LIMIT 1", [$uid, $s['id']]) : null,
         'description' => $g['name'] . ' : ' . Cat::GROUP_STATUS[$g['public_status']]['label'] . '. Groupe d\'achat de packs de graines et de plants à ' . $g['commune'] . '.',
         'og' => ['image' => $g['photo'] ? (str_starts_with((string)Photo::url($g['photo']), '/') ? abs_url((string)Photo::url($g['photo'])) : Photo::url($g['photo'])) : null],
-        'scripts' => '', 'bodyClass' => 'has-hero',
+        'scripts' => '',
         'groupSaved' => $s ? Sales::groupSaved($s) : 0.0,
     ]);
 }
@@ -112,7 +131,7 @@ function front_organizers(): void
     $price = (float)setting('default_pack_price', '30');
     $example = Varieties::toPack(Varieties::compose(Varieties::all('seeds', true), $price), $price, 'Exemple');
     view('front/organizers', ['commune' => $commune, 'existing' => $existing, 'u' => Auth::user(), 'title' => 'Collectivités, entreprises, associations',
-        'bodyClass' => 'has-hero', 'bestPct' => (int)$example['save_pct'],
+        'bestPct' => (int)$example['save_pct'],
         'description' => 'Lancez « Les Jardins d\'à Côté » de votre commune ou de votre entreprise : des packs de graines et de plants à 30 € pour vos habitants ou salariés, sans stock ni budget.']);
 }
 
@@ -193,7 +212,8 @@ function front_robots(): void
 function front_sitemap(): void
 {
     header('Content-Type: application/xml; charset=utf-8');
-    $urls = ['/', '/groupes', '/comment-ca-marche', '/lancer-un-groupe'];
+    $urls = ['/', '/univers', '/groupes', '/comment-ca-marche', '/lancer-un-groupe'];
+    foreach (Cat::CATEGORIES as $c) $urls[] = '/univers/' . $c['slug'];
     foreach (db()->col("SELECT slug FROM `groups` WHERE status = 'active'") as $s) $urls[] = '/groupes/' . $s;
     foreach (db()->col('SELECT slug FROM packs WHERE is_active = 1') as $s) $urls[] = '/packs/' . $s;
     echo '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';

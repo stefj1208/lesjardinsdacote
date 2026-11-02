@@ -96,6 +96,21 @@ final class Varieties
         return $p + Packs::savings($p);
     }
 
+    /** Aperçu de chaque univers : nombre de variétés et exemple de pack composé au prix conseillé. */
+    public static function overview(): array
+    {
+        $out = [];
+        foreach (Cat::CATEGORIES as $cat => $c) {
+            $list = self::all($cat, true);
+            $price = Cat::packPrice($cat);
+            $ex = $list ? self::toPack(self::compose($list, $price), $price, 'Exemple de pack ' . mb_strtolower($c['label']), $cat) : null;
+            $sale = db()->one("SELECT s.id, s.status, g.name AS group_name, g.slug AS group_slug FROM sales s JOIN `groups` g ON g.id = s.group_id
+                WHERE s.category = ? AND g.status = 'active' AND s.status IN ('voting','open','waiting') ORDER BY FIELD(s.status,'open','voting','waiting'), s.id LIMIT 1", [$cat]);
+            $out[$cat] = $c + ['key' => $cat, 'count' => count($list), 'varieties' => $list, 'example' => $ex, 'price' => $price, 'sale' => $sale];
+        }
+        return $out;
+    }
+
     /** Enregistre la composition comme pack définitif (utilisé à la clôture du vote). */
     public static function createPack(array $comp, array $sale): int
     {

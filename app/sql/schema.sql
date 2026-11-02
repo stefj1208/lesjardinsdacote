@@ -1,5 +1,5 @@
 -- =====================================================================
--- Les Jardins d'à Côté — schéma v4 (groupes locaux, vote des variétés, packs composés, lots, prix marché)
+-- Les Jardins d'à Côté — schéma v5 (groupes locaux, vote des variétés, packs composés, lots, prix marché)
 -- MySQL / MariaDB, InnoDB, utf8mb4
 -- =====================================================================
 SET NAMES utf8mb4;
@@ -76,7 +76,7 @@ CREATE TABLE IF NOT EXISTS group_members (
 CREATE TABLE IF NOT EXISTS packs (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   slug VARCHAR(120) NOT NULL,
-  category ENUM('seeds','vegetables','fruit_trees','aromatics') NOT NULL DEFAULT 'seeds',
+  category ENUM('seeds','vegetables','fruit_trees','aromatics','plants') NOT NULL DEFAULT 'seeds',
   name VARCHAR(160) NOT NULL,
   tagline VARCHAR(255) NULL,
   description TEXT NULL,
@@ -109,7 +109,7 @@ CREATE TABLE IF NOT EXISTS pack_items (
 -- Catalogue des variétés proposées au vote (prix d'achat en gros et prix public en jardinerie)
 CREATE TABLE IF NOT EXISTS varieties (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  category ENUM('seeds','vegetables','fruit_trees','aromatics') NOT NULL DEFAULT 'seeds',
+  category ENUM('seeds','vegetables','fruit_trees','aromatics','plants') NOT NULL DEFAULT 'seeds',
   name VARCHAR(120) NOT NULL,
   variety VARCHAR(120) NULL,
   latin_name VARCHAR(160) NULL,
@@ -133,7 +133,7 @@ CREATE TABLE IF NOT EXISTS varieties (
 CREATE TABLE IF NOT EXISTS sales (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   group_id INT UNSIGNED NOT NULL,
-  category ENUM('seeds','vegetables','fruit_trees','aromatics') NOT NULL DEFAULT 'seeds',
+  category ENUM('seeds','vegetables','fruit_trees','aromatics','plants') NOT NULL DEFAULT 'seeds',
   title VARCHAR(160) NOT NULL,
   status ENUM('waiting','voting','open','closed','cancelled') NOT NULL DEFAULT 'waiting',
   vote_days SMALLINT UNSIGNED NOT NULL DEFAULT 10,

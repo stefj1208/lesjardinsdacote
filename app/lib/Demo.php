@@ -84,22 +84,96 @@ final class Demo
         ['Sarriette', 'vivace', 'Satureja montana', 'SAR02', 1.80, 1, 'L\'herbe des haricots, résiste à la sécheresse', 'commons:Satureja_montana_1.JPG|commons:Satureja_montana_3c.JPG|commons:Thyme.jpg'],
     ];
 
-    /** Crée le catalogue de variétés s'il est vide. */
+    /**
+     * Plants potagers bio, 1 ou 2 plants par variété : [plante, variété, latin, plants, prix producteur TTC par plant, prix jardinerie par plant, conseil, photo].
+     * Prix producteur : vente associative d'un horticulteur 2026 (godet 7×7 ou pot 10,5 cm). Prix jardinerie : Botanic, plants bio en pot (novembre 2026).
+     */
+    public const VEGETABLES = [
+        ['Tomate', 'Ananas', 'Solanum lycopersicum', 2, 1.60, 3.85, 'Grosse côtelée jaune et rouge, chair fondante', 'commons:Seattle-Heirloom-tomato-2155.jpg|commons:Heirloom_tomatoes_2.jpg'],
+        ['Tomate', 'Noire de Crimée', 'Solanum lycopersicum', 2, 1.60, 3.85, 'Chair sombre, sucrée et juteuse', 'commons:Black_krim_tomato.jpg|commons:Tomates_anciennes.jpg'],
+        ['Tomate', 'Cœur de bœuf', 'Solanum lycopersicum', 2, 0.90, 3.85, 'La classique des étés du Sud-Ouest', 'commons:Tomates_anciennes.jpg'],
+        ['Tomate', 'Cornue des Andes', 'Solanum lycopersicum', 2, 0.90, 3.85, 'Allongée, peu de graines, idéale en sauce', 'commons:Tomatoes_for_sale_in_France.jpg|commons:Tomates_anciennes.jpg'],
+        ['Tomate cerise', 'Rouge', 'Solanum lycopersicum var. cerasiforme', 2, 0.90, 3.85, 'Très productive, à grignoter', 'commons:Cherry_Tomato_on_Vine.JPG|commons:Cherry_tomatoes.jpg'],
+        ['Aubergine', 'Black Beauty', 'Solanum melongena', 1, 1.80, 3.85, 'Gros fruits violets, très productive', 'commons:Purple_Eggplant.JPG|commons:Aubergine.jpg'],
+        ['Poivron', 'Petit Marseillais', 'Capsicum annuum', 1, 1.80, 2.33, 'Petit poivron jaune, doux et précoce', 'commons:Capsicum_annuum_fruits_IMGP0049.jpg'],
+        ['Courgette', 'Jaune', 'Cucurbita pepo', 1, 1.80, 3.85, 'Jaune d\'or, très décorative', 'commons:Cucurbita_pepo_var_cylindrica,_Yellow_Zucchini_Squash_(crop).jpg|commons:Courgette.jpg'],
+        ['Cornichon', 'Hokus', 'Cucumis sativus', 1, 1.80, 3.85, 'Petits fruits croquants à confire', 'commons:Dar_cucumber_seedlings.jpg'],
+        ['Melon', 'Petit Gris de Rennes', 'Cucumis melo', 1, 1.80, 3.85, 'Variété ancienne très parfumée', 'commons:Charentais-Melone.jpg|commons:Cantaloupe.jpg'],
+        ['Courge', 'Butternut', 'Cucurbita moschata', 1, 3.00, 3.85, 'Chair douce, longue conservation', 'commons:Cucurbita_moschata_Butternut_2012_G2.jpg|commons:Pumpkin_seeds_in_hand.jpg'],
+        ['Potimarron', 'Uchiki Kuri', 'Cucurbita maxima', 1, 3.00, 3.85, 'Goût de châtaigne, se conserve tout l\'hiver', "commons:Pumpkin_'Sweet_Dumpling'_01.jpg|commons:Pumpkin_seeds_in_hand.jpg"],
+        ['Fraisier', 'remontant', 'Fragaria × ananassa', 3, 1.00, 1.33, 'Récoltes de juin aux gelées', 'commons:Garden_strawberry_(Fragaria_×_ananassa)_single.jpg|commons:Strawberry_Plant_in_early_June.JPG'],
+    ];
+
+    /**
+     * Arbres fruitiers demi-tige 8-10 cm en racines nues : [arbre, variété, latin, prix grossiste HT, conseil, photo].
+     * Grossiste : Arboriverse (Bletterans, Jura), tarifs 2026/27. Prix public : lycée horticole de Fayl-Billot, demi-tige racines nues 52 € (pêchers et abricotiers 56 €).
+     */
+    public const TREES = [
+        ['Abricotier', 'Tardif de Tarbes', 'Prunus armeniaca', 24.50, 56, 'Variété des Hautes-Pyrénées, floraison tardive qui évite les gelées', 'commons:Apricots.jpg|commons:Prunus_armeniaca_Nubra_Valley.jpg|commons:Apple_orchard.jpg'],
+        ['Abricotier', 'Bergeron', 'Prunus armeniaca', 25.00, 56, 'Gros fruits orangés, excellent en confiture', 'commons:Apricots_(4223660369).jpg|commons:Apricots.jpg|commons:Apple_orchard.jpg'],
+        ['Pêcher', 'Reine des Vergers', 'Prunus persica', 24.50, 56, 'Pêche jaune juteuse, très rustique', 'commons:Peaches.jpg|commons:Apple_orchard.jpg'],
+        ['Pêcher', 'Pêche de vigne chair blanche', 'Prunus persica', 24.50, 56, 'Petite pêche sanguine des vignes, très parfumée', 'commons:Peaches.jpg|commons:Apple_orchard.jpg'],
+        ['Nectarinier', 'Fantasia', 'Prunus persica var. nucipersica', 24.50, 56, 'Nectarine jaune à peau lisse, récolte en août', 'commons:Peaches.jpg|commons:Apple_orchard.jpg'],
+        ['Prunier', 'Victoria', 'Prunus domestica', 25.00, 52, 'Grosse prune rose, autofertile', 'commons:Prunus_domestica_fruits_001.JPG|commons:Fruits_Prunus_domestica.jpg|commons:Apple_orchard.jpg'],
+        ['Prunier', 'Stanley', 'Prunus domestica', 25.00, 52, 'Prune d\'Ente violette, à sécher ou en tarte', 'commons:Fruits_Prunus_domestica.jpg|commons:Prunus-domestica.JPG|commons:Apple_orchard.jpg'],
+        ['Cognassier', 'Champion', 'Cydonia oblonga', 25.00, 52, 'Coings parfumés pour pâtes de fruits et gelées', 'commons:Cydonia_oblonga_Pigwa_pospolita_2011-09-11_02.jpg|commons:Cydonia.jpg|commons:Apple_orchard.jpg'],
+        ['Pommier', 'Reinette Grand-mère', 'Malus domestica', 23.50, 52, 'Pomme ancienne acidulée, se garde tout l\'hiver', 'commons:Piper-Orchard-Old-apple-tree-3369.jpg|commons:Apple_orchard.jpg'],
+    ];
+
+    /**
+     * Aromatiques en pot : [plante, variété, latin, prix producteur TTC, prix jardinerie, conseil, photo].
+     * Prix producteur : vente associative d'un horticulteur 2026 (pot 10,5 cm, 3 €). Prix jardinerie : Botanic, plants bio (novembre 2026).
+     */
+    public const HERBS = [
+        ['Romarin', 'officinal', 'Salvia rosmarinus', 3.00, 3.94, 'Résiste à la sécheresse, fleurs mellifères', 'commons:Rosemary_Plant.jpg|commons:Rosemary.jpg'],
+        ['Thym', 'commun', 'Thymus vulgaris', 3.00, 4.89, 'Plein soleil, sol sec', 'commons:Fresh_thyme.jpg|commons:Thyme.jpg'],
+        ['Menthe', 'pouliot', 'Mentha pulegium', 3.00, 4.79, 'Couvre-sol parfumé', 'commons:Thymus_serpyllum_001.JPG|commons:Basil_leaves.jpg'],
+        ['Estragon', 'français', 'Artemisia dracunculus', 3.00, 3.89, 'Indispensable de la sauce béarnaise', 'commons:Basil_leaves.jpg'],
+        ['Verveine', 'citronnelle', 'Aloysia citrodora', 3.00, 4.09, 'Feuilles citronnées pour les tisanes', 'commons:Lemon_Basil.jpg|commons:Basil_leaves.jpg'],
+        ['Lavande', 'vraie', 'Lavandula angustifolia', 3.00, 4.89, 'Mellifère, très résistante au soleil', 'commons:Lavender_fields_in_India.jpg|commons:Rosemary_Plant.jpg'],
+        ['Basilic', 'Grand vert', 'Ocimum basilicum', 3.00, 3.85, 'Au pied des tomates', 'commons:Basil_leaves.jpg|commons:Ocimum_basilicum_001.JPG'],
+        ['Ciboulette', 'commune', 'Allium schoenoprasum', 3.00, 3.85, 'Repousse après chaque coupe', 'commons:Fresh_thyme.jpg'],
+    ];
+
+    /** Crée le catalogue de chaque univers qui n'a encore aucune variété. */
     public static function seedCatalog(): void
     {
         $db = db();
-        if ((int)$db->val('SELECT COUNT(*) FROM varieties')) return;
-        foreach (self::SEEDS as $i => [$n, $v, $l, $ref, $p10, $note, $ph]) {
-            $known = $ref === 'TO134';
-            $p100 = $known ? 9.40 : round($p10 * self::RATIO_100, 2);
-            $db->insert('varieties', ['category' => 'seeds', 'name' => $n, 'variety' => $v, 'latin_name' => $l, 'note' => $note, 'photo' => $ph,
-                'portion_qty' => 10, 'unit' => 'graines', 'purchase_price' => round($p100 * self::VAT, 2), 'purchase_qty' => 100, 'market_price' => self::MARKET,
-                'supplier' => $known ? 'Agrosemens' : 'Agrosemens (prix des 100 graines estimé)', 'supplier_ref' => $ref, 'position' => $i]);
+        $has = fn(string $cat) => (int)$db->val('SELECT COUNT(*) FROM varieties WHERE category = ?', [$cat]) > 0;
+        if (!$has('seeds')) {
+            foreach (self::SEEDS as $i => [$n, $v, $l, $ref, $p10, $note, $ph]) {
+                $known = $ref === 'TO134';
+                $p100 = $known ? 9.40 : round($p10 * self::RATIO_100, 2);
+                $db->insert('varieties', ['category' => 'seeds', 'name' => $n, 'variety' => $v, 'latin_name' => $l, 'note' => $note, 'photo' => $ph,
+                    'portion_qty' => 10, 'unit' => 'graines', 'purchase_price' => round($p100 * self::VAT, 2), 'purchase_qty' => 100, 'market_price' => self::MARKET,
+                    'supplier' => $known ? 'Agrosemens' : 'Agrosemens (prix des 100 graines estimé)', 'supplier_ref' => $ref, 'position' => $i]);
+            }
+            foreach (self::AROMATICS as $i => [$n, $v, $l, $ref, $p, $grams, $note, $ph]) {
+                $db->insert('varieties', ['category' => 'seeds', 'name' => $n, 'variety' => $v, 'latin_name' => $l, 'note' => $note, 'photo' => $ph,
+                    'portion_qty' => 0.5, 'unit' => 'g', 'purchase_price' => round($p * self::VAT, 2), 'purchase_qty' => $grams, 'market_price' => self::MARKET,
+                    'supplier' => 'Agrosemens (plus petit sachet)', 'supplier_ref' => $ref, 'position' => 100 + $i]);
+            }
         }
-        foreach (self::AROMATICS as $i => [$n, $v, $l, $ref, $p, $grams, $note, $ph]) {
-            $db->insert('varieties', ['category' => 'aromatics', 'name' => $n, 'variety' => $v, 'latin_name' => $l, 'note' => $note, 'photo' => $ph,
-                'portion_qty' => 0.5, 'unit' => 'g', 'purchase_price' => round($p * self::VAT, 2), 'purchase_qty' => $grams, 'market_price' => self::MARKET,
-                'supplier' => 'Agrosemens (plus petit sachet)', 'supplier_ref' => $ref, 'position' => $i]);
+        if (!$has('vegetables')) {
+            foreach (self::VEGETABLES as $i => [$n, $v, $l, $qty, $buy, $shop, $note, $ph]) {
+                $db->insert('varieties', ['category' => 'vegetables', 'name' => $n, 'variety' => $v, 'latin_name' => $l, 'note' => $note, 'photo' => $ph,
+                    'portion_qty' => $qty, 'unit' => 'plants', 'purchase_price' => $buy, 'purchase_qty' => 1, 'market_price' => round($shop * $qty, 2),
+                    'supplier' => 'Horticulteur (tarif de vente associative relevé)', 'position' => $i]);
+            }
+        }
+        if (!$has('fruit_trees')) {
+            foreach (self::TREES as $i => [$n, $v, $l, $ht, $shop, $note, $ph]) {
+                $db->insert('varieties', ['category' => 'fruit_trees', 'name' => $n, 'variety' => $v, 'latin_name' => $l, 'note' => $note . ' · demi-tige, racines nues', 'photo' => $ph,
+                    'portion_qty' => 1, 'unit' => 'arbre', 'purchase_price' => round($ht * 1.10, 2), 'purchase_qty' => 1, 'market_price' => $shop,
+                    'supplier' => 'Arboriverse (grossiste, prix HT + TVA 10 %)', 'position' => $i]);
+            }
+        }
+        if (!$has('aromatics')) {
+            foreach (self::HERBS as $i => [$n, $v, $l, $buy, $shop, $note, $ph]) {
+                $db->insert('varieties', ['category' => 'aromatics', 'name' => $n, 'variety' => $v, 'latin_name' => $l, 'note' => $note, 'photo' => $ph,
+                    'portion_qty' => 1, 'unit' => 'godets', 'purchase_price' => $buy, 'purchase_qty' => 1, 'market_price' => $shop,
+                    'supplier' => 'Horticulteur (tarif de vente associative relevé)', 'position' => $i]);
+            }
         }
     }
 
@@ -107,7 +181,7 @@ final class Demo
     {
         $db = db();
         self::seedCatalog();
-        $seedIds = array_map('intval', $db->col("SELECT id FROM varieties WHERE category = 'seeds' AND is_active = 1 ORDER BY position"));
+        $catIds = fn(string $cat) => array_map('intval', $db->col("SELECT id FROM varieties WHERE category = ? AND is_active = 1 ORDER BY position", [$cat]));
 
         $names = [['Camille', 'Arnaud'], ['Yanis', 'Benoît'], ['Léa', 'Cazes'], ['Hugo', 'Delmas'], ['Inès', 'Esteve'], ['Malik', 'Fabre'],
             ['Chloé', 'Garcia'], ['Nathan', 'Huc'], ['Sarah', 'Izard'], ['Théo', 'Jourdan'], ['Manon', 'Lacoste'], ['Rayan', 'Moreau'],
@@ -121,38 +195,40 @@ final class Demo
 
         $groups = [
             ['Pins-Justaret', '31860', 'collectivite', 'Exemple — commune partenaire', 'Salle des fêtes', 'Place de la mairie, 31860 Pins-Justaret',
-                'commons:Vegetable_garden_1.JPG|commons:Raised_bed.jpg', 'open', 3],
+                'commons:Vegetable_garden_1.JPG|commons:Raised_bed.jpg', 'open', 3, 'seeds', 'Graines rares — printemps ' . (date('Y') + 1), 30],
             ['Pinsaguel', '31120', 'jardin_partage', 'Exemple — jardin partagé du quartier', 'Jardin partagé', 'Chemin des jardins, 31120 Pinsaguel',
-                'commons:Raised_vegetable_bed_at_Boreham,_Essex,_England.jpg|commons:Raised_bed.jpg', 'voting', 2],
+                'commons:Raised_vegetable_bed_at_Boreham,_Essex,_England.jpg|commons:Raised_bed.jpg', 'voting', 2, 'vegetables', 'Plants potagers — mai ' . (date('Y') + 1), 30],
             ['Roques', '31120', 'entreprise', 'Exemple — comité d\'entreprise', 'Hall d\'accueil', 'Zone d\'activités, 31120 Roques',
-                'commons:Vegetable_garden_detail.jpg|commons:Vegetable_garden_1.JPG', 'waiting', 1],
+                'commons:Piper-Orchard-Old-apple-tree-3369.jpg|commons:Apple_orchard.jpg', 'waiting', 1, 'fruit_trees', 'Arbres fruitiers — hiver ' . date('Y') . '-' . (date('Y') + 1), 60],
             ['Portet-sur-Garonne', '31120', 'association', 'Exemple — association de quartier', 'Local associatif', '31120 Portet-sur-Garonne',
-                'commons:George_Washington_University_Community_Garden.jpg|commons:Raised_bed.jpg', 'waiting', 0],
+                'commons:George_Washington_University_Community_Garden.jpg|commons:Raised_bed.jpg', 'waiting', 0, 'aromatics', 'Aromatiques — printemps ' . (date('Y') + 1), 30],
         ];
         $u = 0;
         mt_srand(2027);
-        foreach ($groups as [$commune, $cp, $type, $org, $place, $addr, $photo, $stage, $vol]) {
+        foreach ($groups as [$commune, $cp, $type, $org, $place, $addr, $photo, $stage, $vol, $cat, $title, $price]) {
             $name = Groups::defaultName($commune);
             $gid = $db->insert('groups', ['slug' => Groups::uniqueSlug($name), 'name' => $name, 'commune' => $commune, 'postal_code' => $cp,
                 'organizer_type' => $type, 'organizer_name' => $org, 'pickup_place' => $place, 'pickup_address' => $addr, 'photo' => $photo,
                 'status' => 'active', 'validated_at' => now(),
-                'description' => "Un groupe d'achat de voisins à $commune : on choisit ensemble les variétés du pack de saison, on les achète en gros, et les bénévoles préparent les sachets."]);
+                'description' => "Un groupe d'achat de voisins à $commune : plants, arbres fruitiers, aromatiques ou graines, on choisit ensemble ce qu'on achète en gros à chaque saison, et les bénévoles préparent les packs."]);
             $members = array_slice($users, ($u * 4) % 10, 8);
             $u++;
             foreach ($members as $k => $mid) {
                 $db->exec('INSERT IGNORE INTO group_members (group_id, user_id, role) VALUES (?, ?, ?)', [$gid, $mid, $k < $vol ? 'volunteer' : 'member']);
             }
-            $sid = $db->insert('sales', ['group_id' => $gid, 'category' => 'seeds', 'title' => 'Graines potagères — printemps ' . (date('Y') + 1),
-                'vote_days' => 10, 'sale_days' => 21, 'batch_size' => 10, 'price' => 30, 'max_choices' => 10, 'pickup_at' => date('Y-m-d 10:00:00', strtotime('+40 days'))]);
-            Varieties::setForSale($sid, $seedIds);
+            $ids = $catIds($cat);
+            $sid = $db->insert('sales', ['group_id' => $gid, 'category' => $cat, 'title' => $title,
+                'vote_days' => 10, 'sale_days' => 21, 'batch_size' => 10, 'price' => $price, 'max_choices' => $cat === 'fruit_trees' ? 3 : ($cat === 'seeds' ? 10 : 6),
+                'pickup_at' => date('Y-m-d 10:00:00', strtotime('+40 days'))]);
+            Varieties::setForSale($sid, $ids);
             if ($stage === 'voting' || $stage === 'open') {
                 $db->exec("UPDATE sales SET status = 'voting', vote_starts_at = NOW() - INTERVAL 6 DAY, vote_ends_at = NOW() + INTERVAL 4 DAY WHERE id = ?", [$sid]);
                 // Chaque membre coche 6 à 10 variétés ; les tomates et les aubergines sont un peu plus demandées.
                 $weighted = [];
-                foreach ($seedIds as $k => $vid) for ($w = 0; $w < ($k < 14 ? 3 : ($k < 23 ? 2 : 1)); $w++) $weighted[] = $vid;
+                foreach ($ids as $k => $vid) for ($w = 0; $w < ($k < 14 ? 3 : ($k < 23 ? 2 : 1)); $w++) $weighted[] = $vid;
                 foreach ($members as $mid) {
                     $pick = [];
-                    $want = mt_rand(6, 10);
+                    $want = min(count($ids) - 1, $cat === 'seeds' ? mt_rand(6, 10) : mt_rand(3, 6));
                     while (count($pick) < $want) $pick[$weighted[mt_rand(0, count($weighted) - 1)]] = true;
                     foreach (array_keys($pick) as $vid) $db->exec('INSERT IGNORE INTO variety_votes (sale_id, user_id, variety_id) VALUES (?, ?, ?)', [$sid, $mid, $vid]);
                 }
@@ -181,7 +257,7 @@ final class Demo
             'contact_email' => 'proposition@exemple.test', 'status' => 'proposed', 'description' => 'Proposition reçue depuis le formulaire « Lancer un groupe ».']);
 
         $first = (int)$db->val("SELECT id FROM `groups` WHERE status = 'active' ORDER BY id LIMIT 1");
-        foreach ([['packing', 'Préparation des sachets de graines', '+20 days 10:00', 3, 4], ['distribution', 'Distribution des packs', '+40 days 10:00', 3, 3]] as [$type, $title, $when, $h, $need]) {
+        foreach ([['packing', 'Préparation des packs', '+20 days 10:00', 3, 4], ['distribution', 'Distribution des packs', '+40 days 10:00', 3, 3]] as [$type, $title, $when, $h, $need]) {
             $t = strtotime($when);
             $db->insert('shifts', ['group_id' => $first, 'type' => $type, 'title' => $title, 'location' => 'Salle des fêtes, Pins-Justaret',
                 'starts_at' => date('Y-m-d H:i:s', $t), 'ends_at' => date('Y-m-d H:i:s', $t + $h * 3600), 'volunteers_needed' => $need]);
