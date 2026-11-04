@@ -2,7 +2,7 @@
   <div class="wrap">
     <p class="eyebrow eyebrow--start">Ce que l'on achète ensemble</p>
     <h1>Cinq univers, une saison chacun</h1>
-    <p class="lede">À chaque saison, votre groupe choisit ce qu'il achète en gros : plants au printemps, arbres en hiver, graines dès janvier. Chaque univers affiche ses prix en jardinerie et le prix du groupe.</p>
+    <p class="lede">À chaque saison, votre groupe choisit ce qu'il achète en gros : plants au printemps, arbres en hiver, graines dès janvier. Chaque univers affiche les prix publics et le prix du groupe.</p>
   </div>
 </section>
 <section class="section" style="padding-top:0">

@@ -40,7 +40,7 @@ $curIdx = array_search($ps, $order, true);
         </div>
         <?php if ($s && $s['varieties']): $pj = $s['projection']; ?>
           <h2 class="mt-6">Les <?= count($s['varieties']) ?> variétés qui seront proposées</h2>
-          <p class="muted">Dès l'ouverture du vote, chaque membre choisit jusqu'à <?= (int)$s['max_choices'] ?> variétés. Les plus demandées composent le pack à <?= eur($s['price']) ?><?= $pj && $pj['save'] ? ' : environ ' . count($pj['items']) . ' variétés, d\'une valeur de ' . eur($pj['market']) . ' en jardinerie' : '' ?>.</p>
+          <p class="muted">Dès l'ouverture du vote, chaque membre choisit jusqu'à <?= (int)$s['max_choices'] ?> variétés. Les plus demandées composent le pack à <?= eur($s['price']) ?><?= $pj && $pj['save'] ? ' : environ ' . count($pj['items']) . ' variétés, d\'une valeur de ' . eur($pj['market']) . ' au prix public' : '' ?>.</p>
           <?php partial('partials/variety_picker', ['s' => $s, 'myChoices' => [], 'readonly' => true]); ?>
         <?php endif; ?>
 
@@ -58,8 +58,8 @@ $curIdx = array_search($ps, $order, true);
             </div>
             <div class="projection-stats">
               <div><b data-count="<?= count($pj['items']) ?>"><?= count($pj['items']) ?></b><span>variétés dans le pack</span></div>
-              <div><b><?= eur($pj['price']) ?></b><span>le pack</span></div>
-              <?php if ($pj['save']): ?><div><b class="strike-soft"><?= eur($pj['market']) ?></b><span>en jardinerie</span></div><div><b class="hl" data-count="<?= e(number_format($pj['save'], 2, '.', '')) ?>" data-decimals="2" data-suffix=" €"><?= eur($pj['save']) ?></b><span>d'économie</span></div><?php endif; ?>
+              <div><b><?= eur($pj['price']) ?></b><span>le pack, + <?= eur(Asso::fee()) ?> de frais par commande</span></div>
+              <?php if ($pj['save']): ?><div><b class="strike-soft"><?= eur($pj['market']) ?></b><span>au prix public</span></div><div><b class="hl" data-count="<?= e(number_format($pj['save'], 2, '.', '')) ?>" data-decimals="2" data-suffix=" €"><?= eur($pj['save']) ?></b><span>d'économie</span></div><?php endif; ?>
             </div>
             <div class="projection-items"><?php foreach ($pj['items'] as $it): ?><span class="pi"><?= ph($it['photo'], '', '', 120) ?><?= e($it['variety'] ?: $it['name']) ?></span><?php endforeach; ?></div>
             <?php if ($pj['out']): ?><p class="small muted mb-0 mt-2">Hors budget pour l'instant : <?= e(implode(', ', array_map(fn($v) => $v['variety'] ?: $v['name'], array_slice($pj['out'], 0, 8)))) ?><?= count($pj['out']) > 8 ? '…' : '' ?></p><?php endif; ?>
@@ -107,7 +107,7 @@ $curIdx = array_search($ps, $order, true);
       <?php if (!empty($groupSaved) && $groupSaved > 0): ?>
         <div class="panel panel--navy group-savings" data-reveal>
           <b data-count="<?= e(number_format($groupSaved, 0, '.', '')) ?>" data-suffix=" €"><?= eur(round($groupSaved)) ?></b>
-          <span>déjà économisés par les membres du groupe par rapport aux prix en jardinerie</span>
+          <span>déjà économisés par les membres du groupe par rapport aux prix publics</span>
         </div>
       <?php endif; ?>
 
@@ -133,7 +133,7 @@ $curIdx = array_search($ps, $order, true);
       <?php if ($g['description']): ?><div class="panel"><h3>À propos</h3><div class="muted"><?= nl2p($g['description']) ?></div></div><?php endif; ?>
       <div class="panel">
         <h3>Faire grandir le groupe</h3>
-        <?php $shareText = $g['name'] . ' : on achète ensemble des packs de graines rares, bien moins cher qu\'en jardinerie. Rejoignez-nous !'; $shareUrl = abs_url('/groupes/' . $g['slug']); ?>
+        <?php $shareText = $g['name'] . ' : on achète ensemble des packs de graines rares, bien moins cher qu\'au prix public. Rejoignez-nous !'; $shareUrl = abs_url('/groupes/' . $g['slug']); ?>
         <div class="row"><a class="btn btn--sm" target="_blank" rel="noopener" href="https://wa.me/?text=<?= rawurlencode($shareText . ' ' . $shareUrl) ?>">WhatsApp</a><a class="btn btn--ghost btn--sm" target="_blank" rel="noopener" href="https://www.facebook.com/sharer/sharer.php?u=<?= rawurlencode($shareUrl) ?>">Facebook</a><button class="btn btn--ghost btn--sm" type="button" data-share data-share-text="<?= e($shareText) ?>" data-share-url="<?= e($shareUrl) ?>">Copier le lien</button></div>
       </div>
     </aside>

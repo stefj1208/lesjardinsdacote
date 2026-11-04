@@ -6,7 +6,9 @@ const NOINDEX_CART = '<meta name="robots" content="noindex">';
 function cart_show(): void
 {
     $uid = Auth::id();
-    view('front/cart', ['items' => $uid ? Cart::items($uid) : [], 'title' => 'Mon panier', 'head' => NOINDEX_CART]);
+    $items = $uid ? Cart::items($uid) : [];
+    $valid = array_values(array_filter($items, fn($i) => $i['valid']));
+    view('front/cart', ['items' => $items, 'b' => Asso::breakdown($valid, $uid), 'title' => 'Mon panier', 'head' => NOINDEX_CART]);
 }
 
 function cart_add(): void
@@ -78,7 +80,7 @@ function checkout_show(): void
     }
     $returning = input('setup_intent') && input('redirect_status') === 'succeeded' ? (string)input('setup_intent') : null;
     view('front/checkout', [
-        'items' => $items, 'total' => array_sum(array_column($items, 'total')), 'user' => $user, 'clientSecret' => $clientSecret,
+        'items' => $items, 'b' => Asso::breakdown($items, (int)$user['id']), 'user' => $user, 'clientSecret' => $clientSecret,
         'stripeError' => $stripeError, 'returning' => $returning, 'title' => 'Confirmer mon achat', 'head' => NOINDEX_CART,
         'scripts' => $clientSecret ? '<script src="https://js.stripe.com/v3/"></script><script src="' . asset('js/checkout.js') . '" defer></script>' : '',
     ]);
@@ -89,7 +91,9 @@ function checkout_submit(): void
     $user = Auth::requireLogin();
     $items = checkout_items((int)$user['id']);
     if (!$items) { flash('info', 'Votre panier est vide.'); redirect('/panier'); }
-    if (!input('cgv')) { flash('error', 'Merci d\'accepter les conditions générales.'); redirect('/commande'); }
+    if (!input('cgv')) { flash('error', 'Merci d\'accepter les conditions du mandat d\'achat groupé.'); redirect('/commande'); }
+    $b = Asso::breakdown($items, (int)$user['id']);
+    if ($b['needs_membership'] && !input('adhesion')) { flash('error', 'Les achats groupés sont réservés aux membres : merci de cocher l\'adhésion à l\'association.'); redirect('/commande'); }
     $opts = ['payment_mode' => 'on_pickup', 'notes' => mb_substr((string)input('notes', ''), 0, 500) ?: null];
     if (!$user['phone'] && input('phone')) db()->exec('UPDATE users SET phone = ? WHERE id = ?', [mb_substr((string)input('phone'), 0, 30), $user['id']]);
     if (stripe_enabled() && input('pay_mode') !== 'on_pickup_fallback') {
@@ -106,9 +110,13 @@ function checkout_submit(): void
         }
     }
     $refs = [];
+    $join = $b['needs_membership'];
     foreach ($items as $it) {
         try {
-            $id = Orders::create($user, $it, $opts);
+            // Frais de fonctionnement et de logistique : une fois par commande ; l'adhésion de l'année, sur la première.
+            $o = $opts + ['fee' => Asso::fee(), 'fund' => Asso::fundShare(), 'membership' => $join ? Asso::membershipFee() : 0.0, 'join' => $join];
+            $id = Orders::create($user, $it, $o);
+            $join = false;
             $refs[] = (string)db()->val('SELECT reference FROM orders WHERE id = ?', [$id]);
         } catch (DomainException $e) {
             flash('error', $it['pack_name'] . ' : ' . $e->getMessage());

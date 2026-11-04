@@ -30,12 +30,10 @@
       <?php endforeach; ?>
     </section>
     <aside class="panel summary">
-      <h2>Récapitulatif</h2>
-      <div class="line"><span>Total</span><span><?= money(array_sum(array_column($valid, 'total'))) ?></span></div>
-      <?php $saved = array_sum(array_column($valid, 'saved')); if ($saved > 0): ?><div class="line line--save"><span>Votre économie vs jardinerie</span><span><?= money($saved) ?></span></div><?php endif; ?>
-      <div class="line total"><span>Débité aujourd'hui</span><span><?= money(0) ?></span></div>
-      <p class="small muted">Chaque pack n'est débité que lorsque son lot de 10 achats est complet. Si le lot n'est pas complété avant la fin de la vente, rien n'est prélevé.</p>
-      <?php if ($valid): ?><a class="btn btn--accent btn--lg btn--block" href="/commande">Confirmer mon achat</a><?php endif; ?>
+      <h2>Où va votre argent</h2>
+      <?php partial('partials/breakdown', ['b' => $b]) ?>
+      <p class="small muted mt-2">Rien n'est prélevé avant que votre lot de 10 achats soit complet. S'il ne l'est pas à la fin de la vente, tout est annulé, frais compris.</p>
+      <?php if ($valid): ?><a class="btn btn--accent btn--lg btn--block" href="/commande" data-sprout>Continuer</a><?php endif; ?>
     </aside>
   </div>
   <?php endif; ?>

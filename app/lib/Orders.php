@@ -79,13 +79,16 @@ final class Orders
             $id = $db->insert('orders', [
                 'reference' => 'JDC-' . date('y') . '-' . str_pad((string)$seq, 5, '0', STR_PAD_LEFT),
                 'user_id' => $user['id'], 'sale_id' => $s['id'], 'pack_id' => $pack['id'], 'quantity' => $qty,
-                'unit_price' => $pack['price'], 'amount' => round((float)$pack['price'] * $qty, 2), 'batch_no' => $batchNo,
+                'unit_price' => $pack['price'], 'goods_amount' => $goods = round((float)$pack['price'] * $qty, 2),
+                'fee_amount' => $fee = (float)($opts['fee'] ?? 0), 'fund_amount' => (float)($opts['fund'] ?? 0), 'membership_amount' => $mem = (float)($opts['membership'] ?? 0),
+                'amount' => round($goods + $fee + $mem, 2), 'batch_no' => $batchNo,
                 'payment_mode' => $opts['payment_mode'], 'payment_status' => 'pending',
                 'stripe_setup_intent_id' => $opts['setup_intent_id'] ?? null, 'stripe_payment_method_id' => $opts['payment_method_id'] ?? null,
                 'from_vote' => $cartItem['source'] === 'vote' ? 1 : 0, 'notes' => $opts['notes'] ?? null,
                 'pickup_token' => random_token(16), 'pickup_code' => self::newPickupCode(),
                 'bin_code' => preg_match('/^[A-Z]$/u', $initial) ? $initial : '#', 'cgv_accepted_at' => now(),
             ]);
+            if (!empty($opts['join'])) Asso::join((int)$user['id'], (float)($opts['membership'] ?? 0), $id);
             $db->exec('DELETE FROM cart_items WHERE user_id = ? AND sale_id = ?', [$user['id'], $s['id']]);
             $fill = (int)$db->val("SELECT COALESCE(SUM(quantity),0) FROM orders WHERE sale_id = ? AND batch_no = ? AND status = 'pending'", [$s['id'], $batchNo]);
             if ($fill >= (int)$s['batch_size']) {

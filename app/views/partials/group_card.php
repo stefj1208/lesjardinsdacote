@@ -20,7 +20,7 @@
       <div class="meter meter--tomato"><span style="--p:<?= $b['pct'] ?>"></span></div>
     <?php endif; ?>
     <?php if ($best && $best['save'] > 0): ?><div class="card-save"><?= $ps === 'open'
-      ? count($best['items']) . ' variétés : ' . eur($best['price']) . ' au lieu de ' . eur($best['market']) . ' (−' . (int)$best['save_pct'] . '&nbsp;%)'
-      : 'Pack à ' . eur($best['price']) . ' : environ ' . count($best['items']) . ' variétés, −' . (int)$best['save_pct'] . '&nbsp;% vs jardinerie' ?></div><?php endif; ?>
+      ? count($best['items']) . ' variétés : ' . eur($best['all_in'] ?? $best['price']) . ' frais compris, au lieu de ' . eur($best['market']) . ' (−' . (int)$best['save_pct'] . '&nbsp;%)'
+      : 'Pack à ' . eur($best['price']) . ' : environ ' . count($best['items']) . ' variétés, −' . (int)$best['save_pct'] . '&nbsp;% vs prix publics' ?></div><?php endif; ?>
   </div>
 </a>

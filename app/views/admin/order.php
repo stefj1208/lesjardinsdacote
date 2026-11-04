@@ -19,7 +19,7 @@
     <div class="panel summary"><h2>Paiement</h2>
       <div class="line"><span>Mode</span><span><?= $o['payment_mode'] === 'stripe' ? 'Carte (Stripe)' : 'Au retrait' ?></span></div>
       <div class="line"><span>Statut</span><span><?= e(Orders::PAYMENT_LABELS[$o['payment_status']]) ?></span></div>
-      <div class="line total"><span>Montant</span><span><?= money($o['amount']) ?></span></div>
+      <?php partial('partials/order_lines', ['o' => $o]) ?>
       <?php if ($o['invoice_number']): ?><a class="btn btn--ghost btn--sm btn--block" target="_blank" href="/compte/commande/<?= e($o['reference']) ?>/facture">Facture <?= e($o['invoice_number']) ?></a><?php endif; ?>
     </div>
     <div class="panel stack"><h3>Actions</h3>

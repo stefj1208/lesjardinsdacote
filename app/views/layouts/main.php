@@ -19,7 +19,7 @@ $cartCount = Cart::count(Auth::id());
 <link rel="preload" href="/assets/fonts/nunito-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/heebo-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/pacifico-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-<script>document.documentElement.classList.add('js')</script>
+<script>document.documentElement.classList.add('js');try{if(sessionStorage.getItem('jdc-canopy')&&!matchMedia('(prefers-reduced-motion: reduce)').matches){document.documentElement.classList.add('canopy-arrive');}sessionStorage.removeItem('jdc-canopy');}catch(e){}</script>
 <link rel="stylesheet" href="<?= asset('css/app.css') ?>">
 <meta property="og:site_name" content="<?= e($siteName) ?>">
 <meta property="og:locale" content="fr_FR">
@@ -44,6 +44,7 @@ $cartCount = Cart::count(Auth::id());
       <a href="/univers"<?= $cur('/univers') ?>>Ce qu'on achète</a>
       <a href="/groupes"<?= $cur('/groupes') ?>>Les groupes</a>
       <a href="/comment-ca-marche"<?= $cur('/comment-ca-marche') ?>>Comment ça marche</a>
+      <a href="/association"<?= $cur('/association') ?>>L'association</a>
       <a href="/lancer-un-groupe"<?= $cur('/lancer-un-groupe') ?>>Lancer un groupe</a>
       <?php if (Auth::isVolunteer()): ?><a href="/benevoles"<?= $cur('/benevoles') ?>>Bénévoles</a><?php endif; ?>
       <?php if (Auth::isAdmin()): ?><a href="/admin"<?= $cur('/admin') ?>>Back-office</a><?php endif; ?>
@@ -64,7 +65,7 @@ $cartCount = Cart::count(Auth::id());
     <div class="foot-grid">
       <div>
         <span class="foot-brand">Les jardins d'à côté</span>
-        <p>Des groupes d'achat de voisins, commune par commune : plants potagers, arbres fruitiers, aromatiques, graines. On choisit ensemble, on achète en gros, on paie bien moins cher qu'en jardinerie.</p>
+        <p>Des groupes d'achat de voisins, commune par commune : plants potagers, arbres fruitiers, aromatiques, graines. Une association loi 1901 : on choisit ensemble, l'association achète en notre nom au prix coûtant, et une part des frais plante des arbres.</p>
         <p class="small"><?= e(setting('association_address')) ?><br><a href="mailto:<?= e(setting('contact_email')) ?>"><?= e(setting('contact_email')) ?></a></p>
       </div>
       <div>
@@ -78,7 +79,8 @@ $cartCount = Cart::count(Auth::id());
       <div>
         <h4>Informations</h4>
         <ul>
-          <li><a href="/cgv">Conditions générales</a></li>
+          <li><a href="/association">L'association et ses engagements</a></li>
+          <li><a href="/cgv">Conditions du mandat d'achat</a></li>
           <li><a href="/mentions-legales">Mentions légales</a></li>
           <li><a href="/confidentialite">Données personnelles</a></li>
           <li><a href="/credits-photos">Crédits photos</a></li>
@@ -88,7 +90,9 @@ $cartCount = Cart::count(Auth::id());
     <div class="foot-base"><span>© <?= date('Y') ?> <?= e($siteName) ?> — <?= e(setting('association_legal')) ?></span><span><a href="https://www.lesjardinsdacote.fr/">lesjardinsdacote.fr</a></span></div>
   </div>
 </footer>
+<?php if (($bodyClass ?? '') !== 'admin') partial('partials/canopy'); ?>
 <script src="<?= asset('js/app.js') ?>" defer></script>
+<script src="<?= asset('js/garden-fx.js') ?>" defer></script>
 <?= $scripts ?? '' ?>
 </body>
 </html>

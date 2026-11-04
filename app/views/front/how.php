@@ -43,14 +43,14 @@
   <div class="wrap split split--center">
     <div data-reveal="left">
       <p class="eyebrow eyebrow--start eyebrow--light">Le prix marché, expliqué</p>
-      <h2>Chaque pack affiche ce qu'il vous coûterait en jardinerie</h2>
-      <p class="lede">Pour chaque variété, nous relevons le prix public d'un sachet de la même variété en jardinerie. Additionnés, ils donnent la valeur du pack au prix du marché. La différence avec le prix du pack, c'est votre économie.</p>
+      <h2>Chaque pack affiche ce qu'il vous coûterait à l'unité</h2>
+      <p class="lede">Pour chaque variété, nous relevons le prix public d'un sachet ou d'un plant de la même variété, sans citer d'enseigne. Additionnés, ils donnent la valeur du pack à l'unité. On en retire le prix du pack <strong>et les frais de la commande</strong> : ce qui reste, c'est votre économie réelle.</p>
       <p class="source-note" style="color:#93A1B5"><?= e(setting('market_price_note', Packs::DEFAULT_MARKET_NOTE)) ?></p>
     </div>
     <ul class="ticks" data-reveal="right">
       <li>L'association achète directement aux producteurs, au tarif professionnel : plants chez les horticulteurs, arbres chez les pépiniéristes, graines en grand conditionnement chez le semencier bio.</li>
       <li>Les bénévoles préparent les packs : plants étiquetés, arbres en racines nues, sachets d'environ 10 graines par variété.</li>
-      <li>Le prix du pack couvre les semences, les sachets, les étiquettes et une petite participation au fonctionnement de l'association.</li>
+      <li>Le pack est refacturé <strong>au prix coûtant</strong>, sans marge. L'association se finance par des frais fixes de <?= eur(Asso::fee()) ?> par commande, dont <?= eur(Asso::fundShare()) ?> pour planter des arbres.</li>
     </ul>
   </div>
 </section>
@@ -61,8 +61,9 @@
     <h2>Questions fréquentes</h2>
     <div class="faq mt-3">
       <details open><summary>Que contient un pack ?</summary><div>Chaque pack détaille ses variétés, avec photo, et la quantité exacte : nombre de graines, de plants ou d'arbres. Les graines sont bio et reproductibles, conditionnées par les bénévoles avec le numéro de lot d'origine.</div></details>
-      <details><summary>Combien ça coûte ?</summary><div>30 € le pack, prix affiché avant le vote et identique pour tous. Chaque pack indique aussi sa valeur en jardinerie et l'économie réalisée. Le prix couvre les semences, les sachets, les étiquettes et une petite contribution au fonctionnement de l'association.</div></details>
-      <details><summary>Pourquoi c'est moins cher qu'en jardinerie ?</summary><div>La jardinerie paie un magasin, du personnel, des invendus et des emballages, et vend à l'unité. Le groupe achète en gros directement aux producteurs, ne garde aucun stock et confie la préparation aux bénévoles : le prix paie les plantes.</div></details>
+      <details><summary>Combien ça coûte ?</summary><div>Le prix du pack (30 € en général) correspond au <strong>coût réel des produits</strong>, payé au producteur sans marge. S'ajoutent <strong><?= eur(Asso::fee()) ?> de frais de fonctionnement et de logistique par commande</strong>, quel que soit le nombre de packs, dont <?= eur(Asso::fundShare()) ?> versés au fonds plantations. L'adhésion annuelle à l'association est <?= Asso::membershipFee() > 0 ? 'de ' . eur(Asso::membershipFee()) : 'offerte' ?>. Tout est détaillé au panier avant de valider.</div></details>
+      <details><summary>Pourquoi faut-il adhérer ?</summary><div>Parce que l'association achète <strong>en votre nom</strong> : c'est un mandat d'achat, réservé à ses membres. L'adhésion se coche au moment de la commande, une fois par an. Elle vous donne aussi une voix à l'assemblée générale.</div></details>
+      <details><summary>Pourquoi est-ce moins cher ?</summary><div>Un commerce vend à l'unité et doit financer un magasin, du personnel et des invendus : c'est normal. Le groupe, lui, achète en gros directement aux producteurs, ne garde aucun stock et confie la préparation aux bénévoles : le prix paie les plantes.</div></details>
       <details><summary>Comment se compose le pack ?</summary><div>Pendant la pré-ouverture, chaque membre coche jusqu'à 10 variétés. À la fin du vote, les variétés sont classées par nombre de voix et ajoutées au pack une à une, tant que leur coût d'achat (plus le sachet et l'étiquette) tient dans le prix du pack. Un aperçu « si le vote s'arrêtait maintenant » est affiché en direct sur la page du groupe.</div></details>
       <details><summary>Dois-je voter pour acheter ?</summary><div>Non, mais c'est plus simple : à l'ouverture des ventes, le pack composé est déposé automatiquement dans le panier de chaque votant. Il suffit de confirmer. Les membres qui n'ont pas voté peuvent aussi l'acheter.</div></details>
       <details><summary>Et si une variété que j'ai choisie n'entre pas dans le pack ?</summary><div>Le pack réunit les variétés les plus demandées par l'ensemble du groupe. Si une de vos variétés n'a pas assez de voix, elle n'y sera pas ; le pack arrive quand même dans votre panier et vous restez libre de ne pas confirmer l'achat.</div></details>

@@ -123,7 +123,7 @@ small, .small { font-size: .9rem; }
 .brand img { height: 44px; width: auto; }
 .brand-name { font: 400 1.45rem/1 var(--f-script); letter-spacing: 0; padding-bottom: 4px; }
 .nav { display: flex; gap: .2rem; margin-left: auto; align-items: center; }
-.nav a { position: relative; color: var(--ink-2); text-decoration: none; padding: 9px 13px; border-radius: 999px; font-weight: 600; font-size: .96rem; transition: color .2s, background .2s; }
+.nav a { position: relative; color: var(--ink-2); text-decoration: none; padding: 9px 10px; border-radius: 999px; font-weight: 600; font-size: .93rem; white-space: nowrap; transition: color .2s, background .2s; }
 .nav a::after { content: ""; position: absolute; left: 13px; right: 13px; bottom: 4px; height: 2px; border-radius: 2px; background: var(--green); transform: scaleX(0); transform-origin: left; transition: transform .35s var(--ease); }
 .nav a:hover { color: var(--navy); }
 .nav a:hover::after, .nav a[aria-current="page"]::after { transform: scaleX(1); }
@@ -140,7 +140,7 @@ small, .small { font-size: .9rem; }
 .has-hero .site-head:not(.is-scrolled) .nav-cta { background: var(--green); }
 .has-hero .site-head { position: fixed; left: 0; right: 0; }
 .has-hero .demo-bar + .site-head { top: 0; }
-@media (max-width: 1060px) {
+@media (max-width: 1240px) {
   .nav-toggle { display: inline-flex; gap: 8px; align-items: center; }
   .nav { display: none; position: absolute; left: 0; right: 0; top: 100%; background: var(--paper); flex-direction: column; align-items: stretch; padding: 10px 16px 18px; border-bottom: 1px solid var(--line); box-shadow: var(--shadow); }
   .nav.is-open { display: flex; animation: rise .35s var(--ease) both; }
@@ -846,3 +846,167 @@ table.table { width: 100%; border-collapse: collapse; font-size: .95rem; }
 
 .stat-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 @media (max-width: 560px) { .stat-grid--3 { gap: .5rem; } .stat-grid--3 .stat { padding: .9rem .8rem; } .stat-grid--3 .stat b { font-size: 1.5rem; } .stat-grid--3 .stat span { font-size: .8rem; } }
+
+/* ==========================================================================
+   v6 — Association : transparence des prix, fonds plantations
+   ========================================================================== */
+.price-fee { display: block; font-size: .92rem; color: var(--muted); margin-top: 2px; }
+.price-line .price-was { display: block; }
+
+/* Ventilation du panier */
+.bd { display: grid; gap: 2px; }
+.bd-line { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 10px 0; border-bottom: 1px dashed var(--line); }
+.bd-line > span:first-child { display: grid; gap: 1px; }
+.bd-line b { font: 750 1rem/1.25 var(--f-display); }
+.bd-line small { color: var(--muted); font-size: .84rem; line-height: 1.35; }
+.bd-line > span:last-child { font-weight: 700; white-space: nowrap; }
+.bd-line--tree { border-bottom: 0; padding: 0 0 10px 0; margin-top: -6px; }
+.bd-line--tree > span { display: flex !important; align-items: center; gap: 6px; color: var(--green-dd); font-size: .92rem; }
+.bd-line--tree svg { flex: none; }
+.bd-line--tree b { font: inherit; font-weight: 800; }
+.bd-total { border-bottom: 0; border-top: 2px solid var(--navy); margin-top: 6px; padding-top: 12px; font: 800 1.3rem var(--f-display); }
+.bd-save { background: var(--green-wash); color: var(--green-dd); border-radius: 12px; padding: 10px 12px; font-size: .92rem; }
+.bd-now { display: flex; justify-content: space-between; margin-top: 8px; padding: 10px 12px; border-radius: 12px; background: var(--sky); font-size: .95rem; }
+
+/* Points clés (conditions du mandat) */
+.keypoints { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 1.5rem 0 2rem; }
+.keypoints > div { background: var(--green-wash); border-radius: var(--r-card); padding: 16px 18px; display: grid; gap: 4px; }
+.keypoints b { font: 800 1.15rem var(--f-display); color: var(--green-dd); }
+.keypoints span { font-size: .95rem; line-height: 1.45; }
+@media (max-width: 720px) { .keypoints { grid-template-columns: 1fr; } }
+
+/* Où va l'argent */
+.msplit { background: #fff; border-radius: var(--r-photo); padding: 22px; box-shadow: var(--shadow); }
+.msplit-bar { display: flex; height: 64px; border-radius: 16px; overflow: hidden; gap: 3px; }
+.ms { flex-basis: 0; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: #fff; font: 800 1rem var(--f-display); min-width: 52px; transform-origin: left; }
+.ms b { white-space: nowrap; }
+.ms--prod { background: var(--green-d); }
+.ms--ops { background: var(--navy-3); }
+.ms--tree { background: var(--sun); color: var(--navy); }
+.js .msplit .ms { transform: scaleX(0); transition: transform 1s var(--ease); }
+.js .msplit .ms--ops { transition-delay: .25s; }
+.js .msplit .ms--tree { transition-delay: .45s; }
+.js .msplit.is-in .ms { transform: scaleX(1); }
+.msplit-legend { list-style: none; padding: 0; margin: 16px 0 10px; display: grid; gap: 8px; }
+.msplit-legend li { display: flex; gap: 10px; align-items: flex-start; font-size: .95rem; line-height: 1.45; }
+.msplit-legend i { flex: none; width: 14px; height: 14px; border-radius: 4px; margin-top: 4px; }
+.msplit-legend i.ms--prod { background: var(--green-d); } .msplit-legend i.ms--ops { background: var(--navy-3); } .msplit-legend i.ms--tree { background: var(--sun); }
+
+/* Fonds plantations */
+.fund-card { background: var(--navy); color: #DCE3EC; border-radius: var(--r-photo); padding: 30px; display: grid; gap: 6px; box-shadow: var(--shadow-lg); position: relative; overflow: hidden; }
+.fund-card::before { content: ""; position: absolute; inset: auto -30% -60% auto; width: 80%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, rgba(106,158,109,.45), transparent 70%); }
+.fund-card > b { font: 900 clamp(2.6rem, 6vw, 4rem)/1 var(--f-display); color: #fff; }
+.fund-mini { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 10px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,.14); font-size: .92rem; }
+.fund-mini b { color: #fff; }
+.fund-icon { width: 54px; height: 54px; border-radius: 16px; display: grid; place-items: center; background: rgba(106,158,109,.22); color: #9FD3A2; }
+.fund-icon svg { width: 34px; height: 34px; }
+.grow-leaf { transform-box: fill-box; transform-origin: 0% 100%; animation: leafGrow 3.2s var(--ease) infinite; }
+.grow-leaf--2 { transform-origin: 0% 100%; animation-delay: .4s; }
+@keyframes leafGrow { 0%, 12% { transform: scale(0); opacity: 0; } 40%, 80% { transform: scale(1); opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
+.fund-inline { display: flex; align-items: center; gap: 14px; margin: 1.2rem 0; }
+.fund-inline .fund-icon { background: var(--green-wash); color: var(--green-d); }
+.fund-inline b { display: block; font: 900 2rem/1 var(--f-display); color: var(--green-dd); }
+.fund-inline span { color: var(--muted); font-size: .95rem; }
+.asso-band { background: linear-gradient(180deg, var(--paper), var(--green-wash)); }
+
+/* Page association */
+.asso-hero h1 em { font-style: normal; color: var(--green-d); }
+.pillars { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
+.pillar { background: #fff; border: 1px solid var(--line); border-radius: var(--r-card); padding: 20px; transition: transform .35s var(--ease), box-shadow .35s var(--ease); }
+.pillar:hover { transform: translateY(-6px); box-shadow: var(--shadow); }
+.pillar-n { font: 900 1rem var(--f-display); color: var(--green); letter-spacing: .08em; }
+.pillar h3 { font-size: 1.2rem; margin: 8px 0 6px; }
+.pillar p { font-size: .95rem; margin: 0; color: var(--ink-2); }
+@media (max-width: 1100px) { .pillars { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .pillars { grid-template-columns: 1fr; } }
+.promise-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.promise { display: flex; gap: 12px; padding: 18px; border-radius: var(--r-card); background: var(--sky); }
+.promise svg { flex: none; color: var(--green-d); margin-top: 3px; }
+.promise h3 { font-size: 1.1rem; margin: 0 0 4px; }
+.promise p { margin: 0; font-size: .95rem; color: var(--ink-2); }
+@media (max-width: 900px) { .promise-grid { grid-template-columns: 1fr; } }
+.gov { display: grid; gap: 10px; margin: 0; }
+.gov > div { display: flex; justify-content: space-between; gap: 14px; padding: 14px 18px; border-radius: 14px; background: rgba(255,255,255,.06); }
+.gov dt { color: #9FB0C6; } .gov dd { margin: 0; color: #fff; font-weight: 700; text-align: right; }
+.asso-cta { display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; background: var(--green-wash); border-radius: var(--r-photo); padding: clamp(24px, 4vw, 44px); }
+.asso-cta h2 { margin-bottom: 6px; }
+
+/* ==========================================================================
+   v6 — Micro-interactions végétales
+   ========================================================================== */
+/* 1. Germination au clic */
+.sprout { position: fixed; z-index: 9998; pointer-events: none; width: 0; height: 0; }
+.sprout i { position: absolute; left: 0; top: 0; display: block; }
+.sprout .seed { width: 10px; height: 13px; margin: -6px 0 0 -5px; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; background: #8A6A3B; box-shadow: inset -2px -2px 0 rgba(0,0,0,.18); animation: seedSink .32s var(--ease) forwards; }
+.sprout .lf { width: 22px; height: 12px; margin: -6px 0 0 0; background: linear-gradient(135deg, #8FD18F, #3E8A47); border-radius: 0 100% 0 100%; transform-origin: 0 50%; opacity: 0; animation: leafArc .46s .12s var(--ease) forwards; }
+.sprout .lf--l { --dx: calc(var(--w) * -.42); --r: -158deg; --mid: -110deg; }
+.sprout .lf--r { --dx: calc(var(--w) * .42); --r: -22deg; --mid: -70deg; }
+.sprout .bloom { width: 9px; height: 9px; margin: -4px 0 0 -4px; border-radius: 50%; background: radial-gradient(circle, #FFE58A 35%, #F5B83D 36%); opacity: 0; animation: bloom .3s .48s var(--ease) forwards; }
+@keyframes seedSink { 0% { transform: translateY(-8px) scale(.6); opacity: 0; } 50% { opacity: 1; } 100% { transform: translateY(3px) scale(1); opacity: 0; } }
+@keyframes leafArc {
+  0% { transform: translate(0, 0) rotate(-90deg) scale(.2); opacity: 0; }
+  45% { transform: translate(calc(var(--dx) * .45), calc(var(--h) * -.62)) rotate(var(--mid)) scale(.9); opacity: 1; }
+  100% { transform: translate(var(--dx), calc(var(--h) * -.52)) rotate(var(--r)) scale(1); opacity: 0; }
+}
+@keyframes bloom { 0% { transform: translateY(calc(var(--h) * -.5)) scale(0); opacity: 1; } 60% { transform: translateY(calc(var(--h) * -.55)) scale(1.6); opacity: 1; } 100% { transform: translateY(calc(var(--h) * -.6)) scale(2.4); opacity: 0; } }
+.btn.is-sprouted, .vcard.is-sprouted { animation: chloro .7s var(--ease); }
+@keyframes chloro { 0% { box-shadow: 0 0 0 0 rgba(106,158,109,.65); } 100% { box-shadow: 0 0 0 18px rgba(106,158,109,0); } }
+
+/* 2. Liane de progression */
+.trellis { position: fixed; right: 10px; top: 92px; bottom: 18px; width: 34px; z-index: 40; pointer-events: none; opacity: 0; transition: opacity .5s; }
+.trellis.is-on { opacity: 1; }
+.trellis svg { width: 100%; height: 100%; overflow: visible; }
+.trellis .stake { stroke: rgba(15,23,43,.12); stroke-width: 2; stroke-dasharray: 2 6; stroke-linecap: round; }
+.trellis .vine { fill: none; stroke: var(--green-d); stroke-width: 2.6; stroke-linecap: round; }
+.trellis .bud { pointer-events: auto; cursor: pointer; }
+.trellis .bud circle { fill: #fff; stroke: var(--green-wash-2); stroke-width: 2; transition: fill .3s, stroke .3s, r .3s; }
+.trellis .bud path { fill: var(--green); transform-box: fill-box; transform-origin: 50% 100%; transform: scale(0); transition: transform .5s cubic-bezier(.34,1.56,.64,1); }
+.trellis .bud.is-open circle { fill: var(--green-wash); stroke: var(--green); }
+.trellis .bud.is-open path { transform: scale(1); }
+.trellis .bud:hover circle { stroke: var(--navy); }
+.trellis .bud text { font: 700 11px var(--f-body); fill: var(--navy); opacity: 0; transition: opacity .2s; paint-order: stroke; stroke: var(--paper); stroke-width: 4px; }
+.trellis .bud:hover text, .trellis .bud:focus text { opacity: 1; }
+.trellis .tip { transform-box: fill-box; transform-origin: 50% 100%; }
+.trellis .tip.is-sway { animation: sway 1.1s cubic-bezier(.3,.7,.3,1); }
+@keyframes sway { 0% { rotate: 0deg; } 18% { rotate: 16deg; } 36% { rotate: -11deg; } 54% { rotate: 6deg; } 72% { rotate: -3deg; } 100% { rotate: 0deg; } }
+@media (max-width: 1359px) { .trellis { display: none; } }
+
+/* 3. Rideau de feuilles entre les pages */
+.canopy { position: fixed; inset: 0; z-index: 9999; pointer-events: none; visibility: hidden; overflow: hidden; }
+.canopy .leaf { position: absolute; width: 78vmax; height: 78vmax; top: 50%; left: 50%; margin: -39vmax 0 0 -39vmax; filter: drop-shadow(0 20px 40px rgba(0,0,0,.25)); will-change: transform; }
+.canopy .leaf svg { width: 100%; height: 100%; }
+.canopy .leaf:nth-child(1) { --ox: -95vw; --oy: -30vh; --tx: -32vw; --ty: -24vh; --rot: -28deg; color: #2F5A36; }
+.canopy .leaf:nth-child(2) { --ox: 95vw; --oy: -40vh; --tx: 30vw; --ty: -26vh; --rot: 152deg; color: #3A6440; }
+.canopy .leaf:nth-child(3) { --ox: -95vw; --oy: 40vh; --tx: -28vw; --ty: 26vh; --rot: -64deg; color: #4A7D4F; }
+.canopy .leaf:nth-child(4) { --ox: 95vw; --oy: 35vh; --tx: 30vw; --ty: 24vh; --rot: 118deg; color: #2B4B33; }
+.canopy .leaf:nth-child(5) { --ox: 0; --oy: 110vh; --tx: 0; --ty: 6vh; --rot: -92deg; color: #6A9E6D; }
+.canopy .leaf:nth-child(6) { --ox: 0; --oy: -110vh; --tx: 4vw; --ty: -6vh; --rot: 80deg; color: #3F7046; }
+.canopy .leaf { transform: translate(var(--ox), var(--oy)) rotate(var(--rot)) scale(.9); }
+html.canopy-leave .canopy, html.canopy-arrive .canopy { visibility: visible; }
+html.canopy-leave .canopy .leaf { transition: transform .42s cubic-bezier(.6,0,.3,1); transform: translate(var(--tx), var(--ty)) rotate(var(--rot)) scale(1.05); }
+html.canopy-leave .canopy .leaf:nth-child(even) { transition-delay: .05s; }
+html.canopy-arrive .canopy .leaf { animation: canopyOpen .75s .06s cubic-bezier(.5,0,.2,1) both; }
+html.canopy-arrive .canopy .leaf:nth-child(even) { animation-delay: .12s; }
+@keyframes canopyOpen { from { transform: translate(var(--tx), var(--ty)) rotate(var(--rot)) scale(1.05); } to { transform: translate(var(--ox), var(--oy)) rotate(calc(var(--rot) + 12deg)) scale(.9); } }
+html.canopy-arrive main { animation: canopyParallax .9s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes canopyParallax { from { transform: scale(1.025); filter: saturate(.8); } to { transform: none; filter: none; } }
+
+/* 4. Curseur goutte d'eau et pollen */
+html.has-drop, html.has-drop a, html.has-drop button, html.has-drop label, html.has-drop summary { cursor: none; }
+html.has-drop input, html.has-drop textarea, html.has-drop select, html.has-drop [contenteditable] { cursor: auto; }
+.drop { position: fixed; left: 0; top: 0; z-index: 10000; pointer-events: none; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50% 0 50% 50%; rotate: -45deg; background: radial-gradient(circle at 34% 30%, rgba(255,255,255,.95) 0 12%, rgba(173,216,255,.55) 30%, rgba(80,150,220,.35) 70%); border: 1.5px solid rgba(40,110,180,.55); box-shadow: 0 2px 8px rgba(40,110,180,.3); transition: width .2s, height .2s, margin .2s, opacity .2s, background .2s; will-change: transform; }
+.drop.is-link { width: 30px; height: 30px; margin: -15px 0 0 -15px; background: radial-gradient(circle at 34% 30%, rgba(255,255,255,.95) 0 10%, rgba(143,209,143,.45) 32%, rgba(74,125,79,.3) 70%); border-color: rgba(74,125,79,.6); }
+.drop.is-text { opacity: 0; }
+.drop.is-hidden { opacity: 0; }
+.pollen { position: fixed; inset: 0; z-index: 9997; pointer-events: none; }
+.is-pollinated img, img.is-pollinated { filter: saturate(1.35) brightness(1.05); transition: filter .5s; }
+.ph img { transition: filter .9s, transform .6s var(--ease); }
+
+@media (prefers-reduced-motion: reduce) {
+  .canopy, .trellis, .sprout, .drop, .pollen { display: none !important; }
+  html.has-drop, html.has-drop * { cursor: auto !important; }
+  .grow-leaf { animation: none; transform: none; opacity: 1; }
+}
+.cart-line--sm { grid-template-columns: 72px 1fr auto; }
+.cart-line--sm > .ph { width: 72px; height: 72px; }
+.sprout .lf { width: 30px; height: 16px; margin-top: -8px; }

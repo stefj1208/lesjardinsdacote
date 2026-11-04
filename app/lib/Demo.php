@@ -11,7 +11,7 @@ final class Demo
 {
     /** Prix public d'un sachet de graines bio en jardinerie (La Semence Bio, marque grand public d'Agrosemens, relevé novembre 2026). */
     public const MARKET = 3.30;
-    public const MARKET_NOTE = "Prix marché : 3,30 € le sachet, prix public des sachets de graines bio du même semencier (La Semence Bio, marque grand public d'Agrosemens) chez Truffaut et Nature & Découvertes, relevé en novembre 2026. Une variété = un sachet.";
+    public const MARKET_NOTE = Asso::DEFAULT_MARKET_NOTE;
 
     /** TOMATE Belmonte : 3,20 € HT les 10 graines, 9,40 € HT les 100 graines (catalogue Agrosemens, novembre 2026). */
     private const RATIO_100 = 9.40 / 3.20;
@@ -245,7 +245,7 @@ final class Demo
                     $buyer = $users[$k % count($users)];
                     $bu = $db->one('SELECT * FROM users WHERE id = ?', [$buyer]);
                     $db->insert('orders', ['reference' => 'DEMO-' . $sid . '-' . $k, 'user_id' => $buyer, 'sale_id' => $sid, 'pack_id' => $packId, 'quantity' => 1,
-                        'unit_price' => 30, 'amount' => 30, 'batch_no' => $batch, 'status' => $batch === 1 ? 'confirmed' : 'pending',
+                        'unit_price' => 30, 'amount' => 30 + Asso::fee(), 'goods_amount' => 30, 'fee_amount' => Asso::fee(), 'fund_amount' => Asso::fundShare(), 'batch_no' => $batch, 'status' => $batch === 1 ? 'confirmed' : 'pending',
                         'payment_mode' => 'on_pickup', 'payment_status' => $batch === 1 ? 'to_collect' : 'pending', 'from_vote' => $k < 6 ? 1 : 0,
                         'pickup_token' => random_token(16), 'pickup_code' => strtoupper(substr(random_token(4), 0, 6)),
                         'bin_code' => mb_strtoupper(mb_substr($bu['last_name'], 0, 1)), 'cgv_accepted_at' => now()]);

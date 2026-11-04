@@ -11,9 +11,9 @@ $tiles = array_slice(array_filter($univers, fn($u) => $u['count'] > 0), 0, 4, tr
 <section class="h5">
   <div class="wrap h5-grid">
     <div class="h5-text">
-      <p class="eyebrow eyebrow--start rise" style="--i:0">Achats groupés entre voisins</p>
+      <p class="eyebrow eyebrow--start rise" style="--i:0">Association loi 1901 · achats groupés entre voisins</p>
       <h1 class="h5-title"><?= $words('Votre jardin, acheté en gros') ?> <em><?= $words('avec vos voisins.', 5) ?></em></h1>
-      <p class="lede rise" style="--i:6">Plants potagers, arbres fruitiers, aromatiques, graines rares : dans votre commune, on choisit ensemble, l'association achète en gros, des bénévoles préparent les packs. Vous payez <?= $bestPct ? '<strong>jusqu\'à ' . $bestPct . '&nbsp;% de moins</strong>' : 'bien moins' ?> qu'en jardinerie.</p>
+      <p class="lede rise" style="--i:6">Plants potagers, arbres fruitiers, aromatiques, graines rares : dans votre commune, on choisit ensemble, l'association achète en votre nom <strong>au prix coûtant</strong>, des bénévoles préparent les packs. Seuls <?= eur(Asso::fee()) ?> de frais par commande, dont <?= eur(Asso::fundShare()) ?> pour planter des arbres.</p>
       <form class="hero-search rise" style="--i:7" action="/groupes" method="get" role="search">
         <label class="sr-only" for="hq">Votre commune</label>
         <input id="hq" name="q" placeholder="Votre commune ou code postal" autocomplete="address-level2">
@@ -54,7 +54,7 @@ $tiles = array_slice(array_filter($univers, fn($u) => $u['count'] > 0), 0, 4, tr
   <div class="hs-sticky">
     <div class="wrap hs-head">
       <div><p class="eyebrow eyebrow--start">Ce que l'on achète ensemble</p><h2>Cinq univers, une saison chacun</h2></div>
-      <p class="muted">Faites défiler : à chaque saison son achat groupé, avec le prix en jardinerie et le prix du groupe.</p>
+      <p class="muted">Faites défiler : à chaque saison son achat groupé, avec le prix public et le prix du groupe.</p>
     </div>
     <div class="hs-track">
       <?php $k = 0; foreach ($univers as $u): $ex = $u['example']; ?>
@@ -66,7 +66,7 @@ $tiles = array_slice(array_filter($univers, fn($u) => $u['count'] > 0), 0, 4, tr
             <span class="ucard-intro"><?= e($u['intro']) ?></span>
             <span class="ucard-ex"><?php foreach ($u['examples'] as $x): ?><span><?= e($x) ?></span><?php endforeach; ?></span>
             <?php if ($ex && $ex['save']): ?>
-              <span class="ucard-price"><b><?= eur($ex['price']) ?></b> le pack de <?= count($ex['items']) ?> <?= $u['key'] === 'fruit_trees' ? plural(count($ex['items']), 'arbre', 'arbres') : ($u['key'] === 'seeds' ? 'variétés' : 'plants et variétés') ?> · <s><?= eur($ex['market']) ?></s> en jardinerie</span>
+              <span class="ucard-price"><b><?= eur($ex['price']) ?></b> + <?= eur(Asso::fee()) ?> de frais · le pack de <?= count($ex['items']) ?> <?= $u['key'] === 'fruit_trees' ? plural(count($ex['items']), 'arbre', 'arbres') : ($u['key'] === 'seeds' ? 'variétés' : 'plants et variétés') ?> · <s><?= eur($ex['market']) ?></s> au prix public</span>
             <?php else: ?>
               <span class="ucard-price">Catalogue en préparation</span>
             <?php endif; ?>
@@ -89,13 +89,29 @@ $tiles = array_slice(array_filter($univers, fn($u) => $u['count'] > 0), 0, 4, tr
   </div>
 </section>
 
-<?php if ($heroPack && $heroPack['save'] > 0): $h = $heroPack; $pctGroup = (int)round($h['price'] / $h['market'] * 100); ?>
+<section class="section asso-band">
+  <div class="wrap split split--center">
+    <div data-reveal="left">
+      <p class="eyebrow eyebrow--start">Une association, pas un magasin</p>
+      <h2>Vous payez les plantes au prix coûtant. Et vous plantez des arbres.</h2>
+      <p class="lede">L'association achète en votre nom, sans marge. Ses frais fixes de <?= eur(Asso::fee()) ?> par commande paient la logistique et alimentent un fonds qui finance des plantations.</p>
+      <div class="fund-inline">
+        <span class="fund-icon" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M24 44V26"/><path class="grow-leaf" d="M24 30c-7 0-11-4-11-10 6 0 11 4 11 10z"/><path class="grow-leaf grow-leaf--2" d="M24 26c0-8 5-13 13-13 0 8-5 13-13 13z"/></svg></span>
+        <div><b data-count="<?= e(number_format($fund, 2, '.', '')) ?>" data-decimals="0" data-suffix=" €"><?= eur($fund) ?></b><span>déjà réunis pour planter des arbres</span></div>
+      </div>
+      <a class="btn btn--ghost mt-2" href="/association">Nos engagements <span class="arr" aria-hidden="true">→</span></a>
+    </div>
+    <?php partial('partials/money_split') ?>
+  </div>
+</section>
+
+<?php if ($heroPack && $heroPack['save'] > 0): $h = $heroPack; $pctGroup = (int)round($h['all_in'] / $h['market'] * 100); ?>
 <section class="section section--ink">
   <div class="wrap savings">
     <div data-reveal="left">
       <p class="eyebrow eyebrow--start eyebrow--light">Ce que vous économisez</p>
       <h2>Les mêmes plantes, <?= $h['save_pct'] ?>&nbsp;% moins cher.</h2>
-      <p class="lede">En jardinerie, chaque plant et chaque sachet se paie au prix de détail. En groupe, l'association achète directement aux horticulteurs, pépiniéristes et semenciers, au tarif professionnel, et les bénévoles préparent les packs.</p>
+      <p class="lede">Au prix public, chaque plant et chaque sachet se paie au prix de détail. En groupe, l'association achète directement aux horticulteurs, pépiniéristes et semenciers, au tarif professionnel, et les bénévoles préparent les packs.</p>
       <div class="reasons">
         <div class="reason" data-reveal style="--i:1"><span class="reason-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 12l9 4 9-4M3 17l9 4 9-4"/></svg></span><div><h4>Achat en gros, au producteur</h4><p>Plants chez les horticulteurs, arbres chez les pépiniéristes, graines chez le semencier bio.</p></div></div>
         <div class="reason" data-reveal style="--i:2"><span class="reason-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M15 20c0-2.5 1.2-4.5 3-5"/></svg></span><div><h4>Préparé par des bénévoles</h4><p>Pas de magasin ni d'emballage marketing : le prix paie les plantes, pas la vitrine.</p></div></div>
@@ -105,15 +121,15 @@ $tiles = array_slice(array_filter($univers, fn($u) => $u['count'] > 0), 0, 4, tr
     <div class="compare" data-reveal="right">
       <p class="mb-0" style="color:#fff;font:800 1.15rem var(--f-display)"><?= e($h['name']) ?> · <?= e($h['summary']) ?></p>
       <div class="compare-row">
-        <div class="row"><span>En jardinerie, à l'unité</span><b><?= eur($h['market']) ?></b></div>
+        <div class="row"><span>Prix publics, à l'unité</span><b><?= eur($h['market']) ?></b></div>
         <div class="compare-bar compare-bar--shop"><span style="--p:100"><?= count($h['items']) ?> articles</span></div>
       </div>
       <div class="compare-row">
-        <div class="row"><span>Avec votre groupe</span><b><?= eur($h['price']) ?></b></div>
+        <div class="row"><span>Avec votre groupe, frais compris</span><b><?= eur($h['all_in']) ?></b></div>
         <div class="compare-bar compare-bar--group"><span style="--p:<?= max(18, $pctGroup) ?>">1 pack</span></div>
       </div>
       <div class="compare-total"><b data-count="<?= e(number_format($h['save'], 2, '.', '')) ?>" data-decimals="2" data-suffix=" €"><?= eur($h['save']) ?></b><span>d'économie sur ce pack, soit −<?= $h['save_pct'] ?>&nbsp;%</span></div>
-      <p class="source-note" style="color:#93A1B5">Prix en jardinerie relevés en novembre 2026 (plants : Botanic ; graines : sachets La Semence Bio ; arbres : prix public d'un lycée horticole). Le détail figure sur chaque page d'univers.</p>
+      <p class="source-note" style="color:#93A1B5">Prix publics constatés en novembre 2026 pour les mêmes variétés, à l'unité. Comparaison frais de commande compris ; le détail figure sur chaque page d'univers.</p>
     </div>
   </div>
 </section>
@@ -131,10 +147,10 @@ $tiles = array_slice(array_filter($univers, fn($u) => $u['count'] > 0), 0, 4, tr
           <span class="chip chip--ok">Particuliers</span>
           <h3>Je jardine et je veux acheter</h3>
           <ul class="ticks">
-            <li>Je rejoins le groupe de ma commune, gratuitement.</li>
+            <li>Je rejoins le groupe de ma commune et j'adhère à l'association<?= Asso::membershipFee() > 0 ? '' : ' (adhésion offerte)' ?>.</li>
             <li>À chaque saison, je choisis les plants, arbres ou graines que je veux voir dans le pack.</li>
             <li>Le pack composé par le vote arrive dans mon panier. Rien n'est débité tant que le lot de 10 achats n'est pas complet.</li>
-            <li>Je le retire près de chez moi et je paie <strong>bien moins cher qu'en jardinerie</strong>.</li>
+            <li>Je paie le prix coûtant + <?= eur(Asso::fee()) ?> de frais par commande, et je retire mon pack près de chez moi.</li>
           </ul>
           <div class="row mt-1"><a class="btn" href="/groupes">Trouver mon groupe <span class="arr" aria-hidden="true">→</span></a><a class="btn btn--ghost" href="/comment-ca-marche">Tout comprendre</a></div>
         </div>

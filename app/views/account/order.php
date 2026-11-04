@@ -38,7 +38,7 @@ $steps = [
     <aside class="stack">
       <div class="panel summary">
         <h2>Paiement</h2>
-        <div class="line"><span><?= (int)$o['quantity'] ?> × <?= money($o['unit_price']) ?></span><span><?= money($o['amount']) ?></span></div>
+        <?php partial('partials/order_lines', ['o' => $o]) ?>
         <p class="small mt-2"><strong><?= e(Orders::PAYMENT_LABELS[$o['payment_status']]) ?></strong></p>
         <?php if (in_array($o['payment_status'], ['action_required', 'failed'], true) && stripe_enabled()): ?><a class="btn btn--accent btn--block" href="/compte/paiement/<?= e($o['reference']) ?>">Régler maintenant</a><?php endif; ?>
         <?php if ($o['invoice_number']): ?><a class="btn btn--ghost btn--block mt-2" href="/compte/commande/<?= e($o['reference']) ?>/facture" target="_blank">Facture <?= e($o['invoice_number']) ?></a><?php endif; ?>

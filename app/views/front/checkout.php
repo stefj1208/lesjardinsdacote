@@ -9,7 +9,7 @@
       <section class="panel">
         <h2>Vos packs</h2>
         <?php foreach ($items as $it): ?>
-          <div class="cart-line" style="grid-template-columns:72px 1fr auto">
+          <div class="cart-line cart-line--sm">
             <?= ph($it['photo'], $it['pack_name'], '', 300) ?>
             <div><strong><?= (int)$it['quantity'] ?> × <?= e($it['pack_name']) ?></strong><div class="small muted"><?= e($it['group_name']) ?> · lot n° <?= $it['batch']['no'] ?> (<?= $it['batch']['fill'] ?>/<?= $it['batch']['size'] ?>)</div></div>
             <strong><?= money($it['total']) ?></strong>
@@ -32,12 +32,14 @@
       </section>
     </div>
     <aside class="panel summary">
-      <h2>Récapitulatif</h2>
-      <div class="line"><span>Total</span><span><?= money($total) ?></span></div>
-      <?php $saved = array_sum(array_column($items, 'saved')); if ($saved > 0): ?><div class="line line--save"><span>Votre économie vs jardinerie</span><span><?= money($saved) ?></span></div><?php endif; ?>
-      <div class="line total"><span>Débité aujourd'hui</span><span><?= money(0) ?></span></div>
-      <label class="check mt-3"><input type="checkbox" name="cgv" value="1" required><span>J'accepte les <a href="/cgv" target="_blank">conditions générales</a> et donne mandat à l'association pour acheter ce pack en mon nom, dans le cadre d'un groupement d'achat.</span></label>
-      <button class="btn btn--accent btn--lg btn--block mt-3" type="submit" id="checkout-submit">Confirmer mon achat</button>
+      <h2>Où va votre argent</h2>
+      <?php partial('partials/breakdown', ['b' => $b]) ?>
+      <?php if ($b['needs_membership']): ?>
+        <label class="check mt-3"><input type="checkbox" name="adhesion" value="1" required><span>J'adhère à l'association <?= e(setting('association_name')) ?> pour <?= Asso::year() ?><?= $b['membership'] > 0 ? ' (' . money($b['membership']) . ')' : ' (adhésion offerte)' ?> et j'accepte ses <a href="/association#statuts" target="_blank">statuts</a>.</span></label>
+      <?php endif; ?>
+      <label class="check mt-2"><input type="checkbox" name="cgv" value="1" required><span>Je donne mandat à l'association d'acheter ces produits <strong>en mon nom</strong>, au prix coûtant, selon les <a href="/cgv" target="_blank">conditions du mandat d'achat groupé</a>.</span></label>
+      <button class="btn btn--accent btn--lg btn--block mt-3" type="submit" id="checkout-submit" data-sprout>Valider ma commande</button>
+      <p class="small muted mt-2 mb-0">L'association ne prend aucune marge sur les produits. Les frais financent la logistique (transport, sachets, étiquettes, outil en ligne) et les plantations.</p>
     </aside>
   </form>
 </div>

@@ -4,7 +4,7 @@ declare(strict_types=1);
 /** Mise à jour automatique de la base au premier passage après un déploiement. */
 final class Migrator
 {
-    public const VERSION = 5;
+    public const VERSION = 6;
     private static bool $reseed = false;
 
     public static function execFile(string $file): void
@@ -27,6 +27,7 @@ final class Migrator
             if ($v < 3) self::to3();
             if ($v < 4) self::to4();
             if ($v < 5) self::to5();
+            if ($v < 6) self::to6();
             if (self::$reseed) Demo::seedCatalog();
             if (self::$reseed && setting('demo_data') === '1') { Demo::purge(); Demo::seed(); }
         } finally {
@@ -80,6 +81,30 @@ final class Migrator
         set_setting('schema_version', '5');
         self::$reseed = true;
         audit('migrate', 'schéma v5');
+    }
+
+    /**
+     * v5 → v6 : modèle associatif — frais de fonctionnement et de logistique par commande (dont une part
+     * pour le fonds plantations), adhésion annuelle, comparaisons de prix sans nom d'enseigne.
+     */
+    private static function to6(): void
+    {
+        $pdo = db()->pdo;
+        if (!self::hasColumn('orders', 'fee_amount')) {
+            $pdo->exec('ALTER TABLE orders ADD COLUMN goods_amount DECIMAL(10,2) NULL AFTER amount, ADD COLUMN fee_amount DECIMAL(8,2) NOT NULL DEFAULT 0 AFTER goods_amount,
+                ADD COLUMN fund_amount DECIMAL(8,2) NOT NULL DEFAULT 0 AFTER fee_amount, ADD COLUMN membership_amount DECIMAL(8,2) NOT NULL DEFAULT 0 AFTER fund_amount');
+            $pdo->exec('UPDATE orders SET goods_amount = amount');
+            // Commandes de démonstration : mêmes frais que les vraies, pour illustrer le fonds plantations.
+            db()->exec("UPDATE orders SET fee_amount = ?, fund_amount = ?, amount = goods_amount + ? WHERE reference LIKE 'DEMO-%'", [Asso::fee(), Asso::fundShare(), Asso::fee()]);
+        }
+        self::execFile(APP_DIR . '/sql/schema.sql'); // table memberships et réglages par défaut
+        set_setting('market_price_note', Asso::DEFAULT_MARKET_NOTE);
+        set_setting('pack_fixed_costs', '0');
+        if ((string)setting('president_name', '') === '') set_setting('president_name', 'François Stephan Jaune');
+        if ((string)setting('treasurer_name', '') === '') set_setting('treasurer_name', 'Claudine Aurélie Tourail');
+        if ((string)setting('publication_director', '') === '') set_setting('publication_director', 'François Stephan Jaune, président');
+        set_setting('schema_version', '6');
+        audit('migrate', 'schéma v6');
     }
 
     /** v3 → v4 : catalogue de variétés, vote des variétés (le pack est composé par le vote dans la limite du prix). */

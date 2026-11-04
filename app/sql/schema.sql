@@ -215,6 +215,10 @@ CREATE TABLE IF NOT EXISTS orders (
   quantity TINYINT UNSIGNED NOT NULL DEFAULT 1,
   unit_price DECIMAL(8,2) NOT NULL,
   amount DECIMAL(10,2) NOT NULL,
+  goods_amount DECIMAL(10,2) NULL,
+  fee_amount DECIMAL(8,2) NOT NULL DEFAULT 0,
+  fund_amount DECIMAL(8,2) NOT NULL DEFAULT 0,
+  membership_amount DECIMAL(8,2) NOT NULL DEFAULT 0,
   batch_no SMALLINT UNSIGNED NOT NULL DEFAULT 1,
   status ENUM('pending','confirmed','cancelled','ready','collected') NOT NULL DEFAULT 'pending',
   payment_mode ENUM('stripe','on_pickup') NOT NULL DEFAULT 'on_pickup',
@@ -317,6 +321,17 @@ CREATE TABLE IF NOT EXISTS audit_log (
   KEY idx_audit_created (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS memberships (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  user_id INT UNSIGNED NOT NULL,
+  year SMALLINT UNSIGNED NOT NULL,
+  amount DECIMAL(8,2) NOT NULL DEFAULT 0,
+  order_id INT UNSIGNED NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_memberships (user_id, year),
+  CONSTRAINT fk_memberships_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 INSERT IGNORE INTO sequences (name, value) VALUES ('order', 0), ('invoice', 0);
 INSERT IGNORE INTO settings (k, v) VALUES
  ('association_name', 'Les Jardins d''à Côté'),
@@ -331,4 +346,9 @@ INSERT IGNORE INTO settings (k, v) VALUES
  ('default_pack_price', '30'),
  ('sachet_cost', '0.10'),
  ('pack_fixed_costs', '0'),
- ('market_price_note', 'Prix marché : prix public d''un sachet de la même variété en jardinerie.');
+ ('market_price_note', 'Prix publics constatés en magasin de jardinage (relevés en novembre 2026) : un sachet ou un plant de la même variété, à l''unité.'),
+ ('order_fee', '5'),
+ ('order_fee_fund', '1'),
+ ('membership_fee', '0'),
+ ('president_name', ''),
+ ('treasurer_name', '');

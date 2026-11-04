@@ -7,7 +7,7 @@
     <span class="ucard-intro"><?= e($u['intro']) ?></span>
     <span class="ucard-ex"><?php foreach ($u['examples'] as $x): ?><span><?= e($x) ?></span><?php endforeach; ?></span>
     <?php if ($ex && $ex['save']): ?>
-      <span class="ucard-price"><b><?= eur($ex['price']) ?></b> le pack · <s><?= eur($ex['market']) ?></s> en jardinerie</span>
+      <span class="ucard-price"><b><?= eur($ex['price']) ?></b> + <?= eur(Asso::fee()) ?> de frais · <s><?= eur($ex['market']) ?></s> au prix public</span>
     <?php else: ?>
       <span class="ucard-price">Catalogue en préparation</span>
     <?php endif; ?>

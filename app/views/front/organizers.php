@@ -13,7 +13,7 @@
 <section class="section">
   <div class="wrap">
     <div class="stat-grid mb-4">
-      <?php if ($bestPct): ?><div class="stat" data-reveal style="--i:0"><b data-count="<?= (int)$bestPct ?>" data-prefix="jusqu'à −" data-suffix=" %">jusqu'à −<?= (int)$bestPct ?> %</b><span>pour vos habitants ou salariés, par rapport aux sachets vendus en jardinerie</span></div><?php endif; ?>
+      <?php if ($bestPct): ?><div class="stat" data-reveal style="--i:0"><b data-count="<?= (int)$bestPct ?>" data-prefix="jusqu'à −" data-suffix=" %">jusqu'à −<?= (int)$bestPct ?> %</b><span>pour vos habitants ou salariés, par rapport aux sachets vendus au prix public</span></div><?php endif; ?>
       <div class="stat" data-reveal style="--i:1"><b>0 €</b><span>de budget, de stock ou de caisse pour votre structure</span></div>
       <div class="stat" data-reveal style="--i:2"><b data-count="2">2</b><span>bénévoles et un lieu de retrait suffisent pour ouvrir un groupe</span></div>
     </div>
@@ -49,7 +49,7 @@
         </ul></div>
       <div class="panel" data-reveal="right"><h3>L'association Les jardins d'à côté</h3>
         <ul class="ticks">
-          <li>Sélectionne les producteurs et les catalogues de chaque saison (plants, arbres fruitiers, aromatiques, graines, fleurs) que vos membres choisissent par vote, avec leur prix en jardinerie affiché.</li>
+          <li>Sélectionne les producteurs et les catalogues de chaque saison (plants, arbres fruitiers, aromatiques, graines, fleurs) que vos membres choisissent par vote, avec leur prix public affiché.</li>
           <li>Fournit la page du groupe, les votes, les paiements sécurisés et les emails.</li>
           <li>Commande auprès des fournisseurs par lots de 10 : aucun stock, aucun risque d'invendus.</li>
           <li>Forme les bénévoles : fiche de préparation, étiquettes, QR codes de retrait.</li>

@@ -11,6 +11,17 @@
       <div class="field"><label for="contact_email">Email de contact</label><input id="contact_email" name="contact_email" type="email" value="<?= e($s['contact_email']) ?>"></div>
       <div class="field"><label for="publication_director">Directeur·rice de publication</label><input id="publication_director" name="publication_director" value="<?= e($s['publication_director']) ?>"></div>
     </div>
+    <div class="grid-2">
+      <div class="field"><label for="president_name">Président·e</label><input id="president_name" name="president_name" value="<?= e($s['president_name']) ?>"></div>
+      <div class="field"><label for="treasurer_name">Trésorier·ère</label><input id="treasurer_name" name="treasurer_name" value="<?= e($s['treasurer_name']) ?>"></div>
+    </div>
+    <h2 class="mt-4">Frais et adhésion</h2>
+    <div class="grid-2">
+      <div class="field"><label for="order_fee">Frais de fonctionnement et logistique (€ par commande)</label><input id="order_fee" name="order_fee" inputmode="decimal" value="<?= e($s['order_fee']) ?>"></div>
+      <div class="field"><label for="order_fee_fund">dont part pour le fonds plantations (€)</label><input id="order_fee_fund" name="order_fee_fund" inputmode="decimal" value="<?= e($s['order_fee_fund']) ?>"></div>
+      <div class="field"><label for="membership_fee">Cotisation annuelle (€, 0 = adhésion offerte)</label><input id="membership_fee" name="membership_fee" inputmode="decimal" value="<?= e($s['membership_fee']) ?>"></div>
+    </div>
+    <p class="hint">Les produits sont toujours refacturés au prix coûtant (mandat d'achat). Ces montants s'affichent en clair au panier, sur les packs et dans les conditions du mandat.</p>
     <div class="field"><label for="host_info">Hébergeur (mentions légales)</label><textarea id="host_info" name="host_info" style="min-height:70px"><?= e($s['host_info']) ?></textarea></div>
     <div class="field"><label for="vat_mention">Mention TVA</label><input id="vat_mention" name="vat_mention" value="<?= e($s['vat_mention']) ?>"></div>
     <h2 class="mt-4">Valeurs par défaut des ventes</h2>
@@ -24,7 +35,7 @@
     <h2 class="mt-4">Composition des packs</h2>
     <div class="grid-2">
       <div class="field"><label for="sachet_cost">Coût d'un sachet + étiquette (€ par variété)</label><input id="sachet_cost" name="sachet_cost" inputmode="decimal" value="<?= e($s['sachet_cost']) ?>"></div>
-      <div class="field"><label for="pack_fixed_costs">Frais fixes par pack (€ : port, fonctionnement)</label><input id="pack_fixed_costs" name="pack_fixed_costs" inputmode="decimal" value="<?= e($s['pack_fixed_costs']) ?>"></div>
+      <div class="field"><label for="pack_fixed_costs">Frais fixes retenus sur le budget du pack (€, normalement 0)</label><input id="pack_fixed_costs" name="pack_fixed_costs" inputmode="decimal" value="<?= e($s['pack_fixed_costs']) ?>"></div>
     </div>
     <p class="hint">À la clôture du vote, les variétés les plus demandées entrent dans le pack tant que leurs coûts, plus ces frais, restent sous le prix du pack.</p>
     <h2 class="mt-4">Communication</h2>

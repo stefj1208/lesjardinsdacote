@@ -18,7 +18,7 @@ function front_home(): void
     $allVarieties = Varieties::all(null, true);
     $univers = Varieties::overview();
     $best = max(array_map(fn($u) => (int)($u['example']['save_pct'] ?? 0), $univers) ?: [0]);
-    view('front/home', ['groups' => $groups, 'heroPack' => $hero, 'heroSale' => $sale, 'catalog' => $catalog, 'varieties' => $allVarieties,
+    view('front/home', ['fund' => Asso::fundTotal(), 'groups' => $groups, 'heroPack' => $hero, 'heroSale' => $sale, 'catalog' => $catalog, 'varieties' => $allVarieties,
         'univers' => $univers, 'bestPct' => $best]);
 }
 
@@ -212,7 +212,7 @@ function front_robots(): void
 function front_sitemap(): void
 {
     header('Content-Type: application/xml; charset=utf-8');
-    $urls = ['/', '/univers', '/groupes', '/comment-ca-marche', '/lancer-un-groupe'];
+    $urls = ['/', '/univers', '/groupes', '/comment-ca-marche', '/association', '/lancer-un-groupe'];
     foreach (Cat::CATEGORIES as $c) $urls[] = '/univers/' . $c['slug'];
     foreach (db()->col("SELECT slug FROM `groups` WHERE status = 'active'") as $s) $urls[] = '/groupes/' . $s;
     foreach (db()->col('SELECT slug FROM packs WHERE is_active = 1') as $s) $urls[] = '/packs/' . $s;
@@ -220,4 +220,10 @@ function front_sitemap(): void
     foreach ($urls as $u) echo '<url><loc>' . e(abs_url($u)) . '</loc></url>';
     echo '</urlset>';
     exit;
+}
+
+function front_association(): void
+{
+    view('front/association', ['stats' => Asso::stats(), 'title' => "L'association",
+        'description' => "Une association loi 1901 de voisins : achats groupés au prix coûtant, frais fixes affichés, et un fonds qui finance la plantation d'arbres."]);
 }

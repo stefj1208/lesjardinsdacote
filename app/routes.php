@@ -18,6 +18,7 @@ $router->get('/packs/{slug}', 'front_pack');
 $router->get('/lancer-un-groupe', 'front_organizers');
 $router->post('/lancer-un-groupe', 'front_organizers_submit');
 $router->get('/comment-ca-marche', fn() => front_static('how'));
+$router->get('/association', 'front_association');
 $router->get('/cgv', fn() => front_static('cgv'));
 $router->get('/mentions-legales', fn() => front_static('legal'));
 $router->get('/confidentialite', fn() => front_static('privacy'));

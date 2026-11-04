@@ -478,7 +478,8 @@ function admin_user_role(string $id): void
 }
 
 const SETTING_KEYS = ['sachet_cost', 'pack_fixed_costs', 'market_price_note', 'logo_path', 'association_name', 'association_legal', 'association_address', 'contact_email', 'publication_director', 'host_info',
-    'vat_mention', 'pickup_reminder_hours', 'default_vote_days', 'default_sale_days', 'default_batch_size', 'default_pack_price', 'hero_photo'];
+    'vat_mention', 'pickup_reminder_hours', 'default_vote_days', 'default_sale_days', 'default_batch_size', 'default_pack_price', 'hero_photo',
+    'order_fee', 'order_fee_fund', 'membership_fee', 'president_name', 'treasurer_name'];
 
 function admin_settings(): void
 {

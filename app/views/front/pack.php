@@ -36,7 +36,7 @@
             <h3><?= e($it['variety'] ?: $it['name']) ?></h3>
             <div class="meta"><?= e($it['name']) ?><?= $it['latin_name'] ? ' · <em>' . e($it['latin_name']) . '</em>' : '' ?></div>
             <?php if ($it['note']): ?><p><?= e($it['note']) ?></p><?php endif; ?>
-            <div class="variety-foot"><span class="chip chip--ok"><?= e(Cat::qty($it['quantity'], $it['unit'])) ?></span><?php if ($it['market_price'] !== null): ?><span class="muted">en jardinerie : <?= eur($it['market_price']) ?></span><?php endif; ?></div>
+            <div class="variety-foot"><span class="chip chip--ok"><?= e(Cat::qty($it['quantity'], $it['unit'])) ?></span><?php if ($it['market_price'] !== null): ?><span class="muted">au prix public : <?= eur($it['market_price']) ?></span><?php endif; ?></div>
           </div>
         </article>
       <?php endforeach; ?>
@@ -46,7 +46,7 @@
     <div class="split mt-6">
       <div data-reveal="left">
         <h2>Combien vous économisez</h2>
-        <p>Pour semer ces <?= count($p['items']) ?> variétés, il faudrait acheter un sachet de chacune en jardinerie. Le pack les réunit pour <?= eur($p['price']) ?>.</p>
+        <p>Pour semer ces <?= count($p['items']) ?> variétés, il faudrait acheter un sachet ou un plant de chacune, à l'unité, au prix public. Le pack les réunit pour <?= eur($p['price']) ?> au prix coûtant, plus <?= eur(Asso::fee()) ?> de frais par commande.</p>
         <?php if ($p['save'] > 0): ?><div class="stat-grid" style="grid-template-columns:1fr 1fr">
           <div class="stat"><b data-count="<?= e(number_format($p['save'], 2, '.', '')) ?>" data-decimals="2" data-suffix=" €"><?= eur($p['save']) ?></b><span>d'économie</span></div>
           <div class="stat"><b data-count="<?= (int)$p['save_pct'] ?>" data-prefix="−" data-suffix=" %">−<?= (int)$p['save_pct'] ?> %</b><span>par rapport aux sachets du commerce</span></div>
@@ -55,11 +55,11 @@
       </div>
       <div class="panel" data-reveal="right">
         <div class="table-wrap"><table class="table value-table">
-          <thead><tr><th>Variété</th><th class="num">Dans le pack</th><th class="num">En jardinerie</th></tr></thead>
+          <thead><tr><th>Variété</th><th class="num">Dans le pack</th><th class="num">Au prix public</th></tr></thead>
           <tbody><?php foreach ($p['items'] as $it): ?><tr><td><?= e($it['name']) ?> <span class="muted"><?= e($it['variety']) ?></span></td><td class="num"><?= e(Cat::qty($it['quantity'], $it['unit'])) ?></td><td class="num"><?= $it['market_price'] !== null ? eur($it['market_price']) : '—' ?></td></tr><?php endforeach; ?></tbody>
           <tfoot>
-            <tr><td colspan="2">Total en jardinerie</td><td class="num"><?= eur($p['market']) ?></td></tr>
-            <tr><td colspan="2">Le pack, avec votre groupe</td><td class="num" style="color:var(--green-dd)"><?= eur($p['price']) ?></td></tr>
+            <tr><td colspan="2">Total au prix public</td><td class="num"><?= eur($p['market']) ?></td></tr>
+            <tr><td colspan="2">Le pack au prix coûtant + frais de la commande</td><td class="num" style="color:var(--green-dd)"><?= eur($p['all_in'] ?? $p['price']) ?></td></tr>
           </tfoot>
         </table></div>
       </div>

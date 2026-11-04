@@ -14,8 +14,8 @@ $inPack = $ex ? array_flip(array_map(fn($it) => (int)$it['variety_id'], $ex['ite
       <p class="lede"><?= e($u['intro']) ?></p>
       <?php if ($ex && $ex['save']): ?>
         <div class="stat-grid stat-grid--3 mt-3">
-          <div class="stat"><b><?= eur($ex['price']) ?></b><span>le pack</span></div>
-          <div class="stat"><b class="muted" style="text-decoration:line-through;text-decoration-color:var(--tomato)"><?= eur($ex['market']) ?></b><span>en jardinerie</span></div>
+          <div class="stat"><b><?= eur($ex['price']) ?></b><span>le pack au prix coûtant, + <?= eur(Asso::fee()) ?> de frais par commande</span></div>
+          <div class="stat"><b class="muted" style="text-decoration:line-through;text-decoration-color:var(--tomato)"><?= eur($ex['market']) ?></b><span>au prix public</span></div>
           <div class="stat"><b data-count="<?= (int)$ex['save_pct'] ?>" data-prefix="−" data-suffix=" %">−<?= (int)$ex['save_pct'] ?> %</b><span>d'économie</span></div>
         </div>
       <?php endif; ?>
@@ -46,12 +46,12 @@ $inPack = $ex ? array_flip(array_map(fn($it) => (int)$it['variety_id'], $ex['ite
             <b><?= e($v['variety'] ?: $v['name']) ?></b>
             <small><?= e($v['name']) ?> · <?= e($v['portion']) ?></small>
             <?php if ($v['note']): ?><span class="vnote"><?= e($v['note']) ?></span><?php endif; ?>
-            <span class="vfoot"><span class="vin<?= $inside ? ' is-in' : '' ?>"><?= $inside ? 'Dans l\'exemple' : 'Au choix' ?></span><?php if ($v['market_price'] !== null): ?><span class="muted">jardinerie : <?= eur($v['market_price']) ?></span><?php endif; ?></span>
+            <span class="vfoot"><span class="vin<?= $inside ? ' is-in' : '' ?>"><?= $inside ? 'Dans l\'exemple' : 'Au choix' ?></span><?php if ($v['market_price'] !== null): ?><span class="muted">prix public : <?= eur($v['market_price']) ?></span><?php endif; ?></span>
           </span>
         </div>
       <?php endforeach; ?>
     </div>
-    <p class="source-note mt-3">Prix en jardinerie et prix d'achat relevés en novembre 2026 : <?= e(implode(' ; ', array_unique(array_filter(array_map(fn($v) => $v['supplier'], $list))))) ?>. Prix indicatifs, mis à jour par l'association avant chaque vente.</p>
+    <p class="source-note mt-3">Prix publics et prix d'achat relevés en novembre 2026 : <?= e(implode(' ; ', array_unique(array_filter(array_map(fn($v) => $v['supplier'], $list))))) ?>. Prix indicatifs, mis à jour par l'association avant chaque vente.</p>
   </div>
 </section>
 <?php else: ?>

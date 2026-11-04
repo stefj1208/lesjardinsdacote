@@ -35,7 +35,7 @@ if (!$readonly) usort($list, fn($a, $b) => [-(int)$a['votes'], (int)$a['position
           <?php if ($v['note']): ?><span class="vnote"><?= e($v['note']) ?></span><?php endif; ?>
           <span class="vfoot">
             <?php if ($s['status'] === 'voting'): ?><span class="vin<?= $inside ? ' is-in' : '' ?>"><?= $inside ? 'Dans le pack' : 'Hors budget pour l\'instant' ?></span><?php endif; ?>
-            <?php if ($v['market_price'] !== null): ?><span class="muted">jardinerie : <?= eur($v['market_price']) ?></span><?php endif; ?>
+            <?php if ($v['market_price'] !== null): ?><span class="muted">prix public : <?= eur($v['market_price']) ?></span><?php endif; ?>
           </span>
         </span>
       </label>

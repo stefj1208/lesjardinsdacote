@@ -14,7 +14,7 @@ final class Cart
             $r['valid'] = $r['sale_status'] === 'open' && strtotime((string)$r['sale_ends_at']) > time() && (int)$r['pack_id'] === (int)$r['winning_pack_id'];
             $r['total'] = round((float)$r['price'] * (int)$r['quantity'], 2);
             $market = (float)db()->val('SELECT COALESCE(SUM(market_price), 0) FROM pack_items WHERE pack_id = ?', [$r['pack_id']]);
-            $r['saved'] = $market > (float)$r['price'] ? round(($market - (float)$r['price']) * (int)$r['quantity'], 2) : 0.0;
+            $r['market'] = round($market * (int)$r['quantity'], 2);
             $sale = ['id' => $r['sale_id'], 'batch_size' => $r['batch_size']];
             $r['batch'] = Sales::batchState($sale);
         }

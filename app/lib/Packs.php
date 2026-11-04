@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 final class Packs
 {
-    public const DEFAULT_MARKET_NOTE = "Prix marché : prix public d'un sachet de la même variété en jardinerie.";
+    public const DEFAULT_MARKET_NOTE = Asso::DEFAULT_MARKET_NOTE;
 
     public static function find(int $id): ?array
     {
@@ -41,10 +41,11 @@ final class Packs
         foreach ($p['items'] ?? [] as $it) {
             if ($it['market_price'] !== null && $it['market_price'] !== '') { $market += (float)$it['market_price']; $known++; }
         }
-        $price = (float)$p['price'];
-        if (!$known || $market <= $price) return ['market' => $known ? round($market, 2) : null, 'save' => 0.0, 'save_pct' => 0];
+        // Comparaison honnête : le pack plus les frais d'une commande, face au prix public des mêmes variétés.
+        $price = (float)$p['price'] + Asso::fee();
+        if (!$known || $market <= $price) return ['market' => $known ? round($market, 2) : null, 'save' => 0.0, 'save_pct' => 0, 'all_in' => round($price, 2)];
         $save = round($market - $price, 2);
-        return ['market' => round($market, 2), 'save' => $save, 'save_pct' => (int)floor($save / $market * 100)];
+        return ['market' => round($market, 2), 'save' => $save, 'save_pct' => (int)floor($save / $market * 100), 'all_in' => round($price, 2)];
     }
 
     /** Meilleure économie (en %) parmi des packs. */
