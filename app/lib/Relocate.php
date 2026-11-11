@@ -28,6 +28,9 @@ final class Relocate
             }
             @mkdir($target . '/app/storage', 0750, true);
             if (is_file(APP_DIR . '/storage/installed.lock')) @copy(APP_DIR . '/storage/installed.lock', $target . '/app/storage/installed.lock');
+            // Racine du nouveau site : tout est servi depuis site/public_html (le reste du dépôt reste privé).
+            $root = dirname($target);
+            if (is_file(ROOT_DIR . '/deploy/racine.htaccess') && !is_file($root . '/.htaccess')) @copy(ROOT_DIR . '/deploy/racine.htaccess', $root . '/.htaccess');
             foreach (['uploads/photos', 'uploads/produits'] as $d) self::copyDir(PUBLIC_DIR . '/' . $d, $target . '/public_html/' . $d);
             // L'ancienne adresse redirige désormais vers la nouvelle.
             file_put_contents(APP_DIR . '/config.php', $new, LOCK_EX);

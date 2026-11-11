@@ -1,0 +1,16 @@
+# lesjardinsdacote.fr — le site est dans le dossier « site » (dépôt Git) ; seul site/public_html est public.
+Options -Indexes
+DirectoryIndex index.php
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # www → domaine nu
+  RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+  RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
+  # Déjà dans le dossier public : on laisse faire son propre .htaccess
+  RewriteRule ^site/public_html/ - [L]
+  # Le reste du dépôt (code, .git, configuration) n'est jamais servi
+  RewriteRule ^site(/|$) - [F,L]
+  RewriteRule ^default\.php$ - [F,L]
+  # Tout le reste est servi depuis site/public_html
+  RewriteRule ^(.*)$ site/public_html/$1 [L]
+</IfModule>

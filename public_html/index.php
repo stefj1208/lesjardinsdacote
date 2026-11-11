@@ -14,6 +14,11 @@ header('Permissions-Policy: camera=(self), geolocation=()');
 $uri = $_SERVER['REQUEST_URI'] ?? '/';
 $path = parse_url($uri, PHP_URL_PATH) ?: '/';
 
+// Nouvelle installation en attente de sa configuration (déménagement) : pas d'assistant d'installation.
+if ($GLOBALS['CONFIG'] === null && realpath(APP_DIR) === realpath(Relocate::TARGET_DIR . '/app')) {
+    http_response_code(503); header('Retry-After: 120'); exit('Déménagement en cours, revenez dans quelques minutes.');
+}
+
 // Assistant d'installation tant que la configuration n'existe pas.
 if ($GLOBALS['CONFIG'] === null || !is_file(APP_DIR . '/storage/installed.lock')) {
     start_session();
