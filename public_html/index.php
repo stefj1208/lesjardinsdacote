@@ -21,8 +21,20 @@ if ($GLOBALS['CONFIG'] === null || !is_file(APP_DIR . '/storage/installed.lock')
     exit;
 }
 
+// Adresse canonique : toute autre adresse (ancien sous-domaine, www…) redirige vers base_url.
+$canon = parse_url((string)config('base_url', ''), PHP_URL_HOST);
+$host = strtolower(preg_replace('/:\d+$/', '', (string)($_SERVER['HTTP_HOST'] ?? '')));
+if ($canon && $host && $host !== $canon && !in_array($host, ['localhost', '127.0.0.1'], true) && !in_array($canon, ['localhost', '127.0.0.1'], true)) {
+    // Installation servie depuis un sous-dossier (ex. /lesjardinsdacote/public_html) : on retire ce préfixe.
+    $prefix = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '')), '/');
+    $rest = ($prefix !== '' && str_starts_with($uri, $prefix . '/')) ? substr($uri, strlen($prefix)) : $uri;
+    header('Location: ' . rtrim((string)config('base_url'), '/') . $rest, true, 301);
+    exit;
+}
+
 start_session();
 Migrator::run();
+Relocate::tick();
 $_SESSION['_old_now'] = $_SESSION['_old'] ?? [];
 unset($_SESSION['_old']);
 
