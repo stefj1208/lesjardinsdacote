@@ -7,6 +7,8 @@ $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 $cur = fn(string $p) => ($p === '/' ? $path === '/' : str_starts_with($path, $p)) ? ' aria-current="page"' : '';
 $user = Auth::user();
 $cartCount = Cart::count(Auth::id());
+// Back-office : présentation « application » (installable sur téléphone), sans en-tête ni pied de page publics.
+$adminUi = ($bodyClass ?? '') === 'admin' || !empty($adminApp);
 ?><!doctype html>
 <html lang="fr">
 <head>
@@ -29,10 +31,29 @@ $cartCount = Cart::count(Auth::id());
 <meta property="og:url" content="<?= e(abs_url($path)) ?>">
 <meta property="og:image" content="<?= e($og['image'] ?? abs_url('/assets/img/og-default.png')) ?>">
 <meta name="twitter:card" content="summary_large_image">
+<?php if ($adminUi): ?>
+<link rel="manifest" href="/admin/app.webmanifest">
+<link rel="apple-touch-icon" href="/assets/img/app-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Jardins Pilotage">
+<?php endif; ?>
 <?= $head ?? '' ?>
 </head>
 <body class="<?= e($bodyClass ?? '') ?>">
 <a class="sr-only" href="#main">Aller au contenu</a>
+<?php if ($adminUi): $toVal = Auth::isAdmin() ? Agents::pendingCount() : 0; ?>
+<header class="app-bar">
+  <a class="app-brand" href="/admin"><?php partial('partials/logo') ?><span>Pilotage</span></a>
+  <?php if (Auth::isAdmin()): ?>
+  <div class="app-actions">
+    <a href="/" class="app-link">Voir le site</a>
+    <form method="post" action="/deconnexion"><?= csrf_field() ?><input type="hidden" name="to" value="/admin/connexion"><button class="app-link" type="submit">Déconnexion</button></form>
+  </div>
+  <?php endif; ?>
+</header>
+<?php else: ?>
 <header class="site-head">
   <?php if (setting('demo_data') === '1'): ?><div class="demo-bar">Site de démonstration<span class="hide-sm"> : les groupes, votes et achats affichés sont fictifs</span>.</div><?php endif; ?>
   <div class="wrap">
@@ -54,12 +75,24 @@ $cartCount = Cart::count(Auth::id());
     </nav>
   </div>
 </header>
+<?php endif; ?>
 <?php $fl = flashes(); if ($fl): ?>
 <div class="wrap flash-zone" role="status"><?php foreach ($fl as $f): ?><div class="flash flash--<?= e($f['type']) ?>"><?= e($f['message']) ?></div><?php endforeach; ?></div>
 <?php endif; ?>
 <main id="main">
 <?= $content ?>
 </main>
+<?php if ($adminUi): ?>
+<?php if (Auth::isAdmin()): ?>
+<nav class="app-tabs" aria-label="Raccourcis">
+  <a href="/admin"<?= $path === '/admin' ? ' aria-current="page"' : '' ?>><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h6V4H4zm10 7h6v-9h-6zM4 20h6v-5H4zm10-11h6V4h-6z"/></svg>Pilotage</a>
+  <a href="/admin/a-valider"<?= $cur('/admin/a-valider') ?>><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>À valider<?php if ($toVal): ?><b class="app-badge"><?= $toVal ?></b><?php endif; ?></a>
+  <a href="/admin/commandes"<?= $cur('/admin/commandes') ?>><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7h12l-1 13H7zM9 7a3 3 0 016 0"/></svg>Commandes</a>
+  <a href="/admin/parametres"<?= $cur('/admin/parametres') ?>><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>Réglages</a>
+</nav>
+<?php endif; ?>
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/admin/sw.js',{scope:'/admin'}).catch(function(){});}</script>
+<?php else: ?>
 <footer class="site-foot">
   <div class="wrap">
     <div class="foot-grid">
@@ -90,7 +123,8 @@ $cartCount = Cart::count(Auth::id());
     <div class="foot-base"><span>© <?= date('Y') ?> <?= e($siteName) ?> — <?= e(setting('association_legal')) ?></span><span><a href="https://www.lesjardinsdacote.fr/">lesjardinsdacote.fr</a></span></div>
   </div>
 </footer>
-<?php if (($bodyClass ?? '') !== 'admin') partial('partials/canopy'); ?>
+<?php endif; ?>
+<?php if (!$adminUi) partial('partials/canopy'); ?>
 <script src="<?= asset('js/app.js') ?>" defer></script>
 <script src="<?= asset('js/garden-fx.js') ?>" defer></script>
 <?= $scripts ?? '' ?>

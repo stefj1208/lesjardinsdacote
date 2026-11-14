@@ -19,7 +19,13 @@ $tiles = array_slice(array_filter($univers, fn($u) => $u['count'] > 0), 0, 4, tr
         <input id="hq" name="q" placeholder="Votre commune ou code postal" autocomplete="address-level2">
         <button class="btn" type="submit">Trouver mon groupe <span class="arr" aria-hidden="true">→</span></button>
       </form>
-      <nav class="uchips rise" style="--i:8" aria-label="Univers">
+      <p class="neighbours rise" style="--i:8"><span class="nb-faces" aria-hidden="true"><i></i><i></i><i></i></span><span>Déjà <b data-count="<?= (int)$neighbours ?>"><?= (int)$neighbours ?></b> <?= plural((int)$neighbours, 'voisin inscrit', 'voisins inscrits') ?> dans <?= count($groups) ?> <?= plural(count($groups), 'commune', 'communes') ?></span></p>
+      <ol class="steps3 rise" style="--i:9" aria-label="Comment ça marche, en trois étapes">
+        <li><b>1</b> Je rejoins le groupe de ma commune</li>
+        <li><b>2</b> On vote les variétés, l'association achète au prix coûtant</li>
+        <li><b>3</b> Je retire mon pack près de chez moi</li>
+      </ol>
+      <nav class="uchips rise" style="--i:10" aria-label="Univers">
         <?php foreach ($univers as $u): ?><a class="uchip" href="/univers/<?= e($u['slug']) ?>"><?= e($u['label']) ?><?php if (!empty($u['example']['save_pct'])): ?> <b>−<?= (int)$u['example']['save_pct'] ?>&nbsp;%</b><?php endif; ?></a><?php endforeach; ?>
       </nav>
     </div>
@@ -179,6 +185,7 @@ $tiles = array_slice(array_filter($univers, fn($u) => $u['count'] > 0), 0, 4, tr
       <div><p class="eyebrow eyebrow--start">Près de chez vous</p><h2>Les groupes déjà inscrits</h2><p><?= count($groups) ?> <?= plural(count($groups), 'groupe local', 'groupes locaux') ?> autour de Toulouse<?= $open ? ', dont ' . $open . ' avec les ventes ouvertes' : '' ?>. Le vôtre n'y est pas ? Lancez-le.</p></div>
       <a class="btn btn--ghost" href="/groupes">Voir tous les groupes</a>
     </div>
+    <?php partial('partials/groups_map', ['points' => $mapPoints, 'height' => '380px']) ?>
     <?php if ($groups): ?>
       <div class="groups-grid"><?php foreach (array_slice($groups, 0, 6) as $k => $g) partial('partials/group_card', ['g' => $g, 'i' => $k]); ?></div>
     <?php else: ?>
@@ -186,6 +193,8 @@ $tiles = array_slice(array_filter($univers, fn($u) => $u['count'] > 0), 0, 4, tr
     <?php endif; ?>
   </div>
 </section>
+
+<?php partial('partials/testimonials') ?>
 
 <section class="section">
   <div class="wrap">

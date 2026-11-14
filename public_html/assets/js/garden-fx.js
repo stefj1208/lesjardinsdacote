@@ -181,3 +181,100 @@
   doc.addEventListener('mousedown', function () { drop.style.scale = '.8'; });
   doc.addEventListener('mouseup', function () { drop.style.scale = ''; emit(mx, my, 6); });
 })();
+
+/* ---------- 5. Coccinelles qui se baladent et 6. Feuilles de saison (page d'accueil) ---------- */
+(function () {
+  'use strict';
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var hero = document.querySelector('.h5');
+  if (!hero) return;
+
+  /* Feuilles de saison : automne = feuilles rousses, hiver = flocons, printemps = pétales, été = aigrettes de pissenlit */
+  (function seasonal() {
+    var d = new Date(), md = (d.getMonth() + 1) * 100 + d.getDate();
+    var season = md >= 1221 || md < 320 ? 'winter' : md < 621 ? 'spring' : md < 923 ? 'summer' : 'autumn';
+    var palette = {
+      autumn: ['#C8662D', '#D9902E', '#A8452A', '#E0B24A', '#8C5A2B'],
+      winter: ['#FFFFFF', '#EAF2FB', '#DCE8F5'],
+      spring: ['#F6C6D3', '#F9DCE4', '#FFFFFF', '#F3B3C4'],
+      summer: ['#FFFFFF', '#F4F1E6']
+    }[season];
+    var cv = document.createElement('canvas');
+    cv.className = 'season-fx season-fx--' + season; cv.setAttribute('aria-hidden', 'true');
+    hero.style.position = hero.style.position || 'relative';
+    hero.appendChild(cv);
+    var ctx = cv.getContext('2d'), dpr = Math.min(2, window.devicePixelRatio || 1), W = 0, H = 0, items = [], visible = true, raf = 0, last = 0;
+    var count = window.innerWidth < 700 ? 9 : 16;
+    function size() { W = hero.clientWidth; H = hero.clientHeight; cv.width = W * dpr; cv.height = H * dpr; cv.style.width = W + 'px'; cv.style.height = H + 'px'; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); }
+    function spawn(initial) {
+      return { x: Math.random() * W, y: initial ? Math.random() * H : -20 - Math.random() * 60, s: season === 'winter' ? 2 + Math.random() * 3 : 7 + Math.random() * 8,
+        vy: season === 'winter' ? .35 + Math.random() * .5 : .45 + Math.random() * .7, sw: Math.random() * 6.28, sws: .01 + Math.random() * .02,
+        rot: Math.random() * 6.28, vr: (Math.random() - .5) * .04, c: palette[(Math.random() * palette.length) | 0] };
+    }
+    function drawLeaf(p) {
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.fillStyle = p.c; ctx.globalAlpha = .85;
+      if (season === 'winter') { ctx.beginPath(); ctx.arc(0, 0, p.s, 0, 6.283); ctx.fill(); }
+      else if (season === 'summer') { ctx.strokeStyle = p.c; ctx.globalAlpha = .7; ctx.lineWidth = .8; for (var i = 0; i < 8; i++) { ctx.rotate(.785); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, p.s * .8); ctx.stroke(); } }
+      else if (season === 'spring') { ctx.beginPath(); ctx.ellipse(0, 0, p.s * .55, p.s * .35, 0, 0, 6.283); ctx.fill(); }
+      else { ctx.beginPath(); ctx.moveTo(0, -p.s); ctx.quadraticCurveTo(p.s * .8, -p.s * .2, 0, p.s); ctx.quadraticCurveTo(-p.s * .8, -p.s * .2, 0, -p.s); ctx.fill();
+        ctx.strokeStyle = 'rgba(0,0,0,.18)'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(0, -p.s); ctx.lineTo(0, p.s); ctx.stroke(); }
+      ctx.restore();
+    }
+    function frame(t) {
+      raf = 0;
+      if (!visible || document.hidden) return;
+      var dt = Math.min(3, (t - last) / 16.7 || 1); last = t;
+      ctx.clearRect(0, 0, W, H);
+      items.forEach(function (p, i) {
+        p.sw += p.sws * dt; p.y += p.vy * dt; p.x += Math.sin(p.sw) * .6 * dt; p.rot += p.vr * dt;
+        if (p.y > H + 20) items[i] = spawn(false);
+        drawLeaf(p);
+      });
+      raf = requestAnimationFrame(frame);
+    }
+    function start() { if (!raf) { last = performance.now(); raf = requestAnimationFrame(frame); } }
+    size(); for (var i = 0; i < count; i++) items.push(spawn(true));
+    window.addEventListener('resize', function () { size(); });
+    if ('IntersectionObserver' in window) new IntersectionObserver(function (es) { visible = es[0].isIntersecting; if (visible) start(); }).observe(hero);
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) start(); });
+    start();
+  })();
+
+  /* Coccinelles : se promènent doucement, s'envolent quand on les touche, puis reviennent */
+  (function ladybugs() {
+    var SVG = '<svg viewBox="0 0 40 40" aria-hidden="true"><ellipse cx="20" cy="23" rx="12" ry="13" fill="#D7372C"/><path d="M20 10v26" stroke="#1B1B1B" stroke-width="1.6"/><circle cx="20" cy="10" r="6" fill="#1B1B1B"/><circle cx="17.5" cy="8.6" r="1.2" fill="#fff"/><circle cx="22.5" cy="8.6" r="1.2" fill="#fff"/><circle cx="14" cy="19" r="2.4" fill="#1B1B1B"/><circle cx="26" cy="19" r="2.4" fill="#1B1B1B"/><circle cx="13.5" cy="28" r="2.2" fill="#1B1B1B"/><circle cx="26.5" cy="28" r="2.2" fill="#1B1B1B"/><circle cx="20" cy="31.5" r="1.8" fill="#1B1B1B"/><g stroke="#1B1B1B" stroke-width="1.4" stroke-linecap="round"><path d="M9 18l-4-2M9 24H4M10 30l-4 3M31 18l4-2M31 24h5M30 30l4 3"/></g></svg>';
+    var n = window.innerWidth < 700 ? 1 : 2;
+    for (var i = 0; i < n; i++) (function (k) {
+      var bug = document.createElement('button');
+      bug.type = 'button'; bug.className = 'ladybug'; bug.setAttribute('aria-label', 'Une coccinelle'); bug.tabIndex = -1;
+      bug.innerHTML = SVG; hero.appendChild(bug);
+      var x, y, a, speed = .35 + Math.random() * .25, turn = 0, flying = false, t0 = 0;
+      function place() { x = Math.random() * (hero.clientWidth - 60) + 30; y = hero.clientHeight * (.55 + Math.random() * .35); a = Math.random() * 6.283;
+        bug.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px) rotate(' + (a * 57.3 + 90).toFixed(1) + 'deg)'; }
+      bug.style.opacity = '0';
+      place();
+      function step(t) {
+        if (!flying && !document.hidden) {
+          turn += (Math.random() - .5) * .08; turn *= .96; a += turn;
+          x += Math.cos(a) * speed; y += Math.sin(a) * speed;
+          var W = hero.clientWidth, H = hero.clientHeight;
+          if (x < 20 || x > W - 20) { a = Math.PI - a; x = Math.max(20, Math.min(W - 20, x)); }
+          if (y < H * .35 || y > H - 20) { a = -a; y = Math.max(H * .35, Math.min(H - 20, y)); }
+          // petites pauses, comme une vraie coccinelle
+          if (Math.random() < .004) { t0 = t + 600 + Math.random() * 1400; }
+          if (t < t0) { x -= Math.cos(a) * speed; y -= Math.sin(a) * speed; }
+          bug.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px) rotate(' + (a * 57.3 + 90).toFixed(1) + 'deg)';
+        }
+        requestAnimationFrame(step);
+      }
+      bug.addEventListener('pointerenter', fly); bug.addEventListener('click', fly);
+      function fly() {
+        if (flying) return; flying = true;
+        bug.classList.add('is-flying');
+        bug.style.transform = 'translate(' + (x + (Math.random() - .5) * 300).toFixed(0) + 'px,' + (y - 500).toFixed(0) + 'px) rotate(' + ((Math.random() - .5) * 720).toFixed(0) + 'deg) scale(.6)';
+        setTimeout(function () { bug.classList.remove('is-flying'); place(); bug.style.opacity = '0'; flying = false; setTimeout(function () { bug.style.opacity = ''; }, 50); }, 9000 + Math.random() * 8000);
+      }
+      setTimeout(function () { bug.style.opacity = ''; requestAnimationFrame(step); }, 1200 + k * 2500);
+    })(i);
+  })();
+})();

@@ -477,6 +477,88 @@ function admin_user_role(string $id): void
     back('/admin/utilisateurs');
 }
 
+function admin_login_form(): void
+{
+    if (Auth::isAdmin()) redirect('/admin');
+    view('admin/login', ['title' => 'Back-office', 'head' => NOINDEX, 'adminApp' => true]);
+}
+
+function admin_login(): void
+{
+    if (Auth::tooManyAttempts()) { flash('error', 'Trop de tentatives. Patientez quelques minutes.'); redirect('/admin/connexion'); }
+    if (!Auth::attempt((string)input('email', ''), (string)($_POST['password'] ?? ''))) {
+        keep_old(); flash('error', 'Email ou mot de passe incorrect.'); redirect('/admin/connexion');
+    }
+    if (!Auth::isAdmin()) {
+        Auth::logout();
+        audit('admin.denied', 'connexion au back-office refusée (compte non administrateur)');
+        flash('error', 'Cet espace est réservé à l\'administration.');
+        redirect('/admin/connexion');
+    }
+    if (input('remember')) Auth::remember((int)Auth::id());
+    audit('admin.login', 'connexion au back-office');
+    $to = $_SESSION['intended'] ?? '/admin';
+    unset($_SESSION['intended']);
+    redirect(is_string($to) && str_starts_with($to, '/admin') ? $to : '/admin');
+}
+
+/** Manifeste de l'application mobile du back-office. */
+function admin_manifest(): void
+{
+    header('Content-Type: application/manifest+json; charset=utf-8');
+    echo json_encode([
+        'name' => 'Les Jardins d\'à Côté — Pilotage', 'short_name' => 'Jardins Pilotage',
+        'description' => 'Back-office de l\'association : à valider, agents, chiffres.',
+        'id' => '/admin', 'start_url' => '/admin?app=1', 'scope' => '/admin', 'display' => 'standalone', 'orientation' => 'portrait',
+        'background_color' => '#0F172B', 'theme_color' => '#0F172B', 'lang' => 'fr',
+        'icons' => [
+            ['src' => '/assets/img/app-192.png', 'sizes' => '192x192', 'type' => 'image/png'],
+            ['src' => '/assets/img/app-512.png', 'sizes' => '512x512', 'type' => 'image/png'],
+            ['src' => '/assets/img/app-maskable-512.png', 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'maskable'],
+        ],
+        'shortcuts' => [
+            ['name' => 'À valider', 'url' => '/admin/a-valider'],
+            ['name' => 'Commandes', 'url' => '/admin/commandes'],
+        ],
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    exit;
+}
+
+/** Service worker : réseau d'abord, page hors ligne si la connexion manque. Aucune donnée mise en cache. */
+function admin_sw(): void
+{
+    header('Content-Type: text/javascript; charset=utf-8');
+    header('Service-Worker-Allowed: /admin');
+    header('Cache-Control: no-cache');
+    echo <<<'JS'
+const OFFLINE = '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hors ligne</title><body style="font-family:system-ui;background:#0F172B;color:#fff;display:grid;place-items:center;min-height:100vh;margin:0;text-align:center;padding:24px"><div><p style="font-size:48px;margin:0">🌱</p><h1 style="font-size:22px">Pas de connexion</h1><p style="color:#B8C3D3">Le pilotage a besoin d\'internet. Réessayez dès que le réseau revient.</p><button onclick="location.reload()" style="font:inherit;padding:12px 20px;border-radius:999px;border:0;background:#6A9E6D;color:#fff">Réessayer</button></div></body>';
+self.addEventListener('install', e => self.skipWaiting());
+self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+self.addEventListener('fetch', e => {
+  if (e.request.mode !== 'navigate') return;
+  e.respondWith(fetch(e.request).catch(() => new Response(OFFLINE, { headers: { 'Content-Type': 'text/html; charset=utf-8' } })));
+});
+JS;
+    exit;
+}
+
+function admin_testimonials(): void
+{
+    Auth::requireAdmin();
+    admin_view('testimonials', ['title' => 'Témoignages', 'section' => 'testimonials',
+        'rows' => db()->all("SELECT * FROM testimonials ORDER BY FIELD(status,'pending','published','hidden'), id DESC")]);
+}
+
+function admin_testimonial_set(string $id): void
+{
+    Auth::requireAdmin();
+    $st = input('status');
+    if (in_array($st, ['published', 'hidden', 'pending'], true)) db()->exec('UPDATE testimonials SET status = ? WHERE id = ?', [$st, (int)$id]);
+    if (input('delete')) db()->exec('DELETE FROM testimonials WHERE id = ?', [(int)$id]);
+    audit('testimonial', '#' . (int)$id . ' → ' . ($st ?: 'supprimé'));
+    back('/admin/temoignages');
+}
+
 function admin_pilot(): void
 {
     Auth::requireAdmin();

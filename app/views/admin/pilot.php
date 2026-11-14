@@ -23,12 +23,29 @@ $tiles = [
     <span class="pstatus <?= $cronOk ? 'is-ok' : 'is-ko' ?>"><?= $cronOk ? 'Site et tâches : OK' : 'Tâche du site arrêtée' ?></span>
   </header>
 
+  <div class="panel install-card" data-install hidden>
+    <div class="install-icon"><img src="/assets/img/app-192.png" alt="" width="56" height="56"></div>
+    <div>
+      <b>Installer le pilotage sur votre téléphone</b>
+      <p class="small mb-0" data-install-ios hidden>Sur iPhone : touchez <strong>Partager</strong> <span aria-hidden="true">⬆︎</span> dans Safari, puis <strong>Sur l'écran d'accueil</strong>.</p>
+      <p class="small mb-0" data-install-android hidden>Une icône « Jardins Pilotage » s'ajoute à votre écran d'accueil, comme une application.</p>
+      <p class="small mb-0" data-install-other hidden>Ouvrez cette page sur votre téléphone (Safari sur iPhone, Chrome sur Android) pour l'installer comme une application.</p>
+    </div>
+    <div class="install-actions">
+      <button class="btn btn--sm" type="button" data-install-btn hidden>Installer</button>
+      <button class="btn btn--ghost btn--sm" type="button" data-install-close>Plus tard</button>
+    </div>
+  </div>
+
   <section>
     <h2>À traiter maintenant</h2>
     <div class="ptiles">
       <?php foreach ($tiles as [$label, $n, $href, $hint, $always]): if (!$n && !$always) continue; ?>
         <a class="ptile<?= $n ? ' is-hot' : '' ?>" href="<?= $href ?>"><b><?= (int)$n ?></b><span><?= e($label) ?></span><small><?= e($n ? $hint : 'Rien en attente') ?></small></a>
       <?php endforeach; ?>
+      <?php $pendT = (int)db()->val("SELECT COUNT(*) FROM testimonials WHERE status = 'pending'"); if ($pendT): ?>
+        <a class="ptile is-hot" href="/admin/temoignages"><b><?= $pendT ?></b><span>Témoignages</span><small>À publier ou masquer</small></a>
+      <?php endif; ?>
       <a class="ptile<?= $open ? ' is-hot' : '' ?>" href="#liste"><b><?= count($open) ?></b><span>Dans ma liste</span><small>Actions que vous seul pouvez faire</small></a>
     </div>
   </section>

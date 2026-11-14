@@ -204,3 +204,65 @@
     else $$('input', b.closest('tr')).forEach(function (i) { i.value = ''; });
   });
 })();
+
+/* Carte « Installer le pilotage » (back-office) */
+(function () {
+  var card = document.querySelector('[data-install]');
+  if (!card) return;
+  var standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  var dismissed = false;
+  try { dismissed = localStorage.getItem('jdc-install-later') === '1'; } catch (e) {}
+  if (standalone || dismissed) return;
+  var ua = navigator.userAgent, ios = /iphone|ipad|ipod/i.test(ua), android = /android/i.test(ua);
+  var show = function (sel) { var el = card.querySelector(sel); if (el) el.hidden = false; };
+  var deferred = null;
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault(); deferred = e;
+    show('[data-install-android]'); show('[data-install-btn]'); card.hidden = false;
+  });
+  if (ios) { show('[data-install-ios]'); card.hidden = false; }
+  else if (!android) { show('[data-install-other]'); card.hidden = false; }
+  var btn = card.querySelector('[data-install-btn]');
+  if (btn) btn.addEventListener('click', function () { if (!deferred) return; deferred.prompt(); deferred.userChoice.finally(function () { card.hidden = true; deferred = null; }); });
+  card.querySelector('[data-install-close]').addEventListener('click', function () {
+    card.hidden = true; try { localStorage.setItem('jdc-install-later', '1'); } catch (e) {}
+  });
+})();
+
+/* Carte des groupes (Leaflet chargé à la demande, seulement si une carte est sur la page) */
+(function () {
+  var maps = document.querySelectorAll('.gmap[data-points]');
+  if (!maps.length) return;
+  var V = '/assets/vendor/leaflet/'; // Leaflet 1.9.4, servi depuis le site (intégrité vérifiée)
+  function load(cb) {
+    if (window.L) return cb();
+    var css = document.createElement('link'); css.rel = 'stylesheet'; css.href = V + 'leaflet.css'; css.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY='; css.crossOrigin = ''; document.head.appendChild(css);
+    var s = document.createElement('script'); s.src = V + 'leaflet.js'; s.integrity = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo='; s.crossOrigin = ''; s.onload = cb; document.head.appendChild(s);
+  }
+  var colors = { open: '#D9634A', voting: '#6A9E6D', waiting: '#6A9E6D', active: '#0F172B', proposed: '#9AA6B6' };
+  var labels = { open: 'Ventes ouvertes', voting: 'Vote en cours', waiting: 'Prochain vote en préparation', active: 'Bénévoles recherchés', proposed: 'En création' };
+  function esc(s) { return String(s || '').replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function init(el) {
+    var pts = []; try { pts = JSON.parse(el.getAttribute('data-points')); } catch (e) {}
+    if (!pts.length) return;
+    var map = L.map(el, { scrollWheelZoom: false, attributionControl: true });
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      maxZoom: 17, subdomains: 'abcd',
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+    }).addTo(map);
+    var b = [];
+    pts.forEach(function (p) {
+      var c = colors[p.state] || colors.active;
+      var icon = L.divIcon({ className: 'gpin', html: '<span style="--c:' + c + '"><svg viewBox="0 0 24 24"><path d="M12 21v-7M12 14c-4 0-6-2.5-6-5.5S8.5 3 12 1c3.5 2 6 4.5 6 7.5S16 14 12 14z"/></svg></span>', iconSize: [34, 34], iconAnchor: [17, 32], popupAnchor: [0, -28] });
+      L.marker([p.lat, p.lng], { icon: icon, title: p.commune }).addTo(map)
+        .bindPopup('<b>' + esc(p.name) + '</b><br><span class="gpop-st" style="color:' + c + '">' + esc(labels[p.state] || '') + '</span>' + (p.pickup ? '<br><small>Retrait : ' + esc(p.pickup) + '</small>' : '') + '<br><a href="' + esc(p.url) + '">Voir le groupe →</a>');
+      b.push([p.lat, p.lng]);
+    });
+    if (b.length === 1) map.setView(b[0], 12); else map.fitBounds(b, { padding: [40, 40], maxZoom: 12 });
+    el.addEventListener('click', function () { map.scrollWheelZoom.enable(); }, { once: true });
+  }
+  var io = 'IntersectionObserver' in window ? new IntersectionObserver(function (es) {
+    es.forEach(function (e) { if (e.isIntersecting) { io.unobserve(e.target); load(function () { init(e.target); }); } });
+  }, { rootMargin: '300px' }) : null;
+  maps.forEach(function (m) { if (io) io.observe(m); else load(function () { init(m); }); });
+})();

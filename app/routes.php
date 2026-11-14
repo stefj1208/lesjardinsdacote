@@ -54,6 +54,7 @@ $router->post('/reinitialiser/{token}', 'account_reset');
 $router->get('/compte', 'account_home');
 $router->get('/compte/profil', 'account_profile_form');
 $router->post('/compte/profil', 'account_profile');
+$router->post('/compte/temoignage', 'account_testimonial');
 $router->get('/compte/commande/{ref}', 'account_order');
 $router->post('/compte/commande/{ref}/annuler', 'account_order_cancel');
 $router->get('/compte/commande/{ref}/facture', 'account_invoice');
@@ -73,6 +74,12 @@ $router->get('/benevoles/distribution/{token}', 'vol_handover');
 $router->post('/benevoles/distribution/{token}', 'vol_handover_confirm');
 
 /* Back-office */
+$router->get('/admin/connexion', 'admin_login_form');
+$router->post('/admin/connexion', 'admin_login');
+$router->get('/admin/app.webmanifest', 'admin_manifest');
+$router->get('/admin/sw.js', 'admin_sw');
+$router->get('/admin/temoignages', 'admin_testimonials');
+$router->post('/admin/temoignages/{id}', 'admin_testimonial_set');
 $router->get('/admin', 'admin_pilot');
 $router->post('/admin/pilotage', 'admin_pilot_action');
 $router->get('/admin/activite', 'admin_dashboard');

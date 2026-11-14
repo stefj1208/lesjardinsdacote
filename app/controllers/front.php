@@ -18,7 +18,7 @@ function front_home(): void
     $allVarieties = Varieties::all(null, true);
     $univers = Varieties::overview();
     $best = max(array_map(fn($u) => (int)($u['example']['save_pct'] ?? 0), $univers) ?: [0]);
-    view('front/home', ['fund' => Asso::fundTotal(), 'groups' => $groups, 'heroPack' => $hero, 'heroSale' => $sale, 'catalog' => $catalog, 'varieties' => $allVarieties,
+    view('front/home', ['neighbours' => (int)db()->val("SELECT COUNT(*) FROM users WHERE role <> 'admin'"), 'mapPoints' => Geo::mapPoints(), 'fund' => Asso::fundTotal(), 'groups' => $groups, 'heroPack' => $hero, 'heroSale' => $sale, 'catalog' => $catalog, 'varieties' => $allVarieties,
         'univers' => $univers, 'bestPct' => $best]);
 }
 
@@ -47,7 +47,7 @@ function front_groups(): void
     $counts = ['all' => count($all)] + array_fill_keys(array_keys(Cat::GROUP_STATUS), 0);
     foreach ($all as $g) $counts[$g['public_status']]++;
     $groups = isset(Cat::GROUP_STATUS[$st]) ? array_values(array_filter($all, fn($g) => $g['public_status'] === $st)) : $all;
-    view('front/groups', ['groups' => $groups, 'q' => $q, 'st' => isset(Cat::GROUP_STATUS[$st]) ? $st : '', 'counts' => $counts,
+    view('front/groups', ['mapPoints' => Geo::mapPoints(), 'groups' => $groups, 'q' => $q, 'st' => isset(Cat::GROUP_STATUS[$st]) ? $st : '', 'counts' => $counts,
         'title' => 'Les groupes inscrits', 'description' => 'Liste des groupes d\'achat « Les Jardins d\'à Côté » par commune, avec leur statut : bénévoles recherchés, pré-ouverture ou ventes ouvertes.']);
 }
 

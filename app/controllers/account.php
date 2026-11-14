@@ -75,7 +75,7 @@ function account_logout(): void
 {
     Auth::logout();
     flash('info', 'Vous êtes déconnecté·e. À bientôt au jardin !');
-    redirect('/');
+    redirect(input('to') === '/admin/connexion' ? '/admin/connexion' : '/');
 }
 
 function account_forgot_form(): void
@@ -129,7 +129,9 @@ function account_home(): void
     $groups = Groups::hydrate(db()->all("SELECT g.*, gm.role AS my_role FROM `groups` g JOIN group_members gm ON gm.group_id = g.id WHERE gm.user_id = ? AND g.status = 'active' ORDER BY g.commune", [$u['id']]));
     $cart = Cart::items((int)$u['id']);
     $shifts = Auth::isVolunteer() ? db()->all('SELECT s.* FROM shifts s JOIN shift_signups ss ON ss.shift_id = s.id WHERE ss.user_id = ? AND s.ends_at > NOW() ORDER BY s.starts_at', [$u['id']]) : [];
-    view('account/home', ['u' => $u, 'orders' => $orders, 'groups' => $groups, 'cart' => $cart, 'shifts' => $shifts, 'title' => 'Mon compte', 'head' => NOINDEX]);
+    $canReview = db()->val("SELECT 1 FROM orders WHERE user_id = ? AND status = 'collected' LIMIT 1", [$u['id']])
+        && !db()->val('SELECT 1 FROM testimonials WHERE user_id = ?', [$u['id']]);
+    view('account/home', ['canReview' => (bool)$canReview, 'u' => $u, 'orders' => $orders, 'groups' => $groups, 'cart' => $cart, 'shifts' => $shifts, 'title' => 'Mon compte', 'head' => NOINDEX]);
 }
 
 function account_profile_form(): void
@@ -243,4 +245,18 @@ function account_pay_confirm(string $ref): void
         flash('error', 'Vérification du paiement impossible pour le moment.');
     }
     redirect('/compte/commande/' . $ref);
+}
+
+/** Un membre ayant retiré un pack laisse un avis ; publié seulement après accord de l'administrateur. */
+function account_testimonial(): void
+{
+    $u = Auth::requireLogin();
+    $body = trim(mb_substr((string)input('body', ''), 0, 600));
+    if (mb_strlen($body) < 15) { flash('error', 'Quelques mots de plus, s\'il vous plaît.'); back('/compte'); }
+    if (!db()->val("SELECT 1 FROM orders WHERE user_id = ? AND status = 'collected' LIMIT 1", [$u['id']])) { flash('error', 'Vous pourrez donner votre avis après votre premier retrait.'); back('/compte'); }
+    $commune = (string)(db()->val("SELECT g.commune FROM `groups` g JOIN group_members gm ON gm.group_id = g.id WHERE gm.user_id = ? LIMIT 1", [$u['id']]) ?: '');
+    db()->insert('testimonials', ['user_id' => $u['id'], 'name' => mb_substr(trim($u['first_name'] . ' ' . mb_substr((string)$u['last_name'], 0, 1) . ($u['last_name'] ? '.' : '')) ?: 'Un membre', 0, 80),
+        'commune' => $commune ?: null, 'body' => $body, 'consent' => input('consent') ? 1 : 0]);
+    flash('success', 'Merci pour votre avis !' . (input('consent') ? ' Il sera publié après relecture.' : ''));
+    back('/compte');
 }

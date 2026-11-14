@@ -13,6 +13,16 @@
     </div>
   <?php endif; ?>
 
+  <?php if (!empty($canReview)): ?>
+    <form class="panel review-card mb-4" method="post" action="/compte/temoignage" style="margin-bottom:1.5rem">
+      <?= csrf_field() ?>
+      <h2 style="font-size:1.3rem">Votre premier pack est entre vos mains. Ça s'est bien passé ?</h2>
+      <div class="field"><label for="tb">En quelques mots, pour les voisins qui hésitent</label><textarea id="tb" name="body" rows="3" maxlength="600" required></textarea></div>
+      <label class="check"><input type="checkbox" name="consent" value="1" checked><span>J'accepte que mon avis soit publié sur le site avec mon prénom, l'initiale de mon nom et ma commune.</span></label>
+      <button class="btn btn--sm mt-2" type="submit">Envoyer mon avis</button>
+    </form>
+  <?php endif; ?>
+
   <h2>Mes groupes</h2>
   <?php if (!$groups): ?>
     <div class="empty"><h3>Vous n'avez pas encore rejoint de groupe</h3><p>Trouvez celui de votre commune pour voter et acheter les packs.</p><a class="btn" href="/groupes">Trouver mon groupe</a></div>

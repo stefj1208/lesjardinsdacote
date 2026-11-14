@@ -4,7 +4,7 @@ declare(strict_types=1);
 /** Mise à jour automatique de la base au premier passage après un déploiement. */
 final class Migrator
 {
-    public const VERSION = 8;
+    public const VERSION = 9;
     private static bool $reseed = false;
 
     public static function execFile(string $file): void
@@ -30,6 +30,7 @@ final class Migrator
             if ($v < 6) self::to6();
             if ($v < 7) self::to7();
             if ($v < 8) self::to8();
+            if ($v < 9) self::to9();
             if (self::$reseed) Demo::seedCatalog();
             if (self::$reseed && setting('demo_data') === '1') { Demo::purge(); Demo::seed(); }
         } finally {
@@ -83,6 +84,16 @@ final class Migrator
         set_setting('schema_version', '5');
         self::$reseed = true;
         audit('migrate', 'schéma v5');
+    }
+
+    /** v8 → v9 : connexion mémorisée (application du back-office), témoignages, coordonnées des groupes. */
+    private static function to9(): void
+    {
+        self::execFile(APP_DIR . '/sql/schema.sql');
+        if (!self::hasColumn('groups', 'lat')) db()->pdo->exec('ALTER TABLE `groups` ADD COLUMN lat DECIMAL(9,6) NULL, ADD COLUMN lng DECIMAL(9,6) NULL');
+        Geo::fillGroups();
+        set_setting('schema_version', '9');
+        audit('migrate', 'schéma v9');
     }
 
     /** v7 → v8 : poste de pilotage (passages des agents, liste « à faire », pause et autonomie). */

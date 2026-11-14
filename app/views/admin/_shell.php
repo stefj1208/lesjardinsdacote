@@ -22,6 +22,8 @@ $toValidate = Agents::pendingCount();
     <a href="/benevoles">Espace bénévoles</a>
     <div class="grp">Association</div>
     <?= $link('/admin/utilisateurs', 'users', 'Membres') ?>
+    <?php $pendT = (int)db()->val("SELECT COUNT(*) FROM testimonials WHERE status = 'pending'"); ?>
+    <?= $link('/admin/temoignages', 'testimonials', 'Témoignages' . ($pendT ? ' (' . $pendT . ')' : '')) ?>
     <?= $link('/admin/parametres', 'settings', 'Paramètres') ?>
   </nav>
   <div class="admin-main"><?= $inner ?></div>

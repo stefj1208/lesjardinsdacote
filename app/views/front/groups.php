@@ -19,6 +19,7 @@
 </section>
 <section class="section" style="padding-top:0">
   <div class="wrap">
+    <?php partial('partials/groups_map', ['points' => $mapPoints, 'height' => '440px']) ?>
     <?php if ($groups): ?>
       <div class="groups-grid"><?php foreach ($groups as $k => $g) partial('partials/group_card', ['g' => $g, 'i' => $k]); ?></div>
     <?php else: ?>

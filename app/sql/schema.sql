@@ -53,6 +53,8 @@ CREATE TABLE IF NOT EXISTS `groups` (
   pickup_address VARCHAR(255) NULL,
   photo VARCHAR(500) NULL,
   volunteers_needed TINYINT UNSIGNED NOT NULL DEFAULT 2,
+  lat DECIMAL(9,6) NULL,
+  lng DECIMAL(9,6) NULL,
   status ENUM('proposed','active','archived') NOT NULL DEFAULT 'proposed',
   proposed_by INT UNSIGNED NULL,
   validated_at DATETIME NULL,
@@ -330,6 +332,30 @@ CREATE TABLE IF NOT EXISTS memberships (
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE KEY uq_memberships (user_id, year),
   CONSTRAINT fk_memberships_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS auth_tokens (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  user_id INT UNSIGNED NOT NULL,
+  selector CHAR(18) NOT NULL,
+  validator_hash CHAR(64) NOT NULL,
+  expires_at DATETIME NOT NULL,
+  user_agent VARCHAR(255) NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_auth_selector (selector),
+  CONSTRAINT fk_auth_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS testimonials (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  user_id INT UNSIGNED NULL,
+  name VARCHAR(80) NOT NULL,
+  commune VARCHAR(120) NULL,
+  body VARCHAR(600) NOT NULL,
+  status ENUM('pending','published','hidden') NOT NULL DEFAULT 'pending',
+  consent TINYINT(1) NOT NULL DEFAULT 0,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_testi_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS agent_runs (
