@@ -7,8 +7,9 @@ $toValidate = Agents::pendingCount();
 ?>
 <div class="admin-shell">
   <nav class="admin-side" aria-label="Back-office">
-    <?= $link('/admin', 'dashboard', 'Tableau de bord') ?>
+    <?= $link('/admin', 'pilot', 'Pilotage') ?>
     <?= $link('/admin/a-valider', 'validate', 'À valider' . ($toValidate ? ' (' . $toValidate . ')' : '')) ?>
+    <?= $link('/admin/activite', 'dashboard', 'Ventes & activité') ?>
     <div class="grp">Réseau</div>
     <?= $link('/admin/groupes', 'groups', 'Groupes' . ($proposed ? ' (' . $proposed . ' à valider)' : '')) ?>
     <?= $link('/admin/ventes', 'sales', 'Ventes & votes') ?>

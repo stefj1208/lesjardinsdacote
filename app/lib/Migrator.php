@@ -4,7 +4,7 @@ declare(strict_types=1);
 /** Mise à jour automatique de la base au premier passage après un déploiement. */
 final class Migrator
 {
-    public const VERSION = 7;
+    public const VERSION = 8;
     private static bool $reseed = false;
 
     public static function execFile(string $file): void
@@ -29,6 +29,7 @@ final class Migrator
             if ($v < 5) self::to5();
             if ($v < 6) self::to6();
             if ($v < 7) self::to7();
+            if ($v < 8) self::to8();
             if (self::$reseed) Demo::seedCatalog();
             if (self::$reseed && setting('demo_data') === '1') { Demo::purge(); Demo::seed(); }
         } finally {
@@ -82,6 +83,15 @@ final class Migrator
         set_setting('schema_version', '5');
         self::$reseed = true;
         audit('migrate', 'schéma v5');
+    }
+
+    /** v7 → v8 : poste de pilotage (passages des agents, liste « à faire », pause et autonomie). */
+    private static function to8(): void
+    {
+        self::execFile(APP_DIR . '/sql/schema.sql');
+        Pilot::seedTodos();
+        set_setting('schema_version', '8');
+        audit('migrate', 'schéma v8');
     }
 
     /**

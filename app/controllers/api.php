@@ -67,6 +67,7 @@ function api_agents_items_create(): void
 {
     api_agents_guard();
     $d = api_body();
+    api_agent_paused_guard($d);
     $items = isset($d['items']) && is_array($d['items']) ? $d['items'] : [$d];
     $ids = [];
     foreach (array_slice($items, 0, 30) as $it) {
@@ -81,6 +82,7 @@ function api_agents_items_create(): void
 function api_agents_items_draft(string $id): void
 {
     api_agents_guard();
+    api_agent_paused_guard(api_body());
     if (!Agents::draft((int)$id, api_body())) json_out(['error' => 'élément introuvable ou déjà rédigé'], 409);
     json_out(['ok' => true]);
 }
@@ -90,4 +92,32 @@ function api_agents_stats(): void
 {
     api_agents_guard();
     json_out(Agents::stats());
+}
+
+/** Refuse le dépôt d'un agent mis en pause depuis le poste de pilotage. */
+function api_agent_paused_guard(array $d): void
+{
+    $a = (string)($d['agent'] ?? '');
+    if ($a !== '' && Pilot::paused($a)) json_out(['error' => 'agent en pause', 'paused' => true], 423);
+}
+
+/** POST /api/agents/runs — un agent signale son passage : {agent, summary, created, ok}. */
+function api_agents_runs(): void
+{
+    api_agents_guard();
+    $d = api_body();
+    $agent = (string)($d['agent'] ?? '');
+    if (!isset(Pilot::AGENTS[$agent])) json_out(['error' => 'agent inconnu'], 422);
+    Pilot::logRun($agent, (string)($d['summary'] ?? ''), (int)($d['created'] ?? 0), ($d['ok'] ?? true) !== false);
+    json_out(['ok' => true, 'paused' => Pilot::paused($agent)]);
+}
+
+/** POST /api/agents/todos — ajoute une action à faire par le président : {title, detail, link}. */
+function api_agents_todos(): void
+{
+    api_agents_guard();
+    $d = api_body();
+    if (trim((string)($d['title'] ?? '')) === '') json_out(['error' => 'title requis'], 422);
+    if (db()->val('SELECT id FROM todos WHERE title = ? AND done_at IS NULL', [mb_substr(trim((string)$d['title']), 0, 200)])) json_out(['ok' => true, 'duplicate' => true]);
+    json_out(['id' => Pilot::addTodo((string)$d['title'], (string)($d['detail'] ?? ''), (string)($d['agent'] ?? 'agent'), isset($d['link']) ? (string)$d['link'] : null)], 201);
 }

@@ -51,7 +51,7 @@ final class Agents
     {
         $cat = isset(self::CATEGORIES[$d['category'] ?? '']) ? $d['category'] : 'autre';
         $to = trim((string)($d['to'] ?? ''));
-        return db()->insert('agent_items', [
+        $id = db()->insert('agent_items', [
             'category' => $cat,
             'status' => ($d['status'] ?? '') === 'draft_needed' ? 'draft_needed' : 'pending',
             'title' => mb_substr(trim((string)($d['title'] ?? 'Proposition')), 0, 200),
@@ -63,6 +63,18 @@ final class Agents
             'inbox_id' => isset($d['inbox_id']) ? (int)$d['inbox_id'] : null,
             'source' => mb_substr($source, 0, 100),
         ]);
+        self::maybeAuto($id);
+        return $id;
+    }
+
+    /** Catégorie passée en automatique par le président : l'élément part sans attendre. */
+    private static function maybeAuto(int $id): void
+    {
+        $it = db()->one('SELECT * FROM agent_items WHERE id = ?', [$id]);
+        if (!$it || $it['status'] !== 'pending' || !$it['to_email'] || !$it['subject'] || !$it['body'] || !Pilot::auto($it['category'])) return;
+        db()->exec('UPDATE agent_items SET status = "approved", decided_at = NOW(), decision_note = "envoi automatique" WHERE id = ?', [$id]);
+        audit('agents.auto', '#' . $id . ' ' . $it['title']);
+        self::dispatch($id);
     }
 
     /** Dépose le brouillon d'un élément créé par la boîte mail (draft_needed → pending). */
@@ -77,6 +89,7 @@ final class Agents
             isset(self::CATEGORIES[$d['category'] ?? '']) ? $d['category'] : $it['category'],
             $id,
         ]);
+        self::maybeAuto($id);
         return true;
     }
 
@@ -153,7 +166,12 @@ final class Agents
                 'clean_rate' => $decided ? round((int)$r['clean'] / $decided * 100) : null,
             ];
         }
+        $paused = []; $auto = [];
+        foreach (array_keys(Pilot::AGENTS) as $a) $paused[$a] = Pilot::paused($a);
+        foreach (Pilot::AUTO_ALLOWED as $c) $auto[$c] = Pilot::auto($c);
         return [
+            'paused' => $paused, 'auto' => $auto,
+            'todos_open' => (int)db()->val('SELECT COUNT(*) FROM todos WHERE done_at IS NULL'),
             'pending' => (int)db()->val("SELECT COUNT(*) FROM agent_items WHERE status IN ('pending','draft_needed')"),
             'categories' => $cats,
             'inbox' => [

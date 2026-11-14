@@ -477,6 +477,38 @@ function admin_user_role(string $id): void
     back('/admin/utilisateurs');
 }
 
+function admin_pilot(): void
+{
+    Auth::requireAdmin();
+    Pilot::seedTodos();
+    $stats = Agents::stats();
+    admin_view('pilot', ['title' => 'Pilotage', 'section' => 'pilot', 'stats' => $stats,
+        'todos' => Pilot::todos(), 'runs' => Pilot::lastRuns(), 'journal' => Pilot::journal(),
+        'pipes' => ['fournisseur' => Pilot::pipeline('fournisseur'), 'collectivite' => Pilot::pipeline('collectivite')],
+        'k' => [
+            'proposed' => (int)db()->val("SELECT COUNT(*) FROM `groups` WHERE status = 'proposed'"),
+            'pay_issues' => (int)db()->val("SELECT COUNT(*) FROM orders WHERE payment_status IN ('failed','action_required')"),
+            'to_prepare' => (int)db()->val("SELECT COUNT(*) FROM orders WHERE status = 'confirmed'"),
+            'mail_failed' => (int)db()->val("SELECT COUNT(*) FROM email_queue WHERE status = 'failed'"),
+            'sales_open' => (int)db()->val("SELECT COUNT(*) FROM sales WHERE status IN ('voting','open')"),
+            'posts_ready' => (int)db()->val("SELECT COUNT(*) FROM agent_items WHERE category = 'social' AND status = 'approved'"),
+        ],
+        'lastCron' => setting('last_cron_at')]);
+}
+
+function admin_pilot_action(): void
+{
+    Auth::requireAdmin();
+    $do = (string)input('do');
+    if ($do === 'pause' || $do === 'resume') Pilot::setPaused((string)input('agent'), $do === 'pause');
+    elseif ($do === 'auto_on' || $do === 'auto_off') {
+        if (!Pilot::setAuto((string)input('category'), $do === 'auto_on', Agents::stats())) flash('error', 'Pas encore possible : il faut 20 décisions dont 90 % validées sans retouche dans cette catégorie.');
+    }
+    elseif ($do === 'todo_done' || $do === 'todo_undo') Pilot::toggleTodo(input_int('id'), $do === 'todo_done');
+    elseif ($do === 'todo_add' && trim((string)input('title')) !== '') Pilot::addTodo((string)input('title'));
+    back('/admin');
+}
+
 function admin_validate(): void
 {
     Auth::requireAdmin();

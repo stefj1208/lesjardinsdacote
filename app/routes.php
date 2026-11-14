@@ -73,7 +73,9 @@ $router->get('/benevoles/distribution/{token}', 'vol_handover');
 $router->post('/benevoles/distribution/{token}', 'vol_handover_confirm');
 
 /* Back-office */
-$router->get('/admin', 'admin_dashboard');
+$router->get('/admin', 'admin_pilot');
+$router->post('/admin/pilotage', 'admin_pilot_action');
+$router->get('/admin/activite', 'admin_dashboard');
 $router->get('/admin/groupes', 'admin_groups');
 $router->get('/admin/groupes/nouveau', 'admin_group_form');
 $router->get('/admin/groupes/{id}', 'admin_group_form');
@@ -117,6 +119,8 @@ $router->get('/api/agents/items', 'api_agents_items');
 $router->post('/api/agents/items', 'api_agents_items_create');
 $router->post('/api/agents/items/{id}/draft', 'api_agents_items_draft');
 $router->get('/api/agents/stats', 'api_agents_stats');
+$router->post('/api/agents/runs', 'api_agents_runs');
+$router->post('/api/agents/todos', 'api_agents_todos');
 
 $router->get('/cron/{key}', function (string $key) {
     if (!hash_equals((string)config('cron_key'), $key)) abort(404);
