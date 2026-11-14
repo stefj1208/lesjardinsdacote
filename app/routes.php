@@ -112,7 +112,7 @@ $router->post('/admin/agents/regenerer', 'admin_agents_regenerate');
 /* API des agents (tâches planifiées) */
 require APP_DIR . '/controllers/api.php';
 $router->get('/api/health', 'api_health');
-$router->post('/api/agents/claim', 'api_agents_claim');
+$router->any('/api/agents/claim', 'api_agents_claim');
 $router->get('/api/agents/items', 'api_agents_items');
 $router->post('/api/agents/items', 'api_agents_items_create');
 $router->post('/api/agents/items/{id}/draft', 'api_agents_items_draft');
