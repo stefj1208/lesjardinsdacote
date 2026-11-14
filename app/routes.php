@@ -105,6 +105,18 @@ $router->post('/admin/utilisateurs/{id}', 'admin_user_role');
 $router->get('/admin/parametres', 'admin_settings');
 $router->post('/admin/parametres', 'admin_settings_save');
 $router->post('/admin/taches', 'admin_run_tasks');
+$router->get('/admin/a-valider', 'admin_validate');
+$router->post('/admin/a-valider/{id}', 'admin_validate_decide');
+$router->post('/admin/agents/regenerer', 'admin_agents_regenerate');
+
+/* API des agents (tâches planifiées) */
+require APP_DIR . '/controllers/api.php';
+$router->get('/api/health', 'api_health');
+$router->post('/api/agents/claim', 'api_agents_claim');
+$router->get('/api/agents/items', 'api_agents_items');
+$router->post('/api/agents/items', 'api_agents_items_create');
+$router->post('/api/agents/items/{id}/draft', 'api_agents_items_draft');
+$router->get('/api/agents/stats', 'api_agents_stats');
 
 $router->get('/cron/{key}', function (string $key) {
     if (!hash_equals((string)config('cron_key'), $key)) abort(404);

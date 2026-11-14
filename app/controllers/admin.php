@@ -477,9 +477,38 @@ function admin_user_role(string $id): void
     back('/admin/utilisateurs');
 }
 
+function admin_validate(): void
+{
+    Auth::requireAdmin();
+    $all = Agents::items(null, null, 200);
+    $isPending = fn($i) => in_array($i['status'], ['pending', 'draft_needed'], true);
+    admin_view('validate', ['title' => 'À valider', 'section' => 'validate',
+        'pending' => array_reverse(array_values(array_filter($all, $isPending))),
+        'recent' => array_slice(array_values(array_filter($all, fn($i) => !$isPending($i))), 0, 25),
+        'stats' => Agents::stats()]);
+}
+
+function admin_validate_decide(string $id): void
+{
+    Auth::requireAdmin();
+    $action = input('action') === 'reject' ? 'reject' : 'approve';
+    $r = Agents::decide((int)$id, $action, ['subject' => input('subject'), 'body' => input('body')], (int)Auth::user()['id'], (string)input('note', ''));
+    if (!($r['ok'] ?? false)) flash('error', $r['error'] ?? 'Impossible de traiter cet élément.');
+    else flash('success', ['approved' => 'Validé.', 'sent' => 'Validé — le message part dans les minutes qui viennent.', 'rejected' => 'Refusé.'][$r['status']] ?? 'Fait.');
+    back('/admin/a-valider');
+}
+
+function admin_agents_regenerate(): void
+{
+    Auth::requireAdmin();
+    $_SESSION['agent_token_once'] = Agents::regenerate();
+    flash('success', 'Nouveau jeton généré. Copiez-le maintenant : il ne sera plus affiché. Pensez à le mettre à jour dans les tâches planifiées Claude.');
+    back('/admin/parametres');
+}
+
 const SETTING_KEYS = ['sachet_cost', 'pack_fixed_costs', 'market_price_note', 'logo_path', 'association_name', 'association_legal', 'association_address', 'contact_email', 'publication_director', 'host_info',
     'vat_mention', 'pickup_reminder_hours', 'default_vote_days', 'default_sale_days', 'default_batch_size', 'default_pack_price', 'hero_photo',
-    'order_fee', 'order_fee_fund', 'membership_fee', 'president_name', 'treasurer_name'];
+    'order_fee', 'order_fee_fund', 'membership_fee', 'president_name', 'treasurer_name', 'imap_host', 'imap_user'];
 
 function admin_settings(): void
 {
@@ -506,6 +535,9 @@ function admin_settings_save(): void
         if (!array_key_exists($k, $_POST)) continue;
         set_setting($k, mb_substr(trim((string)$_POST[$k]), 0, 2000));
     }
+    // Mot de passe de la boîte mail : enregistré seulement s'il est saisi (jamais réaffiché).
+    if (trim((string)input('imap_password', '')) !== '') set_setting('imap_password', trim((string)input('imap_password')));
+    if (input('imap_clear')) set_setting('imap_password', '');
     if ($up = admin_upload('hero_file', 'accueil')) set_setting('hero_photo', $up);
     if ($up = admin_upload('logo_file', 'logo')) set_setting('logo_path', $up);
     flash('success', 'Paramètres enregistrés.');

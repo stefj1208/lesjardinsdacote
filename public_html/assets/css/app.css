@@ -1010,3 +1010,13 @@ html.has-drop input, html.has-drop textarea, html.has-drop select, html.has-drop
 .cart-line--sm { grid-template-columns: 72px 1fr auto; }
 .cart-line--sm > .ph { width: 72px; height: 72px; }
 .sprout .lf { width: 30px; height: 16px; margin-top: -8px; }
+
+/* v7 — file « À valider » */
+.vstats { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.vitem .vitem-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+.vitem textarea { width: 100%; font: inherit; }
+.vitem-actions { align-items: center; gap: 10px; flex-wrap: wrap; }
+.vnote { flex: 1 1 200px; min-width: 160px; }
+.vmail summary { cursor: pointer; font-size: .95rem; color: var(--green-dd); }
+.vpre { white-space: pre-wrap; background: var(--sky); border-radius: 10px; padding: 12px; font: .85rem/1.5 ui-monospace, monospace; max-height: 320px; overflow: auto; }
+.callout--warn { background: #FFF4DC; border: 1px solid #E8CD8F; border-radius: var(--r-card); padding: 14px 16px; }

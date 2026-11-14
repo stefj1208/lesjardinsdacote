@@ -4,7 +4,7 @@ declare(strict_types=1);
 /** Mise à jour automatique de la base au premier passage après un déploiement. */
 final class Migrator
 {
-    public const VERSION = 6;
+    public const VERSION = 7;
     private static bool $reseed = false;
 
     public static function execFile(string $file): void
@@ -28,6 +28,7 @@ final class Migrator
             if ($v < 4) self::to4();
             if ($v < 5) self::to5();
             if ($v < 6) self::to6();
+            if ($v < 7) self::to7();
             if (self::$reseed) Demo::seedCatalog();
             if (self::$reseed && setting('demo_data') === '1') { Demo::purge(); Demo::seed(); }
         } finally {
@@ -81,6 +82,18 @@ final class Migrator
         set_setting('schema_version', '5');
         self::$reseed = true;
         audit('migrate', 'schéma v5');
+    }
+
+    /**
+     * v6 → v7 : file « À valider » des agents (tables inbox_messages et agent_items),
+     * boîte mail entrante en IMAP, jeton d'API des agents.
+     */
+    private static function to7(): void
+    {
+        self::execFile(APP_DIR . '/sql/schema.sql');
+        if ((string)setting('imap_user', '') === '') set_setting('imap_user', (string)setting('contact_email', ''));
+        set_setting('schema_version', '7');
+        audit('migrate', 'schéma v7');
     }
 
     /**

@@ -15,6 +15,14 @@
       <div class="field"><label for="president_name">Président·e</label><input id="president_name" name="president_name" value="<?= e($s['president_name']) ?>"></div>
       <div class="field"><label for="treasurer_name">Trésorier·ère</label><input id="treasurer_name" name="treasurer_name" value="<?= e($s['treasurer_name']) ?>"></div>
     </div>
+    <h2 class="mt-4">Boîte mail entrante (agents)</h2>
+    <p class="hint">La tâche planifiée relève cette boîte toutes les 5 minutes ; chaque message reçu arrive dans « À valider » avec un brouillon de réponse. Nécessite l'extension PHP <code>imap</code><?= extension_loaded('imap') ? ' (active)' : ' (absente : hPanel → Avancé → Configuration PHP)' ?>.</p>
+    <div class="grid-2">
+      <div class="field"><label for="imap_user">Adresse relevée</label><input id="imap_user" name="imap_user" value="<?= e($s['imap_user']) ?>" placeholder="<?= e(setting('contact_email', 'contact@lesjardinsdacote.fr')) ?>"></div>
+      <div class="field"><label for="imap_host">Serveur IMAP</label><input id="imap_host" name="imap_host" value="<?= e($s['imap_host']) ?>" placeholder="imap.hostinger.com"></div>
+      <div class="field"><label for="imap_password">Mot de passe de la boîte</label><input id="imap_password" name="imap_password" type="password" autocomplete="new-password" placeholder="<?= setting('imap_password', '') !== '' ? 'enregistré — saisir pour remplacer' : 'à renseigner' ?>"></div>
+    </div>
+
     <h2 class="mt-4">Frais et adhésion</h2>
     <div class="grid-2">
       <div class="field"><label for="order_fee">Frais de fonctionnement et logistique (€ par commande)</label><input id="order_fee" name="order_fee" inputmode="decimal" value="<?= e($s['order_fee']) ?>"></div>
@@ -67,6 +75,16 @@
         <form method="post" action="/admin/parametres"><?= csrf_field() ?><button class="btn btn--ghost btn--sm" name="retry_photos" value="1">Réessayer</button></form><?php endif; ?>
       <p class="small mt-2"><strong>Cron (toutes les 5 min)</strong><br><code style="word-break:break-all"><?= e($cronCmd) ?></code></p>
       <form method="post" action="/admin/parametres"><?= csrf_field() ?><button class="btn btn--ghost btn--sm" name="test_email" value="1">M'envoyer un email de test</button></form>
+    </div>
+    <div class="panel"><h3>Jeton d'API des agents</h3>
+      <?php if (!empty($_SESSION['agent_token_once'])): ?>
+        <p class="small"><strong>Copiez-le maintenant</strong> (plus jamais affiché) :</p>
+        <p><code style="word-break:break-all"><?= e($_SESSION['agent_token_once']) ?></code></p>
+        <?php unset($_SESSION['agent_token_once']); ?>
+      <?php else: ?>
+        <p class="small"><?= setting('agent_key_hash', '') !== '' ? 'Un jeton est en service : les tâches planifiées Claude l\'utilisent pour déposer leurs propositions dans « À valider ».' : 'Aucun jeton : la première tâche qui appellera /api/agents/claim le recevra.' ?></p>
+      <?php endif; ?>
+      <form method="post" action="/admin/agents/regenerer" data-confirm="Régénérer le jeton ? Les tâches planifiées devront être mises à jour."><?= csrf_field() ?><button class="btn btn--ghost btn--sm">Régénérer le jeton</button></form>
     </div>
     <form class="panel" method="post" action="/admin/parametres" data-confirm="<?= $demo ? 'Supprimer les groupes, votes, achats et membres fictifs ?' : 'Charger les données de démonstration ?' ?>">
       <?= csrf_field() ?><h3>Démonstration</h3>

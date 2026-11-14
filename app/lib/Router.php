@@ -22,7 +22,7 @@ final class Router
             if (!preg_match($regex, $path, $mm)) continue;
             if ($m !== 'ANY' && $m !== $method) continue;
             $params = array_filter($mm, 'is_string', ARRAY_FILTER_USE_KEY);
-            if ($method === 'POST' && !str_starts_with($path, '/stripe/webhook')) verify_csrf();
+            if ($method === 'POST' && !str_starts_with($path, '/stripe/webhook') && !str_starts_with($path, '/api/agents/')) verify_csrf();
             $handler(...array_values($params));
             return;
         }

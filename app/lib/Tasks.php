@@ -13,6 +13,8 @@ final class Tasks
             $out['sales'] = Sales::tick();
             $out['pickup_reminders'] = Orders::remindLate((int)setting('pickup_reminder_hours', 48));
             $out['shift_reminders'] = self::shiftReminders();
+            $out['inbox'] = Inbox::poll();
+            $out['a_valider'] = Agents::pendingCount();
             Photo::registerAll();
             $out['photos'] = Photo::cacheBatch(25);
             $out['emails'] = Mailer::processQueue(60);

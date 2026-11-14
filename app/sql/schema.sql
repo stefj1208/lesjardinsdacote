@@ -332,6 +332,47 @@ CREATE TABLE IF NOT EXISTS memberships (
   CONSTRAINT fk_memberships_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS inbox_messages (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  uid INT UNSIGNED NOT NULL,
+  message_id VARCHAR(255) NULL,
+  from_email VARCHAR(190) NOT NULL,
+  from_name VARCHAR(190) NULL,
+  subject VARCHAR(255) NOT NULL DEFAULT '',
+  body_text MEDIUMTEXT NULL,
+  received_at DATETIME NULL,
+  category VARCHAR(30) NULL,
+  status ENUM('new','answered','archived') NOT NULL DEFAULT 'new',
+  answered_at DATETIME NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_inbox_status (status),
+  UNIQUE KEY uq_inbox_uid (uid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS agent_items (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  category VARCHAR(30) NOT NULL DEFAULT 'autre',
+  status ENUM('draft_needed','pending','approved','rejected','sent','failed') NOT NULL DEFAULT 'pending',
+  title VARCHAR(200) NOT NULL,
+  summary TEXT NULL,
+  to_email VARCHAR(190) NULL,
+  subject VARCHAR(255) NULL,
+  body MEDIUMTEXT NULL,
+  meta JSON NULL,
+  inbox_id INT UNSIGNED NULL,
+  edited TINYINT(1) NOT NULL DEFAULT 0,
+  decided_at DATETIME NULL,
+  decided_by INT UNSIGNED NULL,
+  decision_note VARCHAR(500) NULL,
+  sent_at DATETIME NULL,
+  error VARCHAR(500) NULL,
+  source VARCHAR(100) NOT NULL DEFAULT 'api',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_agent_status (status),
+  KEY idx_agent_cat (category),
+  CONSTRAINT fk_agent_inbox FOREIGN KEY (inbox_id) REFERENCES inbox_messages(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 INSERT IGNORE INTO sequences (name, value) VALUES ('order', 0), ('invoice', 0);
 INSERT IGNORE INTO settings (k, v) VALUES
  ('association_name', 'Les Jardins d''à Côté'),
@@ -351,4 +392,7 @@ INSERT IGNORE INTO settings (k, v) VALUES
  ('order_fee_fund', '1'),
  ('membership_fee', '0'),
  ('president_name', ''),
- ('treasurer_name', '');
+ ('treasurer_name', ''),
+ ('imap_host', 'imap.hostinger.com'),
+ ('imap_user', ''),
+ ('agent_key_hash', '');

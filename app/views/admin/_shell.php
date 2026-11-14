@@ -3,10 +3,12 @@ $sec = $section ?? '';
 $link = fn(string $href, string $key, string $label) => '<a href="' . $href . '"' . ($sec === $key ? ' aria-current="page"' : '') . '>' . e($label) . '</a>';
 $proposed = (int)db()->val("SELECT COUNT(*) FROM `groups` WHERE status = 'proposed'");
 $issues = (int)db()->val("SELECT COUNT(*) FROM orders WHERE payment_status IN ('failed','action_required')");
+$toValidate = Agents::pendingCount();
 ?>
 <div class="admin-shell">
   <nav class="admin-side" aria-label="Back-office">
     <?= $link('/admin', 'dashboard', 'Tableau de bord') ?>
+    <?= $link('/admin/a-valider', 'validate', 'À valider' . ($toValidate ? ' (' . $toValidate . ')' : '')) ?>
     <div class="grp">Réseau</div>
     <?= $link('/admin/groupes', 'groups', 'Groupes' . ($proposed ? ' (' . $proposed . ' à valider)' : '')) ?>
     <?= $link('/admin/ventes', 'sales', 'Ventes & votes') ?>
