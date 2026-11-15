@@ -1254,3 +1254,8 @@ body.admin { background: var(--paper); }
 .vsearch input:focus { outline: none; border-color: var(--green); }
 .vcard[hidden] { display: none; }
 @media (max-width: 560px) { .vcard--text { grid-template-rows: 38px auto; } .vcard--text .vcard-photo > .ph.vband { height: 38px; } }
+
+/* v14 — feuilles et coccinelles sur tout le site (calque fixe, sans gêner les clics) */
+.fx-layer { position: fixed; inset: 0; z-index: 30; pointer-events: none; overflow: hidden; }
+.fx-layer .ladybug { pointer-events: auto; }
+@media print { .fx-layer { display: none; } }

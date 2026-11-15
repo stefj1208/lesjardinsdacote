@@ -152,7 +152,7 @@ final class Demo
             }
             $ids = $catIds($cat);
             $sid = $db->insert('sales', ['group_id' => $gid, 'category' => $cat, 'title' => $title,
-                'vote_days' => 10, 'sale_days' => 21, 'batch_size' => 10, 'price' => $price, 'max_choices' => $cat === 'fruit_trees' ? 3 : ($cat === 'seeds' ? 10 : 6),
+                'vote_days' => 10, 'sale_days' => 21, 'batch_size' => 10, 'price' => $price, 'max_choices' => $cat === 'fruit_trees' ? 3 : ($cat === 'seeds' ? 25 : 6),
                 'pickup_at' => date('Y-m-d 10:00:00', strtotime('+40 days'))]);
             Varieties::setForSale($sid, $ids);
             if ($stage === 'voting' || $stage === 'open') {
@@ -168,7 +168,7 @@ final class Demo
                 }
                 foreach ($members as $mid) {
                     $pick = [];
-                    $want = min(count($ids) - 1, $cat === 'seeds' ? mt_rand(6, 10) : mt_rand(3, 6));
+                    $want = min(count($ids) - 1, $cat === 'seeds' ? mt_rand(12, 22) : mt_rand(3, 6));
                     while (count($pick) < $want) $pick[$weighted[mt_rand(0, count($weighted) - 1)]] = true;
                     foreach (array_keys($pick) as $vid) $db->exec('INSERT IGNORE INTO variety_votes (sale_id, user_id, variety_id) VALUES (?, ?, ?)', [$sid, $mid, $vid]);
                 }

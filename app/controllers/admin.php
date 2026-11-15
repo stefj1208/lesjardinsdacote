@@ -163,7 +163,7 @@ function admin_sale_form(?string $id = null): void
     $s ??= ['id' => null, 'group_id' => input_int('groupe'), 'category' => 'seeds', 'title' => 'Graines potagères — printemps ' . (date('n') > 6 ? date('Y') + 1 : date('Y')), 'status' => 'waiting',
         'vote_days' => (int)setting('default_vote_days', 10), 'sale_days' => (int)setting('default_sale_days', 21), 'batch_size' => (int)setting('default_batch_size', 10),
         'max_per_order' => 3, 'pickup_at' => null, 'pickup_place' => '', 'pickup_address' => '', 'notes' => '', 'packs' => [], 'winner' => null,
-        'price' => (float)setting('default_pack_price', 'seed_pack_price', 30), 'max_choices' => 10, 'max_varieties' => null, 'varieties' => [], 'projection' => null, 'voters' => 0, 'votes_total' => 0];
+        'price' => Cat::packPrice('seeds'), 'max_choices' => 25, 'max_varieties' => null, 'varieties' => array_column(Varieties::all('seeds', true), 'id'), 'projection' => null, 'voters' => 0, 'votes_total' => 0];
     admin_view('sale_form', ['title' => $s['id'] ? 'Vente : ' . $s['title'] : 'Nouvelle vente', 's' => $s, 'groups' => db()->all("SELECT id, name FROM `groups` WHERE status <> 'archived' ORDER BY commune"),
         'catalog' => Varieties::all(null, true), 'section' => 'sales']);
 }
@@ -184,6 +184,8 @@ function admin_sale_save(): void
         'max_varieties' => input_int('max_varieties') ?: null,
     ];
     if (!$data['group_id'] || $data['title'] === '') { flash('error', 'Groupe et titre obligatoires.'); back('/admin/ventes'); }
+    // Rien de coché : toute la liste de l'univers est proposée au vote.
+    if (!$vids) $vids = array_map('intval', array_column(Varieties::all($data['category'], true), 'id'));
     if (count($vids) < 2) { flash('error', 'Cochez au moins 2 variétés à soumettre au vote.'); back('/admin/ventes'); }
     if ($id) {
         $cur = Sales::find($id);

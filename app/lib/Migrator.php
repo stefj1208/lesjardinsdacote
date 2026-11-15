@@ -4,7 +4,7 @@ declare(strict_types=1);
 /** Mise à jour automatique de la base au premier passage après un déploiement. */
 final class Migrator
 {
-    public const VERSION = 13;
+    public const VERSION = 14;
     private static bool $reseed = false;
 
     public static function execFile(string $file): void
@@ -35,6 +35,7 @@ final class Migrator
             if ($v < 11) self::to11();
             if ($v < 12) self::to12();
             if ($v < 13) self::to13();
+            if ($v < 14) self::to14();
             if (self::$reseed) Demo::seedCatalog();
             if (self::$reseed && setting('demo_data') === '1') { Demo::purge(); Demo::seed(); }
         } finally {
@@ -207,5 +208,15 @@ final class Migrator
         if (setting('demo_data') === '1') { Demo::purge(); Demo::seed(); }
         set_setting('schema_version', '13');
         audit('migrate', 'schéma v13 : ' . $n . ' variétés de graines, toutes illustrées');
+    }
+
+    /** v13 → v14 : toute la liste au vote (434 variétés, toutes en photo), jusqu'à 25 choix par membre. */
+    private static function to14(): void
+    {
+        $n = Season::install();
+        db()->exec("UPDATE sales SET max_choices = GREATEST(max_choices, 25) WHERE category = 'seeds' AND status IN ('waiting','voting')");
+        if (setting('demo_data') === '1') { Demo::purge(); Demo::seed(); }
+        set_setting('schema_version', '14');
+        audit('migrate', 'schéma v14 : ' . $n . ' variétés de graines au vote');
     }
 }
