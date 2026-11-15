@@ -26,6 +26,7 @@ function front_collectivites(): void
 {
     view('front/collectivites', ['count' => count(Varieties::all('seeds', true)),
         'pdf' => is_file(PUBLIC_DIR . '/assets/docs/plaquette-collectivites.pdf') ? '/assets/docs/plaquette-collectivites.pdf' : null,
+        'pdfPro' => is_file(PUBLIC_DIR . '/assets/docs/plaquette-entreprises.pdf') ? '/assets/docs/plaquette-entreprises.pdf' : null,
         'title' => 'Mairies, CCAS, entreprises : faites jardiner votre commune',
         'description' => 'Des achats groupés entre voisins (graines bio, plants, arbres fruitiers), clé en main et sans coût pour la collectivité : biodiversité, lien social, pouvoir d\'achat.']);
 }

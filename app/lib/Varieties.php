@@ -70,8 +70,12 @@ final class Varieties
      */
     public static function compose(array $candidates, float $price, ?int $maxVarieties = null): array
     {
-        usort($candidates, fn($a, $b) => [-(int)($a['votes'] ?? 0), (int)$a['position'], (string)$a['name'], (string)$a['variety']]
-            <=> [-(int)($b['votes'] ?? 0), (int)$b['position'], (string)$b['name'], (string)$b['variety']]);
+        // À égalité de voix, on alterne les familles (une tomate, une carotte, une aromatique…) : un pack varié pour un potager familial.
+        usort($candidates, fn($a, $b) => [(int)$a['position'], (string)$a['name'], (string)$a['variety']] <=> [(int)$b['position'], (string)$b['name'], (string)$b['variety']]);
+        $rank = [];
+        foreach ($candidates as &$c) { $c['_rank'] = $rank[(string)$c['name']] = ($rank[(string)$c['name']] ?? -1) + 1; }
+        unset($c);
+        usort($candidates, fn($a, $b) => [-(int)($a['votes'] ?? 0), $a['_rank'], (int)$a['position']] <=> [-(int)($b['votes'] ?? 0), $b['_rank'], (int)$b['position']]);
         $sachet = self::sachetCost();
         $budget = $price - self::fixedCosts();
         $spent = 0.0; $in = []; $out = [];

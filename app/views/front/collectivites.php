@@ -7,7 +7,8 @@
       <p class="lede">« Les Jardins d'à Côté » est une association loi 1901 qui organise des achats groupés entre voisins : graines bio, plants potagers, arbres fruitiers, aromatiques. Les habitants achètent au prix coûtant, des bénévoles préparent les packs. Vous prêtez un lieu et relayez l'information : nous faisons tout le reste.</p>
       <div class="row mt-3">
         <a class="btn" href="/lancer-un-groupe">Proposer un groupe dans ma commune <span class="arr" aria-hidden="true">→</span></a>
-        <?php if ($pdf): ?><a class="btn btn--ghost" href="<?= e($pdf) ?>" download>Télécharger la plaquette (PDF)</a><?php endif; ?>
+        <?php if ($pdf): ?><a class="btn btn--ghost" href="<?= e($pdf) ?>" download>Plaquette mairies et collectivités (PDF)</a><?php endif; ?>
+        <?php if (!empty($pdfPro)): ?><a class="btn btn--ghost" href="<?= e($pdfPro) ?>" download>Plaquette entreprises et CSE (PDF)</a><?php endif; ?>
       </div>
     </div>
     <div class="photo-stack reveal-img" data-reveal="right"><?= ph('commons:Raised_bed.jpg|commons:Vegetable_garden_detail.jpg', 'Potager partagé', '', 1400, true) ?></div>

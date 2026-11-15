@@ -16,6 +16,7 @@ $router->post('/groupes/{slug}/rejoindre', 'front_group_join');
 $router->post('/ventes/{id}/voter', 'front_vote');
 $router->get('/packs/{slug}', 'front_pack');
 $router->get('/collectivites', 'front_collectivites');
+$router->get('/entreprises', 'front_collectivites');
 $router->get('/lancer-un-groupe', 'front_organizers');
 $router->post('/lancer-un-groupe', 'front_organizers_submit');
 $router->get('/comment-ca-marche', fn() => front_static('how'));

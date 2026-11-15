@@ -1,5 +1,6 @@
 <div class="wrap page prose">
   <h1>Crédits photos</h1>
+  <p>Les photos de variétés de graines hébergées sur ce site sont fournies par notre semencier partenaire, Agrosemens, et utilisées avec son accord (© Agrosemens et ses photographes).</p>
   <p>Les photos de démonstration proviennent de <a href="https://commons.wikimedia.org" rel="noopener">Wikimedia Commons</a> et sont utilisées selon leur licence (Creative Commons ou domaine public). Elles peuvent être remplacées à tout moment par vos propres photos depuis le back-office.</p>
   <?php if (!$photos): ?><p class="muted">La liste se remplit automatiquement au fur et à mesure que les photos sont copiées sur le serveur.</p><?php endif; ?>
   <ul>

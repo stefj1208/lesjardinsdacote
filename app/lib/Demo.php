@@ -159,7 +159,13 @@ final class Demo
                 $db->exec("UPDATE sales SET status = 'voting', vote_starts_at = NOW() - INTERVAL 6 DAY, vote_ends_at = NOW() + INTERVAL 4 DAY WHERE id = ?", [$sid]);
                 // Chaque membre coche 6 à 10 variétés ; les tomates et les aubergines sont un peu plus demandées.
                 $weighted = [];
-                foreach ($ids as $k => $vid) for ($w = 0; $w < ($k < 14 ? 3 : ($k < 23 ? 2 : 1)); $w++) $weighted[] = $vid;
+                // Votes répartis sur tout le potager : les deux premières variétés de chaque famille sont un peu plus demandées.
+                $famRank = [];
+                foreach ($ids as $vid) {
+                    $fam = (string)$db->val('SELECT name FROM varieties WHERE id = ?', [$vid]);
+                    $r = $famRank[$fam] = ($famRank[$fam] ?? -1) + 1;
+                    for ($w = 0; $w < ($r < 2 ? 4 : ($r < 5 ? 2 : 1)); $w++) $weighted[] = $vid;
+                }
                 foreach ($members as $mid) {
                     $pick = [];
                     $want = min(count($ids) - 1, $cat === 'seeds' ? mt_rand(6, 10) : mt_rand(3, 6));

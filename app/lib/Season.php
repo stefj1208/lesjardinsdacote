@@ -24,7 +24,7 @@ final class Season
         'Salade', 'Feuille', 'Chou', 'Légumineuse', 'Maïs', 'Oignon', 'Fruit', 'Fleur', 'Aromatique'];
 
     /** Variétés mises en avant sur l'accueil (références internes). */
-    public const SHOWCASE = ['TOM31', 'POT10', 'BET04', 'SOU01', 'TOM04', 'POT04', 'PIM14', 'CON26', 'RAD19', 'BLT14', 'BOU01', 'MEL01'];
+    public const SHOWCASE = ['TOM04', 'CAR06', 'BAS02', 'POT04', 'BET04', 'SOU01', 'LAI11', 'RAD03', 'PIM14', 'BLT14', 'HAR13', 'BOU01'];
 
     /**
      * Catalogue de la saison, tenu dans app/data/seeds_catalog.php :
@@ -53,7 +53,7 @@ final class Season
             // Dans chaque famille, les variétés illustrées passent d'abord.
             $pos = ($order[$fam] ?? 50) * 1000 + ($photo ? 0 : 500) + $i % 500;
             $row = ['category' => 'seeds', 'name' => $fam, 'variety' => $var, 'latin_name' => $latin, 'note' => mb_substr($note, 0, 255),
-                'photo' => $photo ? 'commons:' . $photo : null, 'portion_qty' => $portion, 'unit' => $unit,
+                'photo' => $photo ?: null, 'portion_qty' => $portion, 'unit' => $unit,
                 'purchase_price' => round($ht * self::VAT, 2), 'purchase_qty' => $qty, 'market_price' => $market,
                 'supplier' => self::SUPPLIER . ' (catalogue pro 2027)', 'supplier_ref' => $ref, 'position' => $pos, 'is_active' => 1];
             $id = $ref

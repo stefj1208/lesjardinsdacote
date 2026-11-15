@@ -4,7 +4,7 @@ declare(strict_types=1);
 /** Mise à jour automatique de la base au premier passage après un déploiement. */
 final class Migrator
 {
-    public const VERSION = 12;
+    public const VERSION = 13;
     private static bool $reseed = false;
 
     public static function execFile(string $file): void
@@ -34,6 +34,7 @@ final class Migrator
             if ($v < 10) self::to10();
             if ($v < 11) self::to11();
             if ($v < 12) self::to12();
+            if ($v < 13) self::to13();
             if (self::$reseed) Demo::seedCatalog();
             if (self::$reseed && setting('demo_data') === '1') { Demo::purge(); Demo::seed(); }
         } finally {
@@ -197,5 +198,14 @@ final class Migrator
         db()->exec("UPDATE todos SET done_at = NOW() WHERE done_at IS NULL AND title LIKE 'Confirmer les prix des graines%'");
         set_setting('schema_version', '12');
         audit('migrate', 'schéma v12 : ' . $n . ' variétés de graines, prix du catalogue 2027, site en réel');
+    }
+
+    /** v12 → v13 : catalogue resserré et varié pour un potager familial (233 variétés, toutes en photo), exemples recomposés. */
+    private static function to13(): void
+    {
+        $n = Season::install();
+        if (setting('demo_data') === '1') { Demo::purge(); Demo::seed(); }
+        set_setting('schema_version', '13');
+        audit('migrate', 'schéma v13 : ' . $n . ' variétés de graines, toutes illustrées');
     }
 }

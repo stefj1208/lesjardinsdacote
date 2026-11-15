@@ -1,0 +1,60 @@
+"""Dérive la plaquette entreprises de la plaquette collectivités (mêmes pages, vocabulaire adapté)."""
+import pathlib
+d = pathlib.Path(__file__).resolve().parent
+s = (d / 'collectivites.html').read_text(encoding='utf-8')
+R = [
+("plaquette mairies et collectivités", "plaquette entreprises"),
+("À l'attention des mairies, CCAS, entreprises et bailleurs", "À l'attention des CSE, directions RH et RSE, services généraux"),
+("Des voisins qui achètent ensemble pour leur jardin, <em>et une commune qui fleurit.</em>", "Des collègues qui achètent ensemble pour leur jardin, <em>et une entreprise qui cultive le lien.</em>"),
+("les habitants s'unissent pour acheter en gros, au prix coûtant, grâce à une association loi 1901 à but non lucratif. Votre commune prête un lieu", "vos salariés s'unissent pour acheter en gros, au prix coûtant, grâce à une association loi 1901 à but non lucratif. Votre entreprise prête un lieu"),
+("<span>pour les habitants sur leurs graines bio</span>", "<span>pour les salariés sur leurs graines bio</span>"),
+("<span>de budget pour la commune</span><small>Ni subvention, ni régie, ni stock : les habitants paient en ligne", "<span>de budget pour l'entreprise</span><small>Ni budget imposé, ni caisse, ni stock : les salariés paient en ligne"),
+("qui peut financer une plantation sur votre commune.", "qui peut financer une plantation sur votre site ou près de chez vous."),
+("<h2>Acheter en gros, entre voisins, ce que l'on sème au jardin</h2>", "<h2>Acheter en gros, entre collègues, ce que l'on sème au jardin</h2>"),
+("Un groupe de voisins, lui, peut acheter", "Un groupe de collègues, lui, peut acheter"),
+("les habitants d'une même commune votent ce qu'ils veulent semer", "les salariés d'un même site votent ce qu'ils veulent semer"),
+("prêts à retirer près de chez soi.", "prêts à retirer sur le lieu de travail."),
+("<li><b>Pour les habitants :</b>", "<li><b>Pour les salariés :</b>"),
+("<li><b>Pour la commune :</b> une action concrète pour la biodiversité et le lien social, sans coût ni gestion.</li>", "<li><b>Pour l'entreprise :</b> une action RSE concrète et une animation d'équipe, sans coût ni gestion.</li>"),
+("<li><b>Pour le quartier :</b> des moments partagés, du vote à la distribution,", "<li><b>Pour les équipes :</b> des moments partagés entre services, du vote à la distribution,"),
+("Tout se suit en direct sur le site, commune par commune.", "Tout se suit en direct sur le site, sur la page de votre entreprise."),
+("<h3>Les habitants votent</h3><p>Chacun rejoint le groupe de sa commune et coche", "<h3>Les salariés votent</h3><p>Chacun rejoint le groupe de l'entreprise et coche"),
+("Au nom des habitants, par lots", "Au nom des salariés, par lots"),
+("Lors d'un atelier convivial, les bénévoles répartissent", "Sur une pause de midi, les volontaires répartissent"),
+("Une permanence dans le lieu prêté par la commune. Chacun repart avec son pack, un mot du jardinier, et souvent de nouveaux voisins.", "Une permanence dans vos locaux, sur un temps de pause. Chacun repart avec son pack, une fiche de semis, et de nouveaux collègues."),
+("Le groupe de votre commune est créé ; vous relayez l'annonce.", "Le groupe de votre entreprise est créé ; vous relayez l'annonce."),
+("Les habitants s'inscrivent et votent leurs variétés.", "Les salariés s'inscrivent et votent leurs variétés."),
+("Atelier de mise en sachets avec les bénévoles.", "Atelier de mise en sachets entre collègues."),
+("<li>Une <b>mairie</b> ou un <b>CCAS</b>, pour ses habitants.</li><li>Un <b>comité d'entreprise</b>, pour ses salariés.</li><li>Un <b>bailleur</b>, pour ses résidences.</li><li>Un <b>jardin partagé</b>, une <b>école</b>, une <b>association de quartier</b>.</li>",
+ "<li>Un <b>CSE</b>, au titre des activités sociales et culturelles.</li><li>Une <b>direction RH ou RSE</b>, comme action de qualité de vie au travail.</li><li>Un <b>groupe de salariés</b> motivés, avec l'accord de l'employeur.</li><li>Une <b>zone d'activités</b> ou un <b>club d'entreprises</b>, pour plusieurs sociétés voisines.</li>"),
+("Aucun risque, ni pour les habitants ni pour la commune.", "Aucun risque, ni pour les salariés ni pour l'entreprise."),
+("<h2>Moins cher pour les habitants, plus vivant pour la commune</h2>", "<h2>Moins cher pour les salariés, plus vivant pour l'entreprise</h2>"),
+("<h3>Ce que votre commune y gagne</h3>", "<h3>Ce que votre entreprise y gagne</h3>"),
+("<li><b>Une action biodiversité concrète</b> pour votre plan climat, votre atlas de la biodiversité ou votre label « Territoire engagé pour la nature ».</li>", "<li><b>Une action RSE concrète et mesurable</b> : biodiversité, semences bio, arbres plantés, avec un bilan chiffré pour votre rapport.</li>"),
+("<li><b>Du pouvoir d'achat</b> pour les foyers, sans aide à verser ni dossier à instruire.</li>", "<li><b>Du pouvoir d'achat</b> pour les salariés : chacun paie sa commande, au prix coûtant.</li>"),
+("<li><b>Zéro coût, zéro gestion</b> : ni budget, ni régie, ni stock, ni encaissement.</li>", "<li><b>Zéro coût, zéro gestion</b> : ni budget, ni stock, ni encaissement. Le CSE peut, s'il le souhaite, prendre en charge une partie du pack.</li>"),
+("<li><b>Une animation de la vie locale</b> qui valorise vos jardins partagés, vos écoles et vos associations.</li>", "<li><b>De la cohésion</b> entre services et entre sites, autour d'un sujet qui parle à tout le monde.</li>"),
+("<li><b>Une image positive</b> : une commune qui fait jardiner ses habitants et plante des arbres.</li>", "<li><b>Une marque employeur</b> qui se voit : une entreprise qui fait jardiner ses équipes et plante des arbres.</li>"),
+("Le lien social entre voisins, au cœur du projet</h3>", "Le lien entre collègues, au cœur du projet</h3>"),
+("Le vote crée une conversation de quartier :", "Le vote crée une conversation à la machine à café :"),
+("réunit retraités, familles, nouveaux arrivants autour d'une table.", "réunit atelier, bureaux et direction autour d'une même table."),
+("un petit marché de voisins,", "un petit marché entre collègues,"),
+("Une seule livraison par commune, des sachets papier, un retrait à pied.", "Une seule livraison par site, des sachets papier, un retrait sur le lieu de travail."),
+("<h2>Trois gestes pour la commune, l'association fait le reste</h2>", "<h2>Trois gestes pour l'entreprise, l'association fait le reste</h2>"),
+("<h3>Ce que nous demandons à la commune</h3>", "<h3>Ce que nous demandons à l'entreprise</h3>"),
+("<li><b>Un lieu</b>, deux à trois demi-journées par campagne : une salle pour l'atelier de mise en sachets et la distribution (salle des fêtes, hall, médiathèque, jardin partagé).</li>", "<li><b>Un lieu</b>, deux à trois créneaux par campagne : une salle de réunion ou la cafétéria pour l'atelier de mise en sachets et la distribution.</li>"),
+("<li><b>Un relais d'information</b> : bulletin municipal, site, panneau lumineux, réseaux sociaux, affichage.", "<li><b>Un relais d'information</b> : intranet, messagerie interne, affichage, écrans d'accueil."),
+("<li><b>Un interlocuteur</b> en mairie, élu ou agent, pour caler les dates.</li>", "<li><b>Un interlocuteur</b> : élu du CSE, référent RSE ou salarié volontaire, pour caler les dates.</li>"),
+("Nous recherchons des bénévoles dans chaque commune</h3>", "Quelques volontaires suffisent dans chaque entreprise</h3>"),
+("Quelques heures par saison suffisent. Aucune compétence requise : juste l'envie de rendre service et de rencontrer ses voisins.", "Une ou deux pauses de midi par saison. Aucune compétence requise : juste l'envie de rendre service et de rencontrer d'autres collègues."),
+("Le contact de l'association dans la commune : il fixe les dates avec la mairie et anime le groupe.", "Le contact de l'association dans l'entreprise : il fixe les dates avec le CSE ou la direction et anime le groupe."),
+("<b>Relais de quartier</b><p>Faire connaître le groupe : affiches chez les commerçants, mot dans les boîtes aux lettres, école.</p>", "<b>Relais interne</b><p>Faire connaître le groupe : affiches, message sur l'intranet, mot en réunion d'équipe.</p>"),
+("<small>Une demi-journée par campagne</small>", "<small>Une pause de midi par campagne</small>"),
+("<h3>Lançons un groupe dans votre commune</h3>", "<h3>Lançons un groupe dans votre entreprise</h3>"),
+("lesjardinsdacote.fr/collectivites</p>", "lesjardinsdacote.fr/entreprises</p>"),
+]
+for a, b in R:
+    assert a in s, a[:70]
+    s = s.replace(a, b)
+(d / 'entreprises.html').write_text(s, encoding='utf-8')
+print('ok')
