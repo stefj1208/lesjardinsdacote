@@ -114,16 +114,15 @@ final class Demo
                 ?: $db->insert('users', ['email' => $email, 'password_hash' => password_hash(random_token(), PASSWORD_DEFAULT), 'first_name' => $f, 'last_name' => $l]));
         }
 
-        $y = (int)date('Y') + 1;
         $groups = [
             ['Pins-Justaret', '31860', 'collectivite', 'Exemple — commune partenaire', 'Salle des fêtes', 'Place de la mairie, 31860 Pins-Justaret',
-                'commons:Vegetable_garden_1.JPG|commons:Raised_bed.jpg', 'open', 3, 'seeds', 'Graines bio — printemps ' . $y, 30],
+                'commons:Vegetable_garden_1.JPG|commons:Raised_bed.jpg', 'open', 3, 'seeds', 'Graines bio — printemps ' . (date('Y') + 1), 30],
             ['Pinsaguel', '31120', 'jardin_partage', 'Exemple — jardin partagé du quartier', 'Jardin partagé', 'Chemin des jardins, 31120 Pinsaguel',
-                'commons:Raised_vegetable_bed_at_Boreham,_Essex,_England.jpg|commons:Raised_bed.jpg', 'voting', 2, 'seeds', 'Graines bio — printemps ' . $y, 30],
+                'commons:Raised_vegetable_bed_at_Boreham,_Essex,_England.jpg|commons:Raised_bed.jpg', 'voting', 2, 'vegetables', 'Plants potagers — mai ' . (date('Y') + 1), 30],
             ['Roques', '31120', 'entreprise', 'Exemple — comité d\'entreprise', 'Hall d\'accueil', 'Zone d\'activités, 31120 Roques',
-                'commons:George_Washington_University_Community_Garden.jpg|commons:Raised_bed.jpg', 'waiting', 1, 'seeds', 'Graines bio — printemps ' . $y, 30],
+                'commons:Piper-Orchard-Old-apple-tree-3369.jpg|commons:Apple_orchard.jpg', 'waiting', 1, 'fruit_trees', 'Arbres fruitiers — hiver ' . date('Y') . '-' . (date('Y') + 1), 60],
             ['Portet-sur-Garonne', '31120', 'association', 'Exemple — association de quartier', 'Local associatif', '31120 Portet-sur-Garonne',
-                'commons:Vegetable_garden_detail.jpg|commons:Raised_bed.jpg', 'waiting', 0, 'seeds', 'Graines bio — printemps ' . $y, 30],
+                'commons:George_Washington_University_Community_Garden.jpg|commons:Raised_bed.jpg', 'waiting', 0, 'aromatics', 'Aromatiques — printemps ' . (date('Y') + 1), 30],
         ];
         $u = 0;
         mt_srand(2027);
@@ -132,7 +131,7 @@ final class Demo
             $gid = $db->insert('groups', ['slug' => Groups::uniqueSlug($name), 'name' => $name, 'commune' => $commune, 'postal_code' => $cp,
                 'organizer_type' => $type, 'organizer_name' => $org, 'pickup_place' => $place, 'pickup_address' => $addr, 'photo' => $photo,
                 'status' => 'active', 'validated_at' => now(),
-                'description' => "Un groupe d'achat de voisins à $commune : on vote ensemble les variétés de graines bio de la saison, l'association les achète en gros au prix coûtant, et les bénévoles préparent les packs."]);
+                'description' => "Un groupe d'achat de voisins à $commune : plants, arbres fruitiers, aromatiques ou graines bio, on choisit ensemble ce qu'on achète en gros à chaque saison, l'association achète au prix coûtant et les bénévoles préparent les packs."]);
             $members = array_slice($users, ($u * 4) % 10, 8);
             $u++;
             foreach ($members as $k => $mid) {

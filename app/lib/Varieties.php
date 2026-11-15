@@ -100,17 +100,17 @@ final class Varieties
     public static function overview(): array
     {
         $out = [];
-        // Les univers de la saison d'abord ; les autres sont annoncés « à venir », sans catalogue public.
+        // Tous les univers sont ouverts ; celui mis en avant cette saison passe en premier.
         $cats = Cat::CATEGORIES;
-        uksort($cats, fn($a, $b) => (int)Season::isOpen($b) <=> (int)Season::isOpen($a));
+        uksort($cats, fn($a, $b) => (int)Season::featured($b) <=> (int)Season::featured($a));
         foreach ($cats as $cat => $c) {
-            $live = Season::isOpen($cat);
-            $list = $live ? self::all($cat, true) : [];
+            $live = Season::featured($cat);
+            $list = self::all($cat, true);
             $price = Cat::packPrice($cat);
             $ex = $list ? self::toPack(self::compose($list, $price), $price, 'Exemple de pack ' . mb_strtolower($c['label']), $cat) : null;
-            $sale = !$live ? null : db()->one("SELECT s.id, s.status, g.name AS group_name, g.slug AS group_slug FROM sales s JOIN `groups` g ON g.id = s.group_id
+            $sale = db()->one("SELECT s.id, s.status, g.name AS group_name, g.slug AS group_slug FROM sales s JOIN `groups` g ON g.id = s.group_id
                 WHERE s.category = ? AND g.status = 'active' AND s.status IN ('voting','open','waiting') ORDER BY FIELD(s.status,'open','voting','waiting'), s.id LIMIT 1", [$cat]);
-            $out[$cat] = $c + ['key' => $cat, 'live' => $live, 'count' => count($list), 'varieties' => $list, 'example' => $ex, 'price' => $price, 'sale' => $sale];
+            $out[$cat] = $c + ['key' => $cat, 'featured' => $live, 'count' => count($list), 'varieties' => $list, 'example' => $ex, 'price' => $price, 'sale' => $sale];
         }
         return $out;
     }

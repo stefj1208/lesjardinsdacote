@@ -1,113 +1,262 @@
-<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Les Jardins d'à Côté — plaquette collectivités</title>
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Les Jardins d'à Côté — plaquette mairies et collectivités</title>
 <style>
 @font-face{font-family:Nunito;src:url(../../public_html/assets/fonts/nunito-latin-wght-normal.woff2);font-weight:200 1000}
 @font-face{font-family:Heebo;src:url(../../public_html/assets/fonts/heebo-latin-wght-normal.woff2);font-weight:100 900}
 @font-face{font-family:Pacifico;src:url(../../public_html/assets/fonts/pacifico-latin-400-normal.woff2)}
 @page{size:A4;margin:0}
 *{box-sizing:border-box}
-body{margin:0;font:10.6pt/1.5 Heebo,sans-serif;color:#0F172B;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-.page{width:210mm;height:297mm;position:relative;overflow:hidden;page-break-after:always}
-h1,h2,h3{font-family:Nunito,sans-serif;margin:0;line-height:1.12}
-.hand{font-family:Pacifico,cursive;color:#6A9E6D}
-/* page 1 */
-.cover{background:#0F172B;color:#fff;height:106mm;padding:13mm 18mm 0;position:relative}
-.brand{display:flex;align-items:center;gap:4mm;font:400 17pt Pacifico,cursive}
-.brand svg{width:13mm;height:13mm}
-.cover h1{font-size:30pt;font-weight:900;margin-top:9mm;max-width:150mm}
+body{margin:0;font:10pt/1.45 Heebo,sans-serif;color:#0F172B;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.page{width:210mm;height:297mm;position:relative;overflow:hidden;page-break-after:always;padding:12mm 16mm 0}
+h1,h2,h3{font-family:Nunito,sans-serif;margin:0;line-height:1.14}
+h2{font-size:18pt;font-weight:900;margin-bottom:1.5mm}
+h3{font-size:12.2pt;font-weight:800}
+p{margin:0}
+.k{font:400 12.5pt Pacifico,cursive;color:#6A9E6D;margin-bottom:1mm}
+.lead{font-size:10.2pt;color:#3A4660;max-width:165mm}
+.muted{color:#5B6678}
+.g{color:#4A7D4E}
+.foot{position:absolute;left:16mm;right:16mm;bottom:9mm;display:flex;justify-content:space-between;font-size:8pt;color:#6B7686;border-top:.3mm solid #DCE5EE;padding-top:2.5mm}
+.pn{font-weight:700}
+/* couverture */
+.cover{margin:-12mm -16mm 0;background:#0F172B;color:#fff;padding:12mm 16mm 16mm;position:relative;height:140mm}
+.brand{display:flex;align-items:center;gap:3.5mm;font:400 16pt Pacifico,cursive}
+.brand svg{width:12mm;height:12mm}
+.cover .pre{margin-top:11mm;font:800 10pt Nunito;letter-spacing:.06em;text-transform:uppercase;color:#8FC592}
+.cover h1{font-size:31pt;font-weight:900;margin-top:3mm;max-width:150mm}
 .cover h1 em{font-style:normal;color:#8FC592}
-.cover p{font-size:12.5pt;max-width:128mm;color:#D6DEEA;margin:6mm 0 0}
-.leafs{position:absolute;right:-8mm;bottom:-12mm;width:78mm;opacity:.95}
-.tag{position:absolute;left:18mm;bottom:-6mm;background:#6A9E6D;color:#fff;font:800 10.5pt Nunito;padding:3mm 5mm;border-radius:20mm}
-.body{padding:12mm 18mm 0}
-.three{display:grid;grid-template-columns:repeat(3,1fr);gap:6mm;margin-top:5mm}
-.card{background:#F1F8FF;border-radius:5mm;padding:6mm}
-.card b.n{display:block;font:900 26pt/1 Nunito;color:#4A7D4E}
-.card h3{font-size:12.5pt;margin:2mm 0 1.5mm}
-.card p{margin:0;font-size:9.6pt;color:#3A4660}
-h2{font-size:19pt;font-weight:900}
-.kicker{font:400 13pt Pacifico,cursive;color:#6A9E6D;margin:0 0 1mm}
-.eco{display:grid;grid-template-columns:1fr 1fr;gap:3.5mm 9mm;margin-top:5mm}
-.eco div{display:grid;grid-template-columns:8mm 1fr;gap:3mm;align-items:start}
-.eco i{width:8mm;height:8mm;border-radius:50%;background:#E4F0E2;color:#4A7D4E;display:grid;place-items:center;font:900 11pt Nunito;font-style:normal}
-.eco b{display:block;font:800 10.8pt Nunito}
-.eco span{font-size:9.4pt;color:#3A4660}
-.foot{position:absolute;left:18mm;right:18mm;bottom:10mm;display:flex;justify-content:space-between;font-size:8.4pt;color:#6B7686;border-top:.3mm solid #DCE5EE;padding-top:3mm}
-/* page 2 */
-.p2{padding:11mm 18mm 0}
-.steps{counter-reset:s;display:grid;grid-template-columns:1fr 1fr;gap:4mm;margin:5mm 0 0;padding:0;list-style:none}
-.steps li{counter-increment:s;display:grid;grid-template-columns:10mm 1fr;gap:3.5mm;align-items:start;background:#fff;border:.3mm solid #DCE5EE;border-radius:4mm;padding:4.5mm 5mm}
-.steps li::before{content:counter(s);width:10mm;height:10mm;border-radius:50%;background:#0F172B;color:#fff;display:grid;place-items:center;font:900 14pt Nunito}
-.steps b{font:800 12pt Nunito;display:block}
-.steps span{font-size:9.8pt;color:#3A4660}
-.split{display:grid;grid-template-columns:1.05fr .95fr;gap:7mm;margin-top:5mm}
-.you,.we{border-radius:5mm;padding:6mm}
-.you{background:#E4F0E2}.we{background:#F1F8FF}
-.you h3,.we h3{font-size:13pt;margin-bottom:2.5mm}
-ul.t{margin:0;padding:0;list-style:none}
-ul.t li{position:relative;padding:0 0 1.8mm 6mm;font-size:9.8pt}
-ul.t li::before{content:"";position:absolute;left:0;top:1.8mm;width:2.6mm;height:2.6mm;border-radius:50%;background:#6A9E6D}
-.money{margin-top:5mm;background:#0F172B;color:#fff;border-radius:5mm;padding:5mm 7mm;display:grid;grid-template-columns:1fr auto;gap:8mm;align-items:center}
-.money h3{font-size:14pt;margin-bottom:2mm}
-.money p{margin:0;font-size:9.8pt;color:#D6DEEA}
-.bar{display:flex;width:62mm;height:11mm;border-radius:3mm;overflow:hidden;font:800 8.6pt Nunito;text-align:center;line-height:11mm}
-.bar span:nth-child(1){flex:30;background:#fff;color:#0F172B}.bar span:nth-child(2){flex:4;background:#C7D3E2}.bar span:nth-child(3){flex:1.6;background:#8FC592}
-.legend{font-size:8.2pt;color:#D6DEEA;margin-top:2mm;line-height:1.45}
-.cta{position:absolute;left:18mm;right:18mm;bottom:22mm;display:grid;grid-template-columns:1fr 27mm;gap:8mm;align-items:center;border:.5mm solid #6A9E6D;border-radius:5mm;padding:4mm 6mm}
-.cta h3{font-size:14pt}
-.cta p{margin:1.5mm 0 0;font-size:10.2pt}
-.cta .url{font:900 13pt Nunito;color:#4A7D4E}
-.cta svg{width:27mm;height:27mm}
+.cover .sub{font-size:12.4pt;max-width:120mm;color:#D6DEEA;margin-top:6mm;line-height:1.5}
+.cover .art{position:absolute;right:-4mm;bottom:-6mm;width:86mm}
+.figs{display:grid;grid-template-columns:repeat(3,1fr);gap:5mm;margin-top:-12mm;position:relative}
+.fig{background:#fff;border-radius:5mm;padding:5mm 5.5mm;box-shadow:0 2mm 6mm rgba(15,23,43,.12)}
+.fig b{display:block;font:900 25pt/1 Nunito;color:#4A7D4E}
+.fig span{display:block;font:800 10.5pt/1.25 Nunito;margin-top:1.5mm}
+.fig small{display:block;font-size:8.8pt;color:#5B6678;margin-top:1.2mm;line-height:1.4}
+.idea{margin-top:7mm;display:grid;grid-template-columns:1fr 1fr;gap:8mm}
+.idea p{font-size:9.8pt}
+.idea b{color:#0F172B}
+.box{border-radius:5mm;padding:4.5mm 5mm}
+.box--g{background:#E9F3E7}.box--b{background:#F1F8FF}.box--y{background:#FFF4DC}.box--n{background:#0F172B;color:#fff}
+/* étapes */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:3.5mm;margin-top:4mm}
+.st{background:#F1F8FF;border-radius:5mm;padding:4mm 4mm;position:relative}
+.st .n{width:9mm;height:9mm;border-radius:50%;background:#0F172B;color:#fff;display:grid;place-items:center;font:900 12pt Nunito}
+.st svg{position:absolute;right:4mm;top:4.5mm;width:10mm;height:10mm;fill:none;stroke:#6A9E6D;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.st h3{margin:3.5mm 0 1.5mm;font-size:11.2pt}
+.st p{font-size:8.6pt;color:#3A4660;line-height:1.4}
+.st em{display:block;font-style:normal;font:800 8.4pt Nunito;color:#4A7D4E;margin-top:2.5mm}
+.uni{display:grid;grid-template-columns:repeat(5,1fr);gap:3mm;margin-top:5mm}
+.uni div{border:.3mm solid #DCE5EE;border-radius:4mm;padding:3mm;font-size:8.4pt;line-height:1.38}
+.uni div b{display:block;font:800 10pt Nunito;margin-bottom:1mm}
+.uni .on{border:.6mm solid #6A9E6D;background:#F3F8F1}
+.uni .on i{display:inline-block;font-style:normal;background:#F2B63C;border-radius:2mm;padding:.5mm 2mm;font:800 7.6pt Nunito;margin-bottom:1.5mm}
+.tl{display:grid;grid-template-columns:repeat(5,1fr);margin-top:5mm;border-radius:4mm;overflow:hidden}
+.tl div{padding:3mm;font-size:8.4pt;line-height:1.4;background:#E9F3E7;border-right:.4mm solid #fff}
+.tl div:nth-child(even){background:#DCEBD8}
+.tl b{display:block;font:800 9.6pt Nunito;color:#2F5A33}
+/* gains */
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:6mm;margin-top:5mm}
+.ex{display:grid;grid-template-columns:1fr auto;gap:2mm 6mm;margin-top:3mm;font-size:10pt}
+.ex .r{text-align:right;font-weight:700}
+.ex .t{border-top:.4mm solid #9FC39B;padding-top:2mm;font:900 12pt Nunito;color:#2F5A33}
+.ex .s{text-decoration:line-through;color:#8A93A3}
+.compare{display:flex;align-items:flex-end;gap:5mm;height:32mm;margin-top:3mm}
+.compare div{flex:1;border-radius:3mm 3mm 0 0;display:flex;align-items:flex-start;justify-content:center;padding-top:2mm;font:900 11pt Nunito}
+.compare .a{background:#C7D3E2;color:#0F172B}.compare .b{background:#6A9E6D;color:#fff}
+.cl{display:flex;gap:5mm;font-size:8.4pt;color:#5B6678;text-align:center}.cl span{flex:1}
+ul.t{margin:2mm 0 0;padding:0;list-style:none}
+ul.t li{position:relative;padding:0 0 1.3mm 5.5mm;font-size:9.2pt;line-height:1.4}
+ul.t li::before{content:"";position:absolute;left:0;top:1.7mm;width:2.4mm;height:2.4mm;border-radius:50%;background:#6A9E6D}
+ul.t li b{font-weight:700}
+.box--n ul.t li::before{background:#8FC592}
+.quote{margin-top:5mm;font:400 12pt/1.5 Nunito;color:#2F5A33;border-left:1.2mm solid #6A9E6D;padding:1mm 0 1mm 5mm}
+/* rôles */
+.roles{display:grid;grid-template-columns:1fr 1fr;gap:4mm;margin-top:4mm}
+.vol{display:grid;grid-template-columns:repeat(3,1fr);gap:3mm;margin-top:3mm}
+.vol div{background:#fff;border-radius:4mm;padding:3mm 3.5mm;color:#0F172B}
+.vol b{display:block;font:800 10pt Nunito;margin-bottom:1mm}
+.vol p{font-size:8.3pt;line-height:1.38;color:#3A4660}
+.vol small{display:block;margin-top:1.8mm;font:800 8pt Nunito;color:#4A7D4E}
+.money{display:grid;grid-template-columns:1fr 70mm;gap:7mm;align-items:center;margin-top:5mm}
+.bar{display:flex;height:10mm;border-radius:3mm;overflow:hidden;font:800 8.4pt Nunito;text-align:center;line-height:10mm}
+.bar span:nth-child(1){flex:30;background:#E9F3E7;color:#0F172B}.bar span:nth-child(2){flex:4;background:#C7D3E2}.bar span:nth-child(3){flex:1.6;background:#6A9E6D;color:#fff}
+.legend{font-size:8pt;color:#5B6678;margin-top:1.5mm;line-height:1.4}
+.cta{position:absolute;left:16mm;right:16mm;bottom:17mm;display:grid;grid-template-columns:1fr 30mm;gap:7mm;align-items:center;background:#E9F3E7;color:#0F172B;border:.6mm solid #6A9E6D;border-radius:5mm;padding:5mm 6mm}
+.cta h3{font-size:15pt}
+.cta p{margin-top:1.5mm;font-size:9.6pt;color:#3A4660}
+.cta .url{font:900 13pt Nunito;color:#2F5A33;margin-top:2mm}
+.cta .qr{background:#fff;border-radius:3mm;padding:2mm}
+.cta svg{width:26mm;height:26mm;display:block}
 </style></head><body>
+
+<!-- 1. Couverture et concept -->
 <section class="page">
   <div class="cover">
-    <div class="brand"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="#6A9E6D"/><path d="M20 31.5V18.5" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><path d="M20 22.5c-6.6 0-10.2-3.7-10.2-10.2 6.5 0 10.2 3.7 10.2 10.2z" fill="#0F172B" opacity=".85"/><path d="M20 19c0-6.5 3.700-10.200 10.200-10.200 0 6.500-3.700 10.200-10.200 10.200z" fill="#fff"/><path d="M13 31.500h14" stroke="#fff" stroke-width="2.400" stroke-linecap="round"/></svg>Les jardins d'à côté</div>
-    <h1>Faites jardiner votre commune, <em>sans budget ni logistique.</em></h1>
-    <p>Un achat groupé de graines bio entre voisins, organisé de bout en bout par une association loi 1901. Vous prêtez un lieu, vous relayez l'information : nous faisons le reste.</p>
-    <svg class="leafs" viewBox="0 0 200 200" fill="none"><path d="M100 200V70" stroke="#6A9E6D" stroke-width="5" stroke-linecap="round"/><path d="M100 120C60 120 36 96 36 56c40 0 64 24 64 64z" fill="#6A9E6D"/><path d="M100 96c0-44 26-70 70-70 0 44-26 70-70 70z" fill="#8FC592"/><path d="M100 160c-26 0-42-16-42-42 26 0 42 16 42 42z" fill="#4A7D4E"/><circle cx="150" cy="150" r="7" fill="#F2B63C"/><circle cx="168" cy="126" r="4" fill="#F2B63C"/><circle cx="34" cy="150" r="5" fill="#F2B63C"/></svg>
-    <span class="tag">Mairies · CCAS · entreprises · bailleurs · jardins partagés</span>
+    <div class="brand"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="#6A9E6D"/><path d="M20 31.5V18.5" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><path d="M20 22.5c-6.6 0-10.2-3.7-10.2-10.2 6.5 0 10.2 3.7 10.2 10.2z" fill="#0F172B" opacity=".85"/><path d="M20 19c0-6.5 3.7-10.2 10.2-10.2 0 6.5-3.7 10.2-10.2 10.2z" fill="#fff"/><path d="M13 31.5h14" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>Les jardins d'à côté</div>
+    <p class="pre">À l'attention des mairies, CCAS, entreprises et bailleurs</p>
+    <h1>Des voisins qui achètent ensemble pour leur jardin, <em>et une commune qui fleurit.</em></h1>
+    <p class="sub">Graines, plants, arbres fruitiers : les habitants s'unissent pour acheter en gros, au prix coûtant, grâce à une association loi 1901 à but non lucratif. Votre commune prête un lieu et relaie : nous organisons tout le reste.</p>
+    <svg class="art" viewBox="0 0 220 200" fill="none"><path d="M70 200v-70" stroke="#6A9E6D" stroke-width="4" stroke-linecap="round"/><path d="M70 150c-24 0-38-14-38-38 24 0 38 14 38 38z" fill="#4A7D4E"/><path d="M70 136c0-26 15-41 41-41 0 26-15 41-41 41z" fill="#8FC592"/><path d="M150 200V60" stroke="#6A9E6D" stroke-width="5" stroke-linecap="round"/><path d="M150 110c-40 0-64-24-64-64 40 0 64 24 64 64z" fill="#6A9E6D"/><path d="M150 86c0-44 26-70 70-70 0 44-26 70-70 70z" fill="#8FC592"/><path d="M150 150c-26 0-42-16-42-42 26 0 42 16 42 42z" fill="#4A7D4E"/><circle cx="196" cy="142" r="7" fill="#F2B63C"/><circle cx="208" cy="118" r="4" fill="#F2B63C"/><circle cx="30" cy="176" r="5" fill="#F2B63C"/><circle cx="104" cy="186" r="3.5" fill="#F2B63C"/></svg>
   </div>
-  <div class="body">
-    <div class="three">
-      <div class="card"><b class="n">47</b><h3>variétés bio au vote</h3><p>Tomates anciennes, courges, légumes oubliés, fleurs mellifères : vos habitants choisissent ensemble ce qu'ils sèmeront.</p></div>
-      <div class="card"><b class="n">0 €</b><h3>pour la collectivité</h3><p>Ni subvention, ni régie, ni stock. Les habitants paient en ligne ; l'association ne commande que ce qui est acheté.</p></div>
-      <div class="card"><b class="n">1 €</b><h3>par commande pour les arbres</h3><p>Chaque commande alimente un fonds de plantation. Une plantation peut être organisée sur votre commune.</p></div>
+  <div class="figs">
+    <div class="fig"><b>−{{PCT}} %</b><span>pour les habitants sur leurs graines bio</span><small>Pack de {{PACK_N}} variétés : {{PACK_ALLIN}} frais compris, au lieu de {{PACK_MARKET}} en sachets du commerce.</small></div>
+    <div class="fig"><b>0 €</b><span>de budget pour la commune</span><small>Ni subvention, ni régie, ni stock : les habitants paient en ligne, l'association ne commande que ce qui est acheté.</small></div>
+    <div class="fig"><b>1 €</b><span>par commande pour planter des arbres</span><small>Un fonds plantations aux comptes publics, qui peut financer une plantation sur votre commune.</small></div>
+  </div>
+  <div class="idea">
+    <div>
+      <p class="k">Le concept</p>
+      <h2>Acheter en gros, entre voisins, ce que l'on sème au jardin</h2>
+      <p class="lead" style="margin-top:2mm">En jardinerie, une graine bio se paie au sachet et un plant à l'unité, au prix de détail. Un groupe de voisins, lui, peut acheter <b>les grands conditionnements des professionnels</b> et les partager. C'est tout le principe : les habitants d'une même commune votent ce qu'ils veulent semer, l'association passe une commande groupée au prix coûtant, et des bénévoles répartissent la marchandise en petits sachets, prêts à retirer près de chez soi.</p>
     </div>
-    <p class="kicker" style="margin-top:8mm">Une action concrète pour le vivant</p>
-    <h2>Ce que votre territoire y gagne</h2>
-    <div class="eco">
-      <div><i>1</i><p style="margin:0"><b>Des semences 100 % bio</b><span>Certifiées agriculture biologique, produites sans pesticides ni engrais de synthèse.</span></p></div>
-      <div><i>2</i><p style="margin:0"><b>Des variétés que l'on ressème</b><span>Aucun hybride F1 : chacun peut récolter ses graines et les partager l'année suivante.</span></p></div>
-      <div><i>3</i><p style="margin:0"><b>La biodiversité cultivée</b><span>Chaque variété ancienne semée dans un jardin est une variété qui ne disparaît pas.</span></p></div>
-      <div><i>4</i><p style="margin:0"><b>Des fleurs pour les pollinisateurs</b><span>Bourrache, souci, cosmos, capucine : du nectar du printemps à l'automne.</span></p></div>
-      <div><i>5</i><p style="margin:0"><b>Moins d'emballages et de trajets</b><span>Un grand conditionnement partagé, une seule livraison par groupe, un retrait à pied.</span></p></div>
-      <div><i>6</i><p style="margin:0"><b>Du lien entre habitants</b><span>Vote, mise en sachets, distribution : des moments simples qui rassemblent toutes les générations.</span></p></div>
+    <div class="box box--g">
+      <h3>En résumé</h3>
+      <ul class="t">
+        <li><b>Pour les habitants :</b> des graines et plants de qualité, bio, jusqu'à {{PCT}} % moins cher.</li>
+        <li><b>Pour la commune :</b> une action concrète pour la biodiversité et le lien social, sans coût ni gestion.</li>
+        <li><b>Pour le quartier :</b> des moments partagés, du vote à la distribution, et des jardiniers qui s'entraident.</li>
+        <li><b>Pour la planète :</b> moins d'emballages et de trajets, des variétés anciennes préservées, des arbres plantés.</li>
+      </ul>
     </div>
   </div>
-  <div class="foot"><span>Les Jardins d'à Côté · association loi 1901 à but non lucratif · Pins-Justaret (31)</span><span>lesjardinsdacote.fr</span></div>
+  <div class="foot"><span>Les Jardins d'à Côté · association loi 1901 à but non lucratif · Pins-Justaret (31)</span><span class="pn">1 / 4</span></div>
 </section>
+
+<!-- 2. Comment ça marche -->
 <section class="page">
-  <div class="p2">
-    <p class="kicker">Comment ça marche</p>
-    <h2>Quatre étapes, affichées en direct sur le site</h2>
-    <ol class="steps">
-      <li><p style="margin:0"><b>Vous proposez un groupe</b><span>Cinq minutes sur le formulaire en ligne, sans engagement. Nous créons la page de votre commune ou de votre entreprise.</span></p></li>
-      <li><p style="margin:0"><b>Les habitants votent les variétés</b><span>Chacun coche ses préférées parmi les 47 variétés en photo. Les plus demandées composent le pack du groupe.</span></p></li>
-      <li><p style="margin:0"><b>L'association achète au prix coûtant</b><span>En leur nom, par lots de dix commandes, directement chez un semencier bio français. Rien n'est débité tant qu'un lot n'est pas complet.</span></p></li>
-      <li><p style="margin:0"><b>Les bénévoles préparent, chacun retire son pack</b><span>Mise en sachets collective, puis distribution dans le lieu que vous mettez à disposition.</span></p></li>
-    </ol>
-    <div class="split">
-      <div class="you"><h3>Votre rôle</h3><ul class="t"><li>Mettre à disposition un lieu de retrait, deux demi-journées par saison (salle, hall, jardin partagé).</li><li>Relayer l'information : bulletin municipal, panneau lumineux, intranet, affichage.</li><li>Désigner un interlocuteur.</li></ul></div>
-      <div class="we"><h3>Ce que nous fournissons</h3><ul class="t"><li>Le site, le catalogue, le vote et le paiement en ligne.</li><li>Les achats, la logistique et l'organisation des bénévoles.</li><li>Les textes et visuels prêts à diffuser.</li><li>Un bilan chiffré en fin de saison.</li></ul></div>
+  <p class="k">Comment ça marche</p>
+  <h2>Quatre étapes, de la commande au jardin</h2>
+  <p class="lead">Tout se suit en direct sur le site, commune par commune. L'exemple ci-dessous est celui de la campagne en cours : les graines bio.</p>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M20 12v6a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h9"/></svg>
+      <h3>Les habitants votent</h3><p>Chacun rejoint le groupe de sa commune et coche ses variétés préférées parmi {{N_SEEDS}} graines bio, toutes en photo. Les plus demandées composent le pack.</p><em>Décembre – janvier</em></div>
+    <div class="st"><span class="n">2</span><svg viewBox="0 0 24 24"><path d="M3 6h18l-2 12H5z"/><path d="M8 6V4h8v2"/></svg>
+      <h3>L'association achète</h3><p>Au nom des habitants, par lots de dix commandes, directement chez un semencier bio français. Rien n'est débité tant qu'un lot n'est pas complet.</p><em>Fin janvier</em></div>
+    <div class="st"><span class="n">3</span><svg viewBox="0 0 24 24"><path d="M6 3h12l-1 18H7z"/><path d="M9 8h6M9 12h6"/></svg>
+      <h3>Les bénévoles ensachent</h3><p>Lors d'un atelier convivial, les bénévoles répartissent les grands conditionnements en petits sachets étiquetés : une dizaine de graines par variété et par foyer.</p><em>Début février</em></div>
+    <div class="st"><span class="n">4</span><svg viewBox="0 0 24 24"><path d="M3 10l9-6 9 6v10H3z"/><path d="M9 20v-6h6v6"/></svg>
+      <h3>Chacun retire son pack</h3><p>Une permanence dans le lieu prêté par la commune. Chacun repart avec son pack, un mot du jardinier, et souvent de nouveaux voisins.</p><em>Mi-février, juste avant les semis</em></div>
+  </div>
+
+  <h3 style="margin-top:6mm">Ce que l'on achète ensemble, au fil des saisons</h3>
+  <div class="uni">
+    <div class="on"><i>Campagne en cours</i><b>Graines bio</b>{{N_SEEDS}} variétés anciennes et reproductibles : tomates, courges, légumes oubliés, fleurs mellifères.</div>
+    <div><b>Plants potagers</b>Tomates, courgettes, poivrons en godets, chez des horticulteurs de la région. Avril – mai.</div>
+    <div><b>Arbres fruitiers</b>Pommiers, poiriers, pruniers en racines nues, chez des pépiniéristes. Novembre – mars.</div>
+    <div><b>Aromatiques</b>Thym, romarin, menthes, verveine en pots. Avril – juin.</div>
+    <div><b>Fleurs &amp; vivaces</b>Vivaces mellifères, haies fleuries. Aux saisons suivantes.</div>
+  </div>
+
+  <h3 style="margin-top:6mm">Le calendrier d'une campagne de graines</h3>
+  <div class="tl">
+    <div><b>Décembre</b>Le groupe de votre commune est créé ; vous relayez l'annonce.</div>
+    <div><b>Décembre – janvier</b>Les habitants s'inscrivent et votent leurs variétés.</div>
+    <div><b>Fin janvier</b>Clôture du vote, achats, commande groupée.</div>
+    <div><b>Début février</b>Atelier de mise en sachets avec les bénévoles.</div>
+    <div><b>Mi-février</b>Distribution des packs, juste avant les premiers semis.</div>
+  </div>
+
+  <div class="cols" style="margin-top:6mm">
+    <div class="box box--b"><h3>Qui peut lancer un groupe ?</h3>
+      <ul class="t"><li>Une <b>mairie</b> ou un <b>CCAS</b>, pour ses habitants.</li><li>Un <b>comité d'entreprise</b>, pour ses salariés.</li><li>Un <b>bailleur</b>, pour ses résidences.</li><li>Un <b>jardin partagé</b>, une <b>école</b>, une <b>association de quartier</b>.</li></ul></div>
+    <div class="box box--y"><h3>Pourquoi des lots de dix ?</h3>
+      <p style="font-size:9.6pt;margin-top:2mm">Dix commandes suffisent pour acheter les grands conditionnements. Tant qu'un lot n'est pas complet, personne n'est débité ; un lot incomplet est annulé sans frais. Aucun risque, ni pour les habitants ni pour la commune.</p></div>
+  </div>
+  <div class="foot"><span>Les Jardins d'à Côté · lesjardinsdacote.fr</span><span class="pn">2 / 4</span></div>
+</section>
+
+<!-- 3. Ce que chacun y gagne -->
+<section class="page">
+  <p class="k">Ce que chacun y gagne</p>
+  <h2>Moins cher pour les habitants, plus vivant pour la commune</h2>
+  <div class="cols">
+    <div class="box box--g">
+      <h3>L'économie, en chiffres réels</h3>
+      <p style="font-size:9.4pt;margin-top:1.5mm" class="muted">Exemple : le pack de graines bio composé par le vote</p>
+      <div class="ex">
+        <span>{{PACK_N}} variétés, en sachets du commerce</span><span class="r s">{{PACK_MARKET}}</span>
+        <span>Le même pack au prix coûtant</span><span class="r">{{PACK_PRICE}}</span>
+        <span>Frais de l'association (dont 1 € pour les arbres)</span><span class="r">{{FEE}}</span>
+        <span class="t">Économie pour un foyer</span><span class="r t">{{PACK_SAVE}}</span>
+      </div>
+      <div class="compare"><div class="a" style="height:100%">{{PACK_MARKET}}</div><div class="b" style="height:{{BAR_H}}%">{{PACK_ALLIN}}</div></div>
+      <div class="cl"><span>En jardinerie</span><span>En groupe, tout compris</span></div>
+      <p style="font-size:8pt;margin-top:3mm" class="muted">Pour semer {{PACK_N}} variétés, il faut acheter {{PACK_N}} sachets en jardinerie ({{MARKET}} le sachet bio, relevé de novembre 2026). En groupe, chaque foyer reçoit la juste quantité pour un jardin familial, au tarif professionnel du semencier, TVA comprise.</p>
     </div>
-    <div class="money">
-      <div><h3>Où va l'argent ? Tout est public.</h3><p>Les graines sont payées à leur prix d'achat, sans marge. S'y ajoutent 5 € de frais fixes par commande, dont 1 € pour le fonds plantations. Les comptes sont publiés sur le site.</p></div>
-      <div><div class="bar"><span>30 €</span><span>4</span><span>1</span></div><p class="legend">Exemple pour un pack de 30 € :<br>graines au prix coûtant · frais · arbres</p></div>
+    <div>
+      <div class="box box--b">
+        <h3>Ce que votre commune y gagne</h3>
+        <ul class="t">
+          <li><b>Une action biodiversité concrète</b> pour votre plan climat, votre atlas de la biodiversité ou votre label « Territoire engagé pour la nature ».</li>
+          <li><b>Du pouvoir d'achat</b> pour les foyers, sans aide à verser ni dossier à instruire.</li>
+          <li><b>Zéro coût, zéro gestion</b> : ni budget, ni régie, ni stock, ni encaissement.</li>
+          <li><b>Une animation de la vie locale</b> qui valorise vos jardins partagés, vos écoles et vos associations.</li>
+          <li><b>Une image positive</b> : une commune qui fait jardiner ses habitants et plante des arbres.</li>
+        </ul>
+      </div>
     </div>
   </div>
+
+  <div class="box box--n" style="margin-top:5mm">
+    <h3 style="font-size:13pt">Le lien social entre voisins, au cœur du projet</h3>
+    <div class="cols" style="margin-top:2mm;gap:8mm">
+      <ul class="t">
+        <li><b>On choisit ensemble.</b> Le vote crée une conversation de quartier : quelle tomate, quelle courge, quelles fleurs pour les abeilles ?</li>
+        <li><b>On prépare ensemble.</b> L'atelier de mise en sachets réunit retraités, familles, nouveaux arrivants autour d'une table.</li>
+      </ul>
+      <ul class="t">
+        <li><b>On se retrouve.</b> La distribution devient un petit marché de voisins, où l'on échange conseils et boutures.</li>
+        <li><b>On s'entraide.</b> Ceux qui ont trop de plants les donnent, les débutants apprennent des jardiniers confirmés.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 style="margin-top:5mm">Et un vrai geste pour le vivant</h3>
+  <div class="cols" style="margin-top:2mm;grid-template-columns:repeat(3,1fr);gap:4mm">
+    <div class="box box--g" style="padding:4.5mm"><b>Bio et reproductibles</b><p style="font-size:9pt;margin-top:1mm">Des semences certifiées bio, de variétés que chacun peut ressemer l'année suivante.</p></div>
+    <div class="box box--g" style="padding:4.5mm"><b>Biodiversité cultivée</b><p style="font-size:9pt;margin-top:1mm">Variétés anciennes et fleurs mellifères : bourrache, souci, phacélie, cosmos.</p></div>
+    <div class="box box--g" style="padding:4.5mm"><b>Moins d'emballages</b><p style="font-size:9pt;margin-top:1mm">Une seule livraison par commune, des sachets papier, un retrait à pied.</p></div>
+  </div>
+  <div class="foot"><span>Les Jardins d'à Côté · lesjardinsdacote.fr</span><span class="pn">3 / 4</span></div>
+</section>
+
+<!-- 4. Le rôle de chacun -->
+<section class="page">
+  <p class="k">Le rôle de chacun</p>
+  <h2>Trois gestes pour la commune, l'association fait le reste</h2>
+  <div class="roles">
+    <div class="box box--b"><h3>Ce que nous demandons à la commune</h3>
+      <ul class="t">
+        <li><b>Un lieu</b>, deux à trois demi-journées par campagne : une salle pour l'atelier de mise en sachets et la distribution (salle des fêtes, hall, médiathèque, jardin partagé).</li>
+        <li><b>Un relais d'information</b> : bulletin municipal, site, panneau lumineux, réseaux sociaux, affichage. Nous fournissons textes et visuels.</li>
+        <li><b>Un interlocuteur</b> en mairie, élu ou agent, pour caler les dates.</li>
+      </ul></div>
+    <div class="box box--g"><h3>Ce que fait l'association</h3>
+      <ul class="t">
+        <li>Le site, le catalogue en photos, le vote et le paiement en ligne sécurisé.</li>
+        <li>Les achats auprès des producteurs, au prix coûtant, et la réception des livraisons.</li>
+        <li>Le matériel de mise en sachets : sachets papier, étiquettes, balance, fiches de semis.</li>
+        <li>La coordination des bénévoles et un bilan chiffré en fin de campagne.</li>
+        <li><b>Des comptes publics</b> : prix coûtant sans marge, {{FEE}} de frais par commande dont 1 € pour planter des arbres.</li>
+      </ul></div>
+  </div>
+
+  <div class="box box--n" style="margin-top:4mm">
+    <h3 style="font-size:13pt">Nous recherchons des bénévoles dans chaque commune</h3>
+    <p style="font-size:9.6pt;color:#D6DEEA;margin-top:1.5mm">Quelques heures par saison suffisent. Aucune compétence requise : juste l'envie de rendre service et de rencontrer ses voisins.</p>
+    <div class="vol">
+      <div><b>Mise en sachets</b><p>Répartir les graines des grands conditionnements en petits sachets étiquetés, une dizaine de graines par variété, et composer les packs de chaque foyer.</p><small>Un atelier de 2 à 3 h par campagne</small></div>
+      <div><b>Distribution</b><p>Tenir la permanence de retrait, remettre les packs, accueillir les nouveaux et répondre aux questions.</p><small>Une demi-journée par campagne</small></div>
+      <div><b>Réception et tri</b><p>Réceptionner la livraison, vérifier les quantités, préparer l'atelier.</p><small>1 à 2 h par campagne</small></div>
+      <div><b>Référent de groupe</b><p>Le contact de l'association dans la commune : il fixe les dates avec la mairie et anime le groupe.</p><small>Tout au long de l'année</small></div>
+      <div><b>Relais de quartier</b><p>Faire connaître le groupe : affiches chez les commerçants, mot dans les boîtes aux lettres, école.</p><small>Quand vous voulez</small></div>
+      <div><b>Jardinier conseil</b><p>Partager son savoir : calendrier de semis, astuces, petit atelier pour débutants.</p><small>Selon vos envies</small></div>
+    </div>
+  </div>
+
   <div class="cta">
-    <div><h3>Lançons un groupe dans votre commune</h3><p>Contact : François Stephan Jaune, président<br>contact@lesjardinsdacote.fr</p><p class="url">lesjardinsdacote.fr/collectivites</p></div>
-    QRCODE
+    <div><h3>Lançons un groupe dans votre commune</h3><p>François Stephan Jaune, président · contact@lesjardinsdacote.fr<br>Une réunion de 30 minutes suffit pour caler la première campagne.</p><p class="url">lesjardinsdacote.fr/collectivites</p></div>
+    <div class="qr">QRCODE</div>
   </div>
-  <div class="foot"><span>Conformément au RGPD, vous pouvez vous opposer à tout nouveau message : répondez simplement « stop ».</span><span>Novembre 2026</span></div>
+  <div class="foot"><span>Conformément au RGPD, vous pouvez vous opposer à tout nouveau message de notre part : répondez simplement « stop ».</span><span class="pn">4 / 4</span></div>
 </section>
 </body></html>

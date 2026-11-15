@@ -4,7 +4,7 @@ declare(strict_types=1);
 /** Mise à jour automatique de la base au premier passage après un déploiement. */
 final class Migrator
 {
-    public const VERSION = 10;
+    public const VERSION = 11;
     private static bool $reseed = false;
 
     public static function execFile(string $file): void
@@ -32,6 +32,7 @@ final class Migrator
             if ($v < 8) self::to8();
             if ($v < 9) self::to9();
             if ($v < 10) self::to10();
+            if ($v < 11) self::to11();
             if (self::$reseed) Demo::seedCatalog();
             if (self::$reseed && setting('demo_data') === '1') { Demo::purge(); Demo::seed(); }
         } finally {
@@ -166,5 +167,20 @@ final class Migrator
         if (setting('demo_data') === '1') { Demo::purge(); Demo::seed(); }
         set_setting('schema_version', '10');
         audit('migrate', 'schéma v10 : ' . $n . ' variétés de graines au catalogue de la saison');
+    }
+
+    /** v10 → v11 : tous les univers rouverts (graines mises en avant), catalogue de graines étendu, démonstration d'origine. */
+    private static function to11(): void
+    {
+        set_setting('season_focus', 'seeds');
+        $n = Season::install();
+        if (setting('demo_data') === '1') { Demo::purge(); Demo::seed(); }
+        if (!db()->val("SELECT id FROM todos WHERE title LIKE 'Confirmer les prix des graines%'")) {
+            Pilot::addTodo('Confirmer les prix des graines avant la première commande',
+                'Le site du semencier était hors ligne lors de la mise à jour : 87 variétés ont un prix estimé d\'après la gamme (mention « prix estimé » dans Admin → Variétés). Les vérifier sur le tarif pro avant de passer commande.',
+                'plan', '/admin/varietes?univers=seeds');
+        }
+        set_setting('schema_version', '11');
+        audit('migrate', 'schéma v11 : ' . $n . ' variétés de graines au catalogue');
     }
 }

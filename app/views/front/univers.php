@@ -51,11 +51,11 @@ $inPack = $ex ? array_flip(array_map(fn($it) => (int)$it['variety_id'], $ex['ite
         </div>
       <?php endforeach; ?>
     </div>
-    <p class="source-note mt-3"><?= e(setting('market_price_note', Asso::DEFAULT_MARKET_NOTE)) ?> Prix d'achat : tarif professionnel de novembre 2026, TVA comprise. Prix indicatifs, mis à jour par l'association avant chaque vente.</p>
+    <p class="source-note mt-3"><?= e(setting('market_price_note', Asso::DEFAULT_MARKET_NOTE)) ?> Prix d'achat : tarifs professionnels relevés en novembre 2026, TVA comprise. Prix indicatifs, mis à jour par l'association avant chaque vente.</p>
   </div>
 </section>
 <?php else: ?>
-<section class="section" style="padding-top:1rem"><div class="wrap"><div class="empty"><h3><?= $u['live'] ? 'Catalogue en préparation' : 'Pas cette saison : à venir' ?></h3><p><?= $u['live'] ? 'L\'association sélectionne en ce moment les producteurs de cet univers.' : 'Cette saison, l\'association se concentre sur les graines. Cet univers ouvrira quand les premiers groupes seront lancés.' ?> Rejoignez un groupe pour être prévenu·e de la première vente.</p><a class="btn" href="/groupes">Trouver mon groupe</a></div></div></section>
+<section class="section" style="padding-top:1rem"><div class="wrap"><div class="empty"><h3>Catalogue en préparation</h3><p>L'association sélectionne en ce moment les producteurs de cet univers. Rejoignez un groupe pour être prévenu·e de la première vente.</p><a class="btn" href="/groupes">Trouver mon groupe</a></div></div></section>
 <?php endif; ?>
 
 <?php if ($groups): ?>
@@ -69,7 +69,7 @@ $inPack = $ex ? array_flip(array_map(fn($it) => (int)$it['variety_id'], $ex['ite
 
 <section class="section">
   <div class="wrap">
-    <div class="section-head" data-reveal><div><p class="eyebrow eyebrow--start">Les autres univers</p><h2>Aux saisons suivantes</h2></div><a class="btn btn--ghost" href="/univers">Tous les univers</a></div>
+    <div class="section-head" data-reveal><div><p class="eyebrow eyebrow--start">Les autres univers</p><h2>Et aux autres saisons</h2></div><a class="btn btn--ghost" href="/univers">Tous les univers</a></div>
     <div class="ugrid"><?php $k = 0; foreach (array_slice($others, 0, 3) as $o) partial('partials/ucard', ['u' => $o, 'i' => $k++]); ?></div>
   </div>
 </section>
