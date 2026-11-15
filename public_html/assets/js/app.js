@@ -266,3 +266,27 @@
   }, { rootMargin: '300px' }) : null;
   maps.forEach(function (m) { if (io) io.observe(m); else load(function () { init(m); }); });
 })();
+
+
+/* v10 — tableaux en cartes sur téléphone (chaque cellule reprend l'intitulé de sa colonne) et menu du back-office */
+(function () {
+  document.querySelectorAll('table.table').forEach(function (t) {
+    var heads = Array.prototype.map.call(t.querySelectorAll('thead th'), function (th) { return th.textContent.trim(); });
+    if (!heads.length) return;
+    t.querySelectorAll('tbody tr, tfoot tr').forEach(function (tr) {
+      var i = 0;
+      Array.prototype.forEach.call(tr.children, function (td) {
+        if (!td.hasAttribute('data-label')) td.setAttribute('data-label', heads[i] || '');
+        i += td.colSpan || 1;
+      });
+    });
+  });
+  var mb = document.querySelector('[data-admin-menu]');
+  if (mb) {
+    mb.addEventListener('click', function () {
+      var on = document.body.classList.toggle('menu-open');
+      mb.setAttribute('aria-expanded', on ? 'true' : 'false');
+    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { document.body.classList.remove('menu-open'); mb.setAttribute('aria-expanded', 'false'); } });
+  }
+})();

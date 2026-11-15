@@ -4,7 +4,7 @@ declare(strict_types=1);
 /** Mise à jour automatique de la base au premier passage après un déploiement. */
 final class Migrator
 {
-    public const VERSION = 9;
+    public const VERSION = 10;
     private static bool $reseed = false;
 
     public static function execFile(string $file): void
@@ -31,6 +31,7 @@ final class Migrator
             if ($v < 7) self::to7();
             if ($v < 8) self::to8();
             if ($v < 9) self::to9();
+            if ($v < 10) self::to10();
             if (self::$reseed) Demo::seedCatalog();
             if (self::$reseed && setting('demo_data') === '1') { Demo::purge(); Demo::seed(); }
         } finally {
@@ -155,5 +156,15 @@ final class Migrator
         set_setting('schema_version', '4');
         self::$reseed = true;
         audit('migrate', 'schéma v4');
+    }
+
+    /** v9 → v10 : saison centrée sur les graines — nouveau catalogue (photos de chaque variété), démonstration recomposée. */
+    private static function to10(): void
+    {
+        set_setting('season_focus', 'seeds');
+        $n = Season::install();
+        if (setting('demo_data') === '1') { Demo::purge(); Demo::seed(); }
+        set_setting('schema_version', '10');
+        audit('migrate', 'schéma v10 : ' . $n . ' variétés de graines au catalogue de la saison');
     }
 }

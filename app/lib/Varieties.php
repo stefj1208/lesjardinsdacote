@@ -23,7 +23,7 @@ final class Varieties
         $w = []; $p = [];
         if ($category) { $w[] = 'category = ?'; $p[] = $category; }
         if ($activeOnly) $w[] = 'is_active = 1';
-        return array_map([self::class, 'decorate'], db()->all('SELECT * FROM varieties' . ($w ? ' WHERE ' . implode(' AND ', $w) : '') . ' ORDER BY category, position, name, variety', $p));
+        return array_map([self::class, 'decorate'], db()->all('SELECT * FROM varieties' . ($w ? ' WHERE ' . implode(' AND ', $w) : '') . ' ORDER BY category, is_active DESC, position, name, variety', $p));
     }
 
     /** Ajoute coût de la portion, famille (premier mot) et libellé de portion. */
@@ -100,13 +100,17 @@ final class Varieties
     public static function overview(): array
     {
         $out = [];
-        foreach (Cat::CATEGORIES as $cat => $c) {
-            $list = self::all($cat, true);
+        // Les univers de la saison d'abord ; les autres sont annoncés « à venir », sans catalogue public.
+        $cats = Cat::CATEGORIES;
+        uksort($cats, fn($a, $b) => (int)Season::isOpen($b) <=> (int)Season::isOpen($a));
+        foreach ($cats as $cat => $c) {
+            $live = Season::isOpen($cat);
+            $list = $live ? self::all($cat, true) : [];
             $price = Cat::packPrice($cat);
             $ex = $list ? self::toPack(self::compose($list, $price), $price, 'Exemple de pack ' . mb_strtolower($c['label']), $cat) : null;
-            $sale = db()->one("SELECT s.id, s.status, g.name AS group_name, g.slug AS group_slug FROM sales s JOIN `groups` g ON g.id = s.group_id
+            $sale = !$live ? null : db()->one("SELECT s.id, s.status, g.name AS group_name, g.slug AS group_slug FROM sales s JOIN `groups` g ON g.id = s.group_id
                 WHERE s.category = ? AND g.status = 'active' AND s.status IN ('voting','open','waiting') ORDER BY FIELD(s.status,'open','voting','waiting'), s.id LIMIT 1", [$cat]);
-            $out[$cat] = $c + ['key' => $cat, 'count' => count($list), 'varieties' => $list, 'example' => $ex, 'price' => $price, 'sale' => $sale];
+            $out[$cat] = $c + ['key' => $cat, 'live' => $live, 'count' => count($list), 'varieties' => $list, 'example' => $ex, 'price' => $price, 'sale' => $sale];
         }
         return $out;
     }

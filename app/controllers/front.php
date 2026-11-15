@@ -18,14 +18,22 @@ function front_home(): void
     $allVarieties = Varieties::all(null, true);
     $univers = Varieties::overview();
     $best = max(array_map(fn($u) => (int)($u['example']['save_pct'] ?? 0), $univers) ?: [0]);
-    view('front/home', ['neighbours' => (int)db()->val("SELECT COUNT(*) FROM users WHERE role <> 'admin'"), 'mapPoints' => Geo::mapPoints(), 'fund' => Asso::fundTotal(), 'groups' => $groups, 'heroPack' => $hero, 'heroSale' => $sale, 'catalog' => $catalog, 'varieties' => $allVarieties,
+    view('front/home', ['neighbours' => (int)db()->val("SELECT COUNT(*) FROM users WHERE role <> 'admin'"), 'mapPoints' => Geo::mapPoints(), 'fund' => Asso::fundTotal(), 'groups' => $groups, 'heroPack' => $hero, 'heroSale' => $sale, 'catalog' => $catalog, 'varieties' => $catalog,
         'univers' => $univers, 'bestPct' => $best]);
+}
+
+function front_collectivites(): void
+{
+    view('front/collectivites', ['count' => count(Varieties::all('seeds', true)),
+        'pdf' => is_file(PUBLIC_DIR . '/assets/docs/plaquette-collectivites.pdf') ? '/assets/docs/plaquette-collectivites.pdf' : null,
+        'title' => 'Mairies, CCAS, entreprises : faites jardiner votre commune',
+        'description' => 'Un achat groupé de graines bio pour vos habitants ou vos salariés, clé en main et sans coût pour la collectivité : biodiversité, lien social, pouvoir d\'achat.']);
 }
 
 function front_universes(): void
 {
     view('front/universes', ['univers' => Varieties::overview(), 'title' => 'Ce que l\'on achète ensemble',
-        'description' => 'Plants potagers, arbres fruitiers, aromatiques, graines rares, fleurs : tout ce qu\'un groupe de voisins peut acheter en gros, et l\'économie réalisée.']);
+        'description' => 'Plants potagers, arbres fruitiers, aromatiques : cette saison, les graines bio ; ensuite tout ce qu\'un groupe de voisins peut acheter en gros, et l\'économie réalisée.']);
 }
 
 function front_univers(string $slug): void

@@ -133,7 +133,7 @@ $curIdx = array_search($ps, $order, true);
       <?php if ($g['description']): ?><div class="panel"><h3>À propos</h3><div class="muted"><?= nl2p($g['description']) ?></div></div><?php endif; ?>
       <div class="panel">
         <h3>Faire grandir le groupe</h3>
-        <?php $shareText = $g['name'] . ' : on achète ensemble des packs de graines rares, bien moins cher qu\'au prix public. Rejoignez-nous !'; $shareUrl = abs_url('/groupes/' . $g['slug']); ?>
+        <?php $shareText = $g['name'] . ' : on achète ensemble des packs de graines bio de variétés anciennes, bien moins cher qu\'au prix public. Rejoignez-nous !'; $shareUrl = abs_url('/groupes/' . $g['slug']); ?>
         <div class="row"><a class="btn btn--sm" target="_blank" rel="noopener" href="https://wa.me/?text=<?= rawurlencode($shareText . ' ' . $shareUrl) ?>">WhatsApp</a><a class="btn btn--ghost btn--sm" target="_blank" rel="noopener" href="https://www.facebook.com/sharer/sharer.php?u=<?= rawurlencode($shareUrl) ?>">Facebook</a><button class="btn btn--ghost btn--sm" type="button" data-share data-share-text="<?= e($shareText) ?>" data-share-url="<?= e($shareUrl) ?>">Copier le lien</button></div>
       </div>
     </aside>

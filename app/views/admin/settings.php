@@ -86,9 +86,9 @@
       <?php endif; ?>
       <form method="post" action="/admin/agents/regenerer" data-confirm="Régénérer le jeton ? Les tâches planifiées devront être mises à jour."><?= csrf_field() ?><button class="btn btn--ghost btn--sm">Régénérer le jeton</button></form>
     </div>
-    <form class="panel" method="post" action="/admin/parametres" data-confirm="<?= $demo ? 'Supprimer les groupes, votes, achats et membres fictifs ?' : 'Charger les données de démonstration ?' ?>">
+    <form class="panel" id="demo" method="post" action="/admin/parametres" data-confirm="<?= $demo ? 'Supprimer les groupes, votes, achats et membres fictifs ?' : 'Charger les données de démonstration ?' ?>">
       <?= csrf_field() ?><h3>Démonstration</h3>
-      <?php if ($demo): ?><p class="small">Supprime les 5 groupes « Exemple », leurs votes et achats, et les membres fictifs. Les packs de démo non utilisés sont aussi retirés.</p><button class="btn btn--danger btn--sm" name="purge_demo" value="1">Supprimer les données de démo</button>
+      <?php if ($demo): ?><p class="small">Passe le site en réel : retire les groupes « Exemple », leurs votes et achats, les membres fictifs et le bandeau « site de démonstration ». Le catalogue de variétés reste en place.</p><button class="btn btn--danger btn--sm" name="purge_demo" value="1">Passer le site en réel</button>
       <?php else: ?><p class="small">Ajoute des packs avec photos et 4 groupes fictifs à différents stades.</p><button class="btn btn--ghost btn--sm" name="load_demo" value="1">Charger la démo</button><?php endif; ?>
     </form>
   </aside>

@@ -1,8 +1,8 @@
 <section class="page-hero">
   <div class="wrap">
     <p class="eyebrow eyebrow--start">Ce que l'on achète ensemble</p>
-    <h1>Cinq univers, une saison chacun</h1>
-    <p class="lede">À chaque saison, votre groupe choisit ce qu'il achète en gros : plants au printemps, arbres en hiver, graines dès janvier. Chaque univers affiche les prix publics et le prix du groupe.</p>
+    <h1>Cette saison : les graines</h1>
+    <p class="lede">Pour bien démarrer, l'association se concentre sur un seul achat groupé : des graines bio de variétés anciennes et reproductibles. Plants, arbres fruitiers et aromatiques suivront aux prochaines saisons.</p>
   </div>
 </section>
 <section class="section" style="padding-top:0">

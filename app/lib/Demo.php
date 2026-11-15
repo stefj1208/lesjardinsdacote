@@ -2,87 +2,21 @@
 declare(strict_types=1);
 
 /**
- * Données de démonstration : un catalogue de variétés rares (Agrosemens), 4 groupes à
+ * Données de démonstration : le catalogue de la saison (voir Season), 4 groupes à
  * différents stades (bénévoles recherchés, vote des variétés, ventes ouvertes) et une
  * proposition de groupe à valider. Groupes, membres et achats fictifs se suppriment en
  * un clic ; le catalogue de variétés reste, comme base de travail.
  */
 final class Demo
 {
-    /** Prix public d'un sachet de graines bio en jardinerie (La Semence Bio, marque grand public d'Agrosemens, relevé novembre 2026). */
+    /** Prix public d'un sachet de graines bio en jardinerie (relevé novembre 2026). */
     public const MARKET = 3.30;
     public const MARKET_NOTE = Asso::DEFAULT_MARKET_NOTE;
 
-    /** TOMATE Belmonte : 3,20 € HT les 10 graines, 9,40 € HT les 100 graines (catalogue Agrosemens, novembre 2026). */
-    private const RATIO_100 = 9.40 / 3.20;
-    private const VAT = 1.055;
 
     /** Anciens packs de démonstration, supprimés lors des mises à jour. */
     public const OLD_PACKS = ["Potager d'été gourmand", 'Potager facile pour débuter', 'Balcon & petits espaces', 'Herbes du Sud', "Plants d'été", 'Verger familial',
         'Tomates de collection', 'Ratatouille du monde', 'Courges & curiosités', 'Herbes rares du monde'];
-
-    /**
-     * Graines potagères : [plante, variété, nom latin, réf. Agrosemens, prix HT des 10 graines, conseil, photo].
-     * Le prix des 100 graines est connu pour Belmonte ; pour les autres il est estimé avec le même rapport.
-     */
-    public const SEEDS = [
-        ['Tomate noire', 'Black from Tula', 'Solanum lycopersicum', 'TOM87', 1.85, 'Originaire de Tula, en Russie : 200 à 400 g, chair douce et très charnue', 'commons:Black_Beauty_tomat.jpg|commons:Black_krim_tomato.jpg|commons:Tomates_anciennes.jpg'],
-        ['Tomate noire', 'Bedouin', 'Solanum lycopersicum', 'TO152', 1.55, 'Fruits en forme de poire, rouge-noir, 120 à 180 g', 'commons:Seattle-Heirloom-tomato-2156.jpg|commons:Black_krim_tomato.jpg|commons:Tomates_anciennes.jpg'],
-        ['Tomate noire', 'Noire russe charbonneuse', 'Solanum lycopersicum', 'TOM41', 1.85, 'Précoce (70 jours), chocolat foncé, sucrée et sans acidité', 'commons:Black_krim_tomato.jpg|commons:Tomates_anciennes.jpg'],
-        ['Tomate bicolore', 'Ananas noire', 'Solanum lycopersicum', 'TOM88', 2.15, 'Jusqu\'à 500 g, chair verte et rouge, saveur fruitée et épicée', 'commons:Seattle-Heirloom-tomato-2155.jpg|commons:Heirloom_tomatoes_2.jpg'],
-        ['Tomate violette', 'Indigo blue', 'Solanum lycopersicum', 'TO176', 2.15, 'Épaules violet-noir riches en anthocyanes', 'commons:Indigo_Rose_Tomatoes.jpg|commons:Heirloom_tomatoes_2.jpg'],
-        ['Tomate blanche', 'Beauté blanche', 'Solanum lycopersicum', 'TOM97', 1.55, 'Ivoire rosé, 100 à 250 g, très douce', 'commons:Capay_heirloom_tomatoes_at_Slow_Food_Nation.jpg|commons:Heirloom_tomatoes_2.jpg'],
-        ['Tomate orange', 'Verna', 'Solanum lycopersicum', 'TO163', 1.70, 'Cœur de bœuf orange de 200 à 500 g, peu de graines, saveur exceptionnelle', 'commons:Tomatoes_for_sale_in_France.jpg|commons:Heirloom_tomatoes_2.jpg'],
-        ['Tomate orange', 'La Carotina', 'Solanum lycopersicum', 'TO100', 3.20, 'Jaune-orangé, grappes de 5 à 6 fruits parfumés', 'commons:Capay_heirloom_tomatoes_at_Slow_Food_Nation.jpg|commons:Tomates_anciennes.jpg'],
-        ['Tomate zébrée', 'Red zébra', 'Solanum lycopersicum', 'TO154', 2.15, 'Rouge striée d\'or, aussi belle que bonne', 'commons:Heirloom_tomatoes_2.jpg'],
-        ['Tomate rouge', 'Russe rouge', 'Solanum lycopersicum', 'TO123', 1.70, 'Géante de 400 g à 1,5 kg, parfaite pour les sauces et les farcis', 'commons:Tomates_anciennes.jpg'],
-        ['Tomate rose', 'Belmonte', 'Solanum lycopersicum', 'TO134', 3.20, 'Grosse tomate rose originaire de Belmonte (Italie), 300 à 500 g, douce et parfumée', 'commons:Tomato.jpg|commons:Tomates_anciennes.jpg'],
-        ['Tomate cerise', 'Black cherry', 'Solanum lycopersicum var. cerasiforme', 'TOM42', 1.70, 'Cerises rouge-noir de 20 g, sucrées, précoces', 'commons:Tomate_Black_Cherry_15671.jpg|commons:Cherry_tomatoes.jpg'],
-        ['Tomate cerise', 'Gold nugget', 'Solanum lycopersicum var. cerasiforme', 'TOM19', 1.55, 'Pépites dorées de 10 g, récolte en 60 jours', 'commons:Cherry_tomatoes.jpg|commons:Cherry_Tomato_on_Vine.JPG'],
-        ['Tomate cerise', 'Green envy', 'Solanum lycopersicum var. cerasiforme', 'TO160', 1.55, 'Verte virant au jaune pâle, juteuse, ne se fend pas', 'commons:Green_cherry_tomatoes.JPG|commons:Green_cherry_tomatoes_on_vine.JPG|commons:Cherry_tomatoes.jpg'],
-        ['Aubergine', 'Violette de Toulouse', 'Solanum melongena', 'AUB32', 1.85, 'La variété de chez nous, demi-longue et violet profond', 'commons:Purple_Eggplant.JPG|commons:Aubergine.jpg|commons:Aubergines_Three_Types.jpg'],
-        ['Aubergine', 'Rosa Bianca', 'Solanum melongena', 'AUB02', 1.45, 'Ronde, rose lavande et blanc, chair crémeuse', 'commons:Aubergine.jpg|commons:Aubergines_Three_Types.jpg'],
-        ['Aubergine', 'Slim Jim', 'Solanum melongena', 'AUB29', 1.45, 'Petits fruits fins et violets, idéale en pot', 'commons:Solanum-melongena-024.JPG|commons:Aubergines_Three_Types.jpg'],
-        ['Aubergine zébrée', 'Tsakoniki', 'Solanum melongena', 'AUB37', 2.25, 'Ancienne variété grecque, violette striée de blanc, sans amertume', 'commons:Aubergines_Three_Types.jpg|commons:Solanum_melongena_ja001.jpg'],
-        ['Aubergine zébrée', 'Fantazia', 'Solanum melongena', 'AUB43', 2.25, 'Striée de violet et de blanc', 'commons:Solanum_melongena_ja001.jpg|commons:Aubergines_Three_Types.jpg'],
-        ['Aubergine zébrée', 'Zébrina', 'Solanum melongena', 'AUB15', 2.80, 'Petits fruits striés, très productive', 'commons:Solanum_melongena_24_08_2012_(1).JPG|commons:Aubergines_Three_Types.jpg'],
-        ['Aubergine blanche', 'Dourga', 'Solanum melongena', 'AUB13', 1.85, 'Longue et blanche, chair fine', 'commons:Aubergines_Three_Types.jpg'],
-        ['Aubergine blanche', 'Blanche ronde à œuf', 'Solanum melongena', 'AUB30', 1.45, 'Des fruits blancs de la taille d\'un œuf', 'commons:Solanum_ovigerum.JPG|commons:Aubergines_Three_Types.jpg'],
-        ['Aubergine verte', 'Louisiana long green', 'Solanum melongena', 'AUB08', 2.80, 'Longue, vert pâle, originaire de Louisiane', 'commons:Solanum-melongena-024.JPG|commons:Aubergines_Three_Types.jpg'],
-        ['Poivron', 'di Capriglio', 'Capsicum annuum', 'POV31', 1.65, 'Petit poivron ancien du Piémont', 'commons:Capsicum_annuum_fruits_IMGP0049.jpg'],
-        ['Poivron', 'Mandarine', 'Capsicum annuum', 'POV26', 2.90, 'Petits fruits orange vif, très sucrés', 'commons:Capsicum_annuum_fruits_IMGP0049.jpg|commons:Green_capsicum,_sweet_bell_pepper.jpg'],
-        ['Poivron', 'Tomate', 'Capsicum annuum', 'POV15', 1.95, 'Fruits plats et côtelés en forme de tomate', 'commons:Green_capsicum,_sweet_bell_pepper.jpg|commons:Capsicum_annuum_fruits_IMGP0049.jpg'],
-        ['Poivron', 'Doux long des Landes', 'Capsicum annuum', 'POV12', 1.95, 'Long et fin, à faire frire', 'commons:Green_capsicum,_sweet_bell_pepper.jpg'],
-        ['Piment doux', 'Biquinho', 'Capsicum chinense', 'PIM19', 3.45, 'Du Brésil : petites gouttes rouges sucrées, à peine piquantes (1/10)', 'commons:Habanero_chile_-_flower_with_fruit_(aka).jpg|commons:Capsicum_annuum_fruits_IMGP0049.jpg'],
-        ['Piment', 'Basque Gorria', 'Capsicum annuum', 'PIM14', 2.00, 'Le piment d\'Espelette : conique, rouge, force 4/10', "commons:France-Piment_d'Espelette-2005-08-05.jpg|commons:France-AOC_Piment_d'Espelette-2005-08-05.jpg|commons:Capsicum_annuum_fruits_IMGP0049.jpg"],
-        ['Piment', 'Sucette de Provence', 'Capsicum annuum', 'POV33', 2.05, 'Effilé, vert puis rouge vif, force 4 à 7/10', "commons:France-AOC_Piment_d'Espelette-2005-08-05.jpg|commons:Capsicum_annuum_fruits_IMGP0049.jpg"],
-        ['Piment fort', 'Habanero golden', 'Capsicum chinense', 'PIM11', 6.70, 'Jaune vif, fruité et très piquant (10/10)', 'commons:Habanero_pepper.jpg|commons:Piment_habanero.jpg|commons:Habanero_pepers.jpg'],
-        ['Courge', 'Melonette jaspée de Vendée', 'Cucurbita pepo', 'POT47', 2.60, 'Ancienne variété française, chair orange très sucrée', 'commons:Cucurbita_pepo_12zz.jpg|commons:Pumpkin_seeds_in_hand.jpg'],
-        ['Courge', 'Sweet Dumpling (patidou)', 'Cucurbita pepo', 'POT10', 2.40, 'Petite courge striée au goût de châtaigne', "commons:Pumpkin_'Sweet_Dumpling'_01.jpg|commons:Chinese_Sweet_Dumpling.JPG|commons:Pumpkin_seeds_in_hand.jpg"],
-        ['Courgette', 'Ronde de Nice', 'Cucurbita pepo', 'COU01', 2.35, 'Ronde et vert pâle, idéale à farcir', 'commons:Courgette_J1.JPG|commons:Courgette.jpg'],
-        ['Courgette', 'Jaune', 'Cucurbita pepo', 'COU38', 4.60, 'Allongée, jaune d\'or, très décorative', 'commons:Cucurbita_pepo_var_cylindrica,_Yellow_Zucchini_Squash_(crop).jpg|commons:Courgette.jpg'],
-        ['Courgette', 'Yellow Straight Neck', 'Cucurbita pepo', 'COU09', 2.05, 'Jaune à col droit, variété américaine ancienne', 'commons:Cucurbita_pepo_Summer_Squash_Yellow_and_Green_Zucchini_zucchine.jpg|commons:Courgette.jpg'],
-        ['Courgette', "Verte petite d'Alger", 'Cucurbita pepo', 'COU36', 2.65, 'Vert clair, très productive', 'commons:Courgette.jpg|commons:Courgette_J1.JPG'],
-        ['Concombre', 'Arménien', 'Cucumis melo var. flexuosus', 'CON14', 3.40, 'Jusqu\'à 1 m de long, goût de melon, jamais amer', 'commons:Armenian_cucumber_cross-section.JPG|commons:Dar_cucumber_seedlings.jpg'],
-        ['Concombre', 'Lemon', 'Cucumis sativus', 'CON26', 2.65, 'Ancienne variété d\'Inde, ronde et jaune comme un citron', 'commons:Lemon_cucumber_J1.JPG|commons:Dar_cucumber_seedlings.jpg'],
-        ['Concombre', "Rollison's Telegraph", 'Cucumis sativus', 'CON22', 3.40, 'Long concombre anglais du XIXe siècle', 'commons:Dar_cucumber_seedlings.jpg'],
-        ['Melon', 'Vieille France', 'Cucumis melo', 'MEL30', 2.10, 'Charentais brodé, chair orange très sucrée', 'commons:Charentais-Melone.jpg|commons:Cantaloupe.jpg|commons:Pumpkin_seeds_in_hand.jpg'],
-    ];
-
-    /** Aromatiques au gramme : [plante, variété, latin, réf., prix HT du plus petit sachet, grammes de ce sachet, conseil, photo]. */
-    public const AROMATICS = [
-        ['Basilic sacré', 'Tulsi', 'Ocimum tenuiflorum', 'BAS25', 7.05, 2, 'Plante sacrée en Inde, parfum de clou de girofle', 'commons:Ocimum_tenuiflorum.jpg|commons:Tulsi_(2070558022).jpg|commons:Basil_leaves.jpg'],
-        ['Basilic', 'Cannelle', 'Ocimum basilicum', 'BAS03', 4.65, 2, 'Tiges pourpres et parfum de cannelle', 'commons:Thai_basil_with_flowers.jpg|commons:Basil_leaves.jpg'],
-        ['Basilic', 'Citron', 'Ocimum × citriodorum', 'BAS04', 5.70, 2, 'Arôme de citron, parfait avec le poisson', 'commons:Lemon_Basil.jpg|commons:Basil_leaves.jpg'],
-        ['Basilic', 'Thaï', 'Ocimum basilicum var. thyrsiflora', 'BAS09', 5.70, 2, 'Anisé, indispensable de la cuisine asiatique', 'commons:Thai_basil.jpg|commons:Basil_leaves.jpg'],
-        ['Basilic', 'Réglisse', 'Ocimum basilicum', 'BAS18', 4.95, 2, 'Notes douces de réglisse', 'commons:Thai_basil_flower.jpg|commons:Basil_leaves.jpg'],
-        ['Basilic', 'Rouge Osmin', 'Ocimum basilicum', 'BAS06', 2.90, 2, 'Feuillage pourpre presque noir', 'commons:Ocimum_basilicum_001.JPG|commons:Basil_leaves.jpg'],
-        ['Basilic', 'Grec', 'Ocimum basilicum var. minimum', 'BAS10', 2.75, 2, 'Boule compacte à petites feuilles, idéal en pot', 'commons:Pot_of_basil_sprouts_(Ocimum_basilicum)_-_20050422.jpg|commons:Basil_leaves.jpg'],
-        ['Thym', "d'hiver", 'Thymus vulgaris', 'THY02', 3.85, 1, 'Fleurs rose pâle, en cuisine ou en tisane', 'commons:Fresh_thyme.jpg|commons:Thyme.jpg'],
-        ['Agastache', 'anisée', 'Agastache foeniculum', 'AGA01', 4.15, 1, 'Feuilles au goût d\'anis, fleurs adorées des abeilles', 'commons:Agastache_foeniculum.jpg|commons:Fresh_thyme.jpg'],
-        ['Hysope', 'officinale', 'Hyssopus officinalis', 'HYS01', 5.05, 1, 'Vivace mellifère à la saveur mentholée', 'commons:Hyssopus_officinalis.jpg|commons:Hyssopus_officinalis_004.JPG|commons:Rosemary_Plant.jpg'],
-        ['Sarriette', 'vivace', 'Satureja montana', 'SAR02', 1.80, 1, 'L\'herbe des haricots, résiste à la sécheresse', 'commons:Satureja_montana_1.JPG|commons:Satureja_montana_3c.JPG|commons:Thyme.jpg'],
-    ];
 
     /**
      * Plants potagers bio, 1 ou 2 plants par variété : [plante, variété, latin, plants, prix producteur TTC par plant, prix jardinerie par plant, conseil, photo].
@@ -140,20 +74,7 @@ final class Demo
     {
         $db = db();
         $has = fn(string $cat) => (int)$db->val('SELECT COUNT(*) FROM varieties WHERE category = ?', [$cat]) > 0;
-        if (!$has('seeds')) {
-            foreach (self::SEEDS as $i => [$n, $v, $l, $ref, $p10, $note, $ph]) {
-                $known = $ref === 'TO134';
-                $p100 = $known ? 9.40 : round($p10 * self::RATIO_100, 2);
-                $db->insert('varieties', ['category' => 'seeds', 'name' => $n, 'variety' => $v, 'latin_name' => $l, 'note' => $note, 'photo' => $ph,
-                    'portion_qty' => 10, 'unit' => 'graines', 'purchase_price' => round($p100 * self::VAT, 2), 'purchase_qty' => 100, 'market_price' => self::MARKET,
-                    'supplier' => $known ? 'Agrosemens' : 'Agrosemens (prix des 100 graines estimé)', 'supplier_ref' => $ref, 'position' => $i]);
-            }
-            foreach (self::AROMATICS as $i => [$n, $v, $l, $ref, $p, $grams, $note, $ph]) {
-                $db->insert('varieties', ['category' => 'seeds', 'name' => $n, 'variety' => $v, 'latin_name' => $l, 'note' => $note, 'photo' => $ph,
-                    'portion_qty' => 0.5, 'unit' => 'g', 'purchase_price' => round($p * self::VAT, 2), 'purchase_qty' => $grams, 'market_price' => self::MARKET,
-                    'supplier' => 'Agrosemens (plus petit sachet)', 'supplier_ref' => $ref, 'position' => 100 + $i]);
-            }
-        }
+        if (!$has('seeds')) Season::install();
         if (!$has('vegetables')) {
             foreach (self::VEGETABLES as $i => [$n, $v, $l, $qty, $buy, $shop, $note, $ph]) {
                 $db->insert('varieties', ['category' => 'vegetables', 'name' => $n, 'variety' => $v, 'latin_name' => $l, 'note' => $note, 'photo' => $ph,
@@ -193,15 +114,16 @@ final class Demo
                 ?: $db->insert('users', ['email' => $email, 'password_hash' => password_hash(random_token(), PASSWORD_DEFAULT), 'first_name' => $f, 'last_name' => $l]));
         }
 
+        $y = (int)date('Y') + 1;
         $groups = [
             ['Pins-Justaret', '31860', 'collectivite', 'Exemple — commune partenaire', 'Salle des fêtes', 'Place de la mairie, 31860 Pins-Justaret',
-                'commons:Vegetable_garden_1.JPG|commons:Raised_bed.jpg', 'open', 3, 'seeds', 'Graines rares — printemps ' . (date('Y') + 1), 30],
+                'commons:Vegetable_garden_1.JPG|commons:Raised_bed.jpg', 'open', 3, 'seeds', 'Graines bio — printemps ' . $y, 30],
             ['Pinsaguel', '31120', 'jardin_partage', 'Exemple — jardin partagé du quartier', 'Jardin partagé', 'Chemin des jardins, 31120 Pinsaguel',
-                'commons:Raised_vegetable_bed_at_Boreham,_Essex,_England.jpg|commons:Raised_bed.jpg', 'voting', 2, 'vegetables', 'Plants potagers — mai ' . (date('Y') + 1), 30],
+                'commons:Raised_vegetable_bed_at_Boreham,_Essex,_England.jpg|commons:Raised_bed.jpg', 'voting', 2, 'seeds', 'Graines bio — printemps ' . $y, 30],
             ['Roques', '31120', 'entreprise', 'Exemple — comité d\'entreprise', 'Hall d\'accueil', 'Zone d\'activités, 31120 Roques',
-                'commons:Piper-Orchard-Old-apple-tree-3369.jpg|commons:Apple_orchard.jpg', 'waiting', 1, 'fruit_trees', 'Arbres fruitiers — hiver ' . date('Y') . '-' . (date('Y') + 1), 60],
+                'commons:George_Washington_University_Community_Garden.jpg|commons:Raised_bed.jpg', 'waiting', 1, 'seeds', 'Graines bio — printemps ' . $y, 30],
             ['Portet-sur-Garonne', '31120', 'association', 'Exemple — association de quartier', 'Local associatif', '31120 Portet-sur-Garonne',
-                'commons:George_Washington_University_Community_Garden.jpg|commons:Raised_bed.jpg', 'waiting', 0, 'aromatics', 'Aromatiques — printemps ' . (date('Y') + 1), 30],
+                'commons:Vegetable_garden_detail.jpg|commons:Raised_bed.jpg', 'waiting', 0, 'seeds', 'Graines bio — printemps ' . $y, 30],
         ];
         $u = 0;
         mt_srand(2027);
@@ -210,7 +132,7 @@ final class Demo
             $gid = $db->insert('groups', ['slug' => Groups::uniqueSlug($name), 'name' => $name, 'commune' => $commune, 'postal_code' => $cp,
                 'organizer_type' => $type, 'organizer_name' => $org, 'pickup_place' => $place, 'pickup_address' => $addr, 'photo' => $photo,
                 'status' => 'active', 'validated_at' => now(),
-                'description' => "Un groupe d'achat de voisins à $commune : plants, arbres fruitiers, aromatiques ou graines, on choisit ensemble ce qu'on achète en gros à chaque saison, et les bénévoles préparent les packs."]);
+                'description' => "Un groupe d'achat de voisins à $commune : on vote ensemble les variétés de graines bio de la saison, l'association les achète en gros au prix coûtant, et les bénévoles préparent les packs."]);
             $members = array_slice($users, ($u * 4) % 10, 8);
             $u++;
             foreach ($members as $k => $mid) {

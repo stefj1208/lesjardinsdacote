@@ -89,6 +89,7 @@ $adminUi = ($bodyClass ?? '') === 'admin' || !empty($adminApp);
   <a href="/admin/a-valider"<?= $cur('/admin/a-valider') ?>><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>À valider<?php if ($toVal): ?><b class="app-badge"><?= $toVal ?></b><?php endif; ?></a>
   <a href="/admin/commandes"<?= $cur('/admin/commandes') ?>><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7h12l-1 13H7zM9 7a3 3 0 016 0"/></svg>Commandes</a>
   <a href="/admin/parametres"<?= $cur('/admin/parametres') ?>><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>Réglages</a>
+  <button type="button" data-admin-menu aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu</button>
 </nav>
 <?php endif; ?>
 <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/admin/sw.js',{scope:'/admin'}).catch(function(){});}</script>

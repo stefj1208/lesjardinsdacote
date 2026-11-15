@@ -575,7 +575,26 @@ function admin_pilot(): void
             'sales_open' => (int)db()->val("SELECT COUNT(*) FROM sales WHERE status IN ('voting','open')"),
             'posts_ready' => (int)db()->val("SELECT COUNT(*) FROM agent_items WHERE category = 'social' AND status = 'approved'"),
         ],
+        'launch' => admin_launch_steps(),
         'lastCron' => setting('last_cron_at')]);
+}
+
+/** Étapes clés du lancement, constatées par le site : [libellé, fait ?, explication, lien, bouton]. */
+function admin_launch_steps(): array
+{
+    $seeds = (int)db()->val("SELECT COUNT(*) FROM varieties WHERE category = 'seeds' AND is_active = 1");
+    $real = (int)db()->val("SELECT COUNT(*) FROM `groups` WHERE status = 'active' AND (organizer_name IS NULL OR organizer_name NOT LIKE 'Exemple —%')");
+    $legal = (string)setting('association_legal', '');
+    return [
+        ['Site en ligne sur lesjardinsdacote.fr', true, '', null, ''],
+        ['Catalogue de la saison : ' . $seeds . ' variétés de graines en photo', $seeds >= 20, 'Ajoutez ou réactivez des variétés.', '/admin/varietes?univers=seeds', 'Ouvrir'],
+        ['Plaquette pour les mairies prête à envoyer', is_file(PUBLIC_DIR . '/assets/docs/plaquette-collectivites.pdf'), '', '/collectivites', 'Voir'],
+        ['Boîte contact@ reliée au site', Inbox::ready(), 'Saisissez le mot de passe de la boîte dans les réglages.', '/admin/parametres', 'Régler'],
+        ['Assistants autorisés à écrire ici', (int)db()->val('SELECT COUNT(*) FROM agent_runs') > 0, 'Sur claude.ai → Paramètres → Capacités, ajoutez lesjardinsdacote.fr aux domaines autorisés.', null, ''],
+        ['Association déclarée (RNA renseigné)', (bool)preg_match('/W\d{9}/i', $legal), 'Après la déclaration en préfecture, saisissez le numéro RNA dans les réglages.', '/admin/parametres', 'Régler'],
+        ['Exemples fictifs retirés du site', setting('demo_data') !== '1', 'Le bandeau « site de démonstration » disparaît et le site ne montre plus que du réel. À faire juste avant d\'envoyer les plaquettes.', '/admin/parametres#demo', 'Passer en réel'],
+        ['Premier vrai groupe ouvert', $real > 0, 'Créez le groupe de votre commune pour lancer le premier vote.', '/admin/groupes', 'Créer'],
+    ];
 }
 
 function admin_pilot_action(): void
