@@ -290,3 +290,17 @@
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { document.body.classList.remove('menu-open'); mb.setAttribute('aria-expanded', 'false'); } });
   }
 })();
+
+
+/* v12 — recherche dans la liste des variétés au vote */
+(function () {
+  var box = document.querySelector('[data-vsearch]');
+  if (!box) return;
+  var norm = function (s) { return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); };
+  var cards = Array.prototype.slice.call(document.querySelectorAll('.vcard[data-text]'));
+  cards.forEach(function (c) { c._t = norm(c.getAttribute('data-text')); });
+  box.addEventListener('input', function () {
+    var q = norm(box.value.trim());
+    cards.forEach(function (c) { c.hidden = q !== '' && c._t.indexOf(q) === -1; });
+  });
+})();

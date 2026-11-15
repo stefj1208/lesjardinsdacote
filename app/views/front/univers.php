@@ -40,8 +40,8 @@ $inPack = $ex ? array_flip(array_map(fn($it) => (int)$it['variety_id'], $ex['ite
     <?php endif; ?>
     <div class="vgrid" data-vgrid>
       <?php foreach ($list as $k => $v): $inside = isset($inPack[(int)$v['id']]); ?>
-        <div class="vcard<?= $inside ? ' is-on' : '' ?>" data-family="<?= e($v['family']) ?>" data-reveal style="--i:<?= $k % 4 ?>;cursor:default">
-          <span class="vcard-photo"><?= ph($v['photo'], $v['name'] . ' ' . $v['variety'], '', 500) ?></span>
+        <div class="vcard<?= $inside ? ' is-on' : '' ?><?= $v['photo'] ? '' : ' vcard--text' ?>" data-family="<?= e($v['family']) ?>"<?= $k < 24 ? ' data-reveal' : '' ?> style="--i:<?= $k % 4 ?>;cursor:default">
+          <span class="vcard-photo"><?php if ($v['photo']): ?><?= ph($v['photo'], $v['name'] . ' ' . $v['variety'], '', 500) ?><?php else: ?><span class="ph vband"><?= e($v['name']) ?></span><?php endif; ?></span>
           <span class="vcard-body">
             <b><?= e($v['variety'] ?: $v['name']) ?></b>
             <small><?= e($v['name']) ?> · <?= e($v['portion']) ?></small>

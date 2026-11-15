@@ -163,7 +163,7 @@ function admin_sale_form(?string $id = null): void
     $s ??= ['id' => null, 'group_id' => input_int('groupe'), 'category' => 'seeds', 'title' => 'Graines potagères — printemps ' . (date('n') > 6 ? date('Y') + 1 : date('Y')), 'status' => 'waiting',
         'vote_days' => (int)setting('default_vote_days', 10), 'sale_days' => (int)setting('default_sale_days', 21), 'batch_size' => (int)setting('default_batch_size', 10),
         'max_per_order' => 3, 'pickup_at' => null, 'pickup_place' => '', 'pickup_address' => '', 'notes' => '', 'packs' => [], 'winner' => null,
-        'price' => (float)setting('default_pack_price', 30), 'max_choices' => 10, 'max_varieties' => null, 'varieties' => [], 'projection' => null, 'voters' => 0, 'votes_total' => 0];
+        'price' => (float)setting('default_pack_price', 'seed_pack_price', 30), 'max_choices' => 10, 'max_varieties' => null, 'varieties' => [], 'projection' => null, 'voters' => 0, 'votes_total' => 0];
     admin_view('sale_form', ['title' => $s['id'] ? 'Vente : ' . $s['title'] : 'Nouvelle vente', 's' => $s, 'groups' => db()->all("SELECT id, name FROM `groups` WHERE status <> 'archived' ORDER BY commune"),
         'catalog' => Varieties::all(null, true), 'section' => 'sales']);
 }
@@ -592,7 +592,7 @@ function admin_launch_steps(): array
         ['Boîte contact@ reliée au site', Inbox::ready(), 'Saisissez le mot de passe de la boîte dans les réglages.', '/admin/parametres', 'Régler'],
         ['Assistants autorisés à écrire ici', (int)db()->val('SELECT COUNT(*) FROM agent_runs') > 0, 'Sur claude.ai → Paramètres → Capacités, ajoutez lesjardinsdacote.fr aux domaines autorisés.', null, ''],
         ['Association déclarée (RNA renseigné)', (bool)preg_match('/W\d{9}/i', $legal), 'Après la déclaration en préfecture, saisissez le numéro RNA dans les réglages.', '/admin/parametres', 'Régler'],
-        ['Exemples fictifs retirés du site', setting('demo_data') !== '1', 'Le bandeau « site de démonstration » disparaît et le site ne montre plus que du réel. À faire juste avant d\'envoyer les plaquettes.', '/admin/parametres#demo', 'Passer en réel'],
+        ['Site en réel (les exemples fictifs sont signalés un par un)', true, '', null, ''],
         ['Premier vrai groupe ouvert', $real > 0, 'Créez le groupe de votre commune pour lancer le premier vote.', '/admin/groupes', 'Créer'],
     ];
 }
@@ -661,7 +661,7 @@ function admin_settings_save(): void
         flash($ok ? 'success' : 'error', $ok ? 'Email de test envoyé.' : 'Échec de l\'envoi : vérifiez les réglages SMTP dans app/config.php.');
         redirect('/admin/parametres');
     }
-    if (input('purge_demo')) { Demo::purge(); flash('success', 'Données de démonstration supprimées.'); redirect('/admin'); }
+    if (input('purge_demo')) { Demo::purge(); flash('success', 'Exemples fictifs retirés.'); redirect('/admin'); }
     if (input('load_demo')) { if (!db()->val("SELECT 1 FROM `groups` WHERE organizer_name LIKE 'Exemple —%' LIMIT 1")) Demo::seed(); flash('success', 'Données de démonstration chargées.'); redirect('/admin'); }
     if (input('retry_photos')) { db()->exec("UPDATE photos SET status = 'pending', attempts = 0 WHERE status IN ('missing','failed')"); flash('success', 'Les photos seront retentées au prochain passage de la tâche planifiée.'); redirect('/admin/parametres'); }
     foreach (SETTING_KEYS as $k) {

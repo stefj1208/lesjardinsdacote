@@ -1239,3 +1239,18 @@ body.admin { background: var(--paper); }
 .seedcamp-deal b { color: var(--green-dd); }
 .feat-pill { display: inline-block; vertical-align: middle; margin-left: 6px; padding: 3px 9px; border-radius: 999px; background: #F2B63C; color: #0F172B; font: 800 .72rem var(--f-body); letter-spacing: .02em; }
 .ucard--feat { box-shadow: 0 0 0 3px var(--green), var(--shadow, 0 10px 30px rgba(15,23,43,.08)); }
+
+
+/* v12 — site en réel : les groupes d'exemple sont signalés un par un */
+.status--example { background: #FFF4DC; color: #6B4A00; border: 1px dashed #E0A100; margin-left: 6px; }
+.example-note { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; margin: 0 0 18px; padding: 14px 16px; border-radius: 14px; background: #FFF4DC; color: #6B4A00; border: 1px dashed #E0A100; line-height: 1.45; }
+.example-note .btn { margin-left: auto; }
+.vcard--nophoto .vcard-ph, .vcard .ph-empty { background: linear-gradient(135deg, #E9F3E6, #F1F8FF); }
+
+.vcard--text { grid-template-rows: 44px auto; }
+.vcard--text .vcard-photo > .ph.vband { height: 44px; display: flex; align-items: center; padding: 0 14px; background: linear-gradient(120deg, #E4F0E2, #F1F8FF); color: var(--green-dd); font: 800 .8rem var(--f-body); letter-spacing: .06em; text-transform: uppercase; }
+.vsearch { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin: 0 0 14px; }
+.vsearch input { flex: 1 1 260px; max-width: 460px; padding: 12px 16px; border: 2px solid var(--line); border-radius: 999px; font: inherit; background: #fff; }
+.vsearch input:focus { outline: none; border-color: var(--green); }
+.vcard[hidden] { display: none; }
+@media (max-width: 560px) { .vcard--text { grid-template-rows: 38px auto; } .vcard--text .vcard-photo > .ph.vband { height: 38px; } }

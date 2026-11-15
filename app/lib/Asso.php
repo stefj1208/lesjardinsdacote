@@ -60,16 +60,16 @@ final class Asso
     /** Montant réuni pour les plantations (commandes dont le lot est complet). */
     public static function fundTotal(): float
     {
-        return (float)db()->val("SELECT COALESCE(SUM(fund_amount), 0) FROM orders WHERE status IN ('confirmed','ready','collected')");
+        return (float)db()->val("SELECT COALESCE(SUM(fund_amount), 0) FROM orders WHERE status IN ('confirmed','ready','collected') AND reference NOT LIKE 'DEMO-%'");
     }
 
     public static function stats(): array
     {
         return [
             'fund' => self::fundTotal(),
-            'members' => (int)db()->val('SELECT COUNT(DISTINCT user_id) FROM memberships WHERE year = ?', [self::year()]),
+            'members' => (int)db()->val("SELECT COUNT(DISTINCT m.user_id) FROM memberships m JOIN users u ON u.id = m.user_id WHERE m.year = ? AND u.email NOT LIKE '%@exemple.test'", [self::year()]),
             'saved' => (float)db()->val("SELECT COALESCE(SUM(GREATEST((SELECT COALESCE(SUM(pi.market_price),0) FROM pack_items pi WHERE pi.pack_id = o.pack_id) - o.unit_price, 0) * o.quantity), 0)
-                FROM orders o WHERE o.status IN ('confirmed','ready','collected')"),
+                FROM orders o WHERE o.status IN ('confirmed','ready','collected') AND o.reference NOT LIKE 'DEMO-%'"),
         ];
     }
 

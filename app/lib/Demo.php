@@ -98,6 +98,19 @@ final class Demo
         }
     }
 
+    /** Groupe d'exemple (fictif) : visible pour montrer le fonctionnement, mais on ne peut ni le rejoindre, ni y voter, ni y acheter. */
+    public static function isExample(?array $group): bool
+    {
+        return $group !== null && str_starts_with((string)($group['organizer_name'] ?? ''), 'Exemple —');
+    }
+
+    public static function isExampleGroupId(int $groupId): bool
+    {
+        return self::isExample(db()->one('SELECT organizer_name FROM `groups` WHERE id = ?', [$groupId]));
+    }
+
+    public const EXAMPLE_NOTICE = 'Ce groupe est un exemple fictif, là pour montrer comment se passe un achat groupé. Pour participer pour de vrai, rejoignez le groupe de votre commune ou proposez-en un.';
+
     public static function seed(): void
     {
         $db = db();
@@ -116,7 +129,7 @@ final class Demo
 
         $groups = [
             ['Pins-Justaret', '31860', 'collectivite', 'Exemple — commune partenaire', 'Salle des fêtes', 'Place de la mairie, 31860 Pins-Justaret',
-                'commons:Vegetable_garden_1.JPG|commons:Raised_bed.jpg', 'open', 3, 'seeds', 'Graines bio — printemps ' . (date('Y') + 1), 30],
+                'commons:Vegetable_garden_1.JPG|commons:Raised_bed.jpg', 'open', 3, 'seeds', 'Graines bio — printemps ' . (date('Y') + 1), Cat::packPrice('seeds')],
             ['Pinsaguel', '31120', 'jardin_partage', 'Exemple — jardin partagé du quartier', 'Jardin partagé', 'Chemin des jardins, 31120 Pinsaguel',
                 'commons:Raised_vegetable_bed_at_Boreham,_Essex,_England.jpg|commons:Raised_bed.jpg', 'voting', 2, 'vegetables', 'Plants potagers — mai ' . (date('Y') + 1), 30],
             ['Roques', '31120', 'entreprise', 'Exemple — comité d\'entreprise', 'Hall d\'accueil', 'Zone d\'activités, 31120 Roques',
@@ -128,7 +141,7 @@ final class Demo
         mt_srand(2027);
         foreach ($groups as [$commune, $cp, $type, $org, $place, $addr, $photo, $stage, $vol, $cat, $title, $price]) {
             $name = Groups::defaultName($commune);
-            $gid = $db->insert('groups', ['slug' => Groups::uniqueSlug($name), 'name' => $name, 'commune' => $commune, 'postal_code' => $cp,
+            $gid = $db->insert('groups', ['slug' => Groups::uniqueSlug('exemple ' . $commune), 'name' => $name, 'commune' => $commune, 'postal_code' => $cp,
                 'organizer_type' => $type, 'organizer_name' => $org, 'pickup_place' => $place, 'pickup_address' => $addr, 'photo' => $photo,
                 'status' => 'active', 'validated_at' => now(),
                 'description' => "Un groupe d'achat de voisins à $commune : plants, arbres fruitiers, aromatiques ou graines bio, on choisit ensemble ce qu'on achète en gros à chaque saison, l'association achète au prix coûtant et les bénévoles préparent les packs."]);
@@ -166,14 +179,14 @@ final class Demo
                     $buyer = $users[$k % count($users)];
                     $bu = $db->one('SELECT * FROM users WHERE id = ?', [$buyer]);
                     $db->insert('orders', ['reference' => 'DEMO-' . $sid . '-' . $k, 'user_id' => $buyer, 'sale_id' => $sid, 'pack_id' => $packId, 'quantity' => 1,
-                        'unit_price' => 30, 'amount' => 30 + Asso::fee(), 'goods_amount' => 30, 'fee_amount' => Asso::fee(), 'fund_amount' => Asso::fundShare(), 'batch_no' => $batch, 'status' => $batch === 1 ? 'confirmed' : 'pending',
+                        'unit_price' => $price, 'amount' => $price + Asso::fee(), 'goods_amount' => $price, 'fee_amount' => Asso::fee(), 'fund_amount' => Asso::fundShare(), 'batch_no' => $batch, 'status' => $batch === 1 ? 'confirmed' : 'pending',
                         'payment_mode' => 'on_pickup', 'payment_status' => $batch === 1 ? 'to_collect' : 'pending', 'from_vote' => $k < 6 ? 1 : 0,
                         'pickup_token' => random_token(16), 'pickup_code' => strtoupper(substr(random_token(4), 0, 6)),
                         'bin_code' => mb_strtoupper(mb_substr($bu['last_name'], 0, 1)), 'cgv_accepted_at' => now()]);
                 }
             }
         }
-        $db->insert('groups', ['slug' => Groups::uniqueSlug(Groups::defaultName('Villate')), 'name' => Groups::defaultName('Villate'), 'commune' => 'Villate',
+        $db->insert('groups', ['slug' => Groups::uniqueSlug('exemple Villate'), 'name' => Groups::defaultName('Villate'), 'commune' => 'Villate',
             'postal_code' => '31860', 'organizer_type' => 'habitants', 'organizer_name' => 'Exemple — proposition d\'habitants', 'contact_name' => 'Exemple',
             'contact_email' => 'proposition@exemple.test', 'status' => 'proposed', 'description' => 'Proposition reçue depuis le formulaire « Lancer un groupe ».']);
 

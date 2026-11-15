@@ -2,7 +2,6 @@
   <h1>Tableau de bord</h1>
   <form method="post" action="/admin/taches"><?= csrf_field() ?><button class="btn btn--ghost btn--sm" type="submit">Lancer les tâches maintenant</button></form>
 </div>
-<?php if (setting('demo_data') === '1'): ?><div class="notice mb-2" style="margin-bottom:1rem">Les données de démonstration sont chargées (bandeau visible sur le site). Supprimez-les dans <a href="/admin/parametres">Paramètres</a> avant d'ouvrir au public.</div><?php endif; ?>
 <?php if (!$lastCron || strtotime($lastCron) < time() - 3600): ?><div class="flash flash--error">La tâche planifiée ne tourne pas : sans elle, les votes et les ventes ne s'ouvrent ni ne se clôturent automatiquement.</div><?php endif; ?>
 <?php if ($k['proposed']): ?><div class="callout mb-2" style="margin-bottom:1rem"><div class="row row--between"><strong><?= $k['proposed'] ?> <?= plural($k['proposed'], 'proposition de groupe à valider', 'propositions de groupe à valider') ?></strong><a class="btn btn--sm" href="/admin/groupes?statut=proposed">Voir</a></div></div><?php endif; ?>
 <div class="kpis">

@@ -38,6 +38,7 @@
       <div class="field"><label for="ds">Durée de la vente (jours)</label><input id="ds" name="default_sale_days" type="number" min="1" value="<?= e($s['default_sale_days']) ?>"></div>
       <div class="field"><label for="db">Taille d'un lot</label><input id="db" name="default_batch_size" type="number" min="1" value="<?= e($s['default_batch_size']) ?>"></div>
       <div class="field"><label for="dp">Prix d'un pack (€)</label><input id="dp" name="default_pack_price" inputmode="decimal" value="<?= e($s['default_pack_price']) ?>"></div>
+      <div class="field"><label for="sp">Prix d'un pack de graines (€)</label><input id="sp" name="seed_pack_price" inputmode="decimal" value="<?= e((string)setting('seed_pack_price', '19')) ?>"></div>
       <div class="field"><label for="prh">Relance des retardataires (heures)</label><input id="prh" name="pickup_reminder_hours" type="number" value="<?= e($s['pickup_reminder_hours']) ?>"></div>
     </div>
     <h2 class="mt-4">Composition des packs</h2>
@@ -88,7 +89,7 @@
     </div>
     <form class="panel" id="demo" method="post" action="/admin/parametres" data-confirm="<?= $demo ? 'Supprimer les groupes, votes, achats et membres fictifs ?' : 'Charger les données de démonstration ?' ?>">
       <?= csrf_field() ?><h3>Démonstration</h3>
-      <?php if ($demo): ?><p class="small">Passe le site en réel : retire les groupes « Exemple », leurs votes et achats, les membres fictifs et le bandeau « site de démonstration ». Le catalogue de variétés reste en place.</p><button class="btn btn--danger btn--sm" name="purge_demo" value="1">Passer le site en réel</button>
+      <?php if ($demo): ?><p class="small">Le site est en réel. Les groupes « Exemple » sont affichés avec la mention « Exemple fictif » et fermés aux inscriptions ; retirez-les quand vos vrais groupes suffisent à montrer le fonctionnement. Le catalogue reste en place.</p><button class="btn btn--danger btn--sm" name="purge_demo" value="1">Retirer les exemples fictifs</button>
       <?php else: ?><p class="small">Ajoute des packs avec photos et 4 groupes fictifs à différents stades.</p><button class="btn btn--ghost btn--sm" name="load_demo" value="1">Charger la démo</button><?php endif; ?>
     </form>
   </aside>

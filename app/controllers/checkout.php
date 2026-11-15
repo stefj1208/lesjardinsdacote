@@ -18,6 +18,7 @@ function cart_add(): void
     $qty = max(1, input_int('qty', 1));
     $s = Sales::find($saleId);
     if (!$s) abort(404);
+    if (Demo::isExampleGroupId((int)$s['group_id'])) { flash('info', Demo::EXAMPLE_NOTICE); redirect('/groupes/' . $s['group_slug']); }
     if (!Auth::check()) {
         $_SESSION['pending_cart'] = ['sale' => $saleId, 'pack' => $packId, 'qty' => $qty];
         $_SESSION['intended'] = '/panier';

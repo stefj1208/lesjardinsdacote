@@ -4,7 +4,7 @@ declare(strict_types=1);
 /** Mise à jour automatique de la base au premier passage après un déploiement. */
 final class Migrator
 {
-    public const VERSION = 11;
+    public const VERSION = 12;
     private static bool $reseed = false;
 
     public static function execFile(string $file): void
@@ -33,6 +33,7 @@ final class Migrator
             if ($v < 9) self::to9();
             if ($v < 10) self::to10();
             if ($v < 11) self::to11();
+            if ($v < 12) self::to12();
             if (self::$reseed) Demo::seedCatalog();
             if (self::$reseed && setting('demo_data') === '1') { Demo::purge(); Demo::seed(); }
         } finally {
@@ -182,5 +183,19 @@ final class Migrator
         }
         set_setting('schema_version', '11');
         audit('migrate', 'schéma v11 : ' . $n . ' variétés de graines au catalogue');
+    }
+
+    /**
+     * v11 → v12 : site en réel. Catalogue de graines aligné sur le catalogue professionnel 2027 (références et prix réels),
+     * pack de graines à 19 €, exemples fictifs conservés mais signalés un par un et fermés aux inscriptions.
+     */
+    private static function to12(): void
+    {
+        if (setting('seed_pack_price', '') === '') set_setting('seed_pack_price', '19');
+        $n = Season::install();
+        if (setting('demo_data') === '1') { Demo::purge(); Demo::seed(); }
+        db()->exec("UPDATE todos SET done_at = NOW() WHERE done_at IS NULL AND title LIKE 'Confirmer les prix des graines%'");
+        set_setting('schema_version', '12');
+        audit('migrate', 'schéma v12 : ' . $n . ' variétés de graines, prix du catalogue 2027, site en réel');
     }
 }

@@ -12,13 +12,13 @@ function front_home(): void
     if ($hero && $sale) $hero['link'] = '/groupes/' . $sale['group_slug'];
     $catalog = Varieties::all('seeds', true);
     if (!$hero && $catalog) {
-        $hero = Varieties::toPack(Varieties::compose($catalog, (float)setting('default_pack_price', '30')), (float)setting('default_pack_price', '30'), 'Exemple de pack');
+        $hero = Varieties::toPack(Varieties::compose($catalog, Cat::packPrice('seeds')), Cat::packPrice('seeds'), 'Exemple de pack');
         $hero['link'] = '/groupes';
     }
     $allVarieties = Varieties::all(null, true);
     $univers = Varieties::overview();
     $best = max(array_map(fn($u) => (int)($u['example']['save_pct'] ?? 0), $univers) ?: [0]);
-    view('front/home', ['neighbours' => (int)db()->val("SELECT COUNT(*) FROM users WHERE role <> 'admin'"), 'mapPoints' => Geo::mapPoints(), 'fund' => Asso::fundTotal(), 'groups' => $groups, 'heroPack' => $hero, 'heroSale' => $sale, 'catalog' => $catalog, 'varieties' => $allVarieties,
+    view('front/home', ['neighbours' => (int)db()->val("SELECT COUNT(*) FROM users WHERE role <> 'admin' AND email NOT LIKE '%@exemple.test'"), 'mapPoints' => Geo::mapPoints(), 'fund' => Asso::fundTotal(), 'groups' => $groups, 'heroPack' => $hero, 'heroSale' => $sale, 'catalog' => $catalog, 'varieties' => $allVarieties,
         'univers' => $univers, 'bestPct' => $best]);
 }
 
@@ -82,6 +82,7 @@ function front_group_join(string $slug): void
 {
     $g = Groups::findBySlug($slug);
     if (!$g || $g['status'] !== 'active') abort(404);
+    if (Demo::isExample($g)) { flash('info', Demo::EXAMPLE_NOTICE); redirect('/lancer-un-groupe'); }
     if (!Auth::check()) {
         $_SESSION['intended'] = '/groupes/' . $slug;
         $_SESSION['pending_join'] = ['group' => (int)$g['id'], 'role' => input('role') === 'volunteer' ? 'volunteer' : 'member'];
@@ -101,13 +102,14 @@ function apply_pending_join(): void
 {
     $p = $_SESSION['pending_join'] ?? null;
     unset($_SESSION['pending_join']);
-    if ($p && Auth::id()) Groups::join((int)$p['group'], (int)Auth::id(), $p['role']);
+    if ($p && Auth::id() && !Demo::isExampleGroupId((int)$p['group'])) Groups::join((int)$p['group'], (int)Auth::id(), $p['role']);
 }
 
 function front_vote(string $saleId): void
 {
     $s = Sales::find((int)$saleId);
     if (!$s) abort(404);
+    if (Demo::isExampleGroupId((int)$s['group_id'])) { flash('info', Demo::EXAMPLE_NOTICE); redirect('/groupes/' . $s['group_slug']); }
     $ids = array_map('intval', (array)($_POST['varieties'] ?? []));
     if (!Auth::check()) {
         $_SESSION['intended'] = '/groupes/' . $s['group_slug'];
@@ -136,7 +138,7 @@ function front_organizers(): void
 {
     $commune = trim((string)input('commune', ''));
     $existing = $commune !== '' ? db()->one("SELECT name, slug, commune FROM `groups` WHERE status = 'active' AND commune = ?", [$commune]) : null;
-    $price = (float)setting('default_pack_price', '30');
+    $price = Cat::packPrice('seeds');
     $example = Varieties::toPack(Varieties::compose(Varieties::all('seeds', true), $price), $price, 'Exemple');
     view('front/organizers', ['commune' => $commune, 'existing' => $existing, 'u' => Auth::user(), 'title' => 'Collectivités, entreprises, associations',
         'bestPct' => (int)$example['save_pct'],

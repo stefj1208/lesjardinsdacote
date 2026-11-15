@@ -20,12 +20,15 @@ if (!$readonly) usort($list, fn($a, $b) => [-(int)$a['votes'], (int)$a['position
       <?php foreach ($fams as $f => $n): ?><button type="button" class="chip" data-fam="<?= e($f) ?>"><?= e($f) ?> (<?= $n ?>)</button><?php endforeach; ?>
     </div>
   <?php endif; ?>
+  <?php if (count($list) > 30): ?>
+    <div class="vsearch"><label class="sr-only" for="vsearch">Chercher une variété</label><input id="vsearch" type="search" placeholder="Chercher une variété : tomate, basilic, Crimée…" data-vsearch autocomplete="off"><small class="muted"><?= count($list) ?> variétés proposées</small></div>
+  <?php endif; ?>
   <div class="vgrid">
     <?php foreach ($list as $k => $v): $on = in_array((int)$v['id'], $myChoices ?? [], true); $inside = isset($inPack[(int)$v['id']]); ?>
-      <label class="vcard<?= $on ? ' is-on' : '' ?>" data-family="<?= e($v['family']) ?>" data-reveal style="--i:<?= $k % 4 ?>">
+      <label class="vcard<?= $on ? ' is-on' : '' ?><?= $v['photo'] ? '' : ' vcard--text' ?>" data-family="<?= e($v['family']) ?>" data-text="<?= e(mb_strtolower($v['name'] . ' ' . $v['variety'])) ?>"<?= $k < 24 ? ' data-reveal style="--i:' . ($k % 4) . '"' : '' ?>>
         <?php if (!$readonly): ?><input type="checkbox" name="varieties[]" value="<?= (int)$v['id'] ?>"<?= $on ? ' checked' : '' ?>><?php endif; ?>
         <span class="vcard-photo">
-          <?= ph($v['photo'], $v['name'] . ' ' . $v['variety'], '', 500) ?>
+          <?php if ($v['photo']): ?><?= ph($v['photo'], $v['name'] . ' ' . $v['variety'], '', 500) ?><?php else: ?><span class="ph vband"><?= e($v['name']) ?></span><?php endif; ?>
           <?php if (!$readonly): ?><span class="vcheck" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M3.5 8.5l3 3 6-7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><?php endif; ?>
           <?php if ($s['status'] === 'voting'): ?><span class="vvotes"><?= (int)$v['votes'] ?> <?= plural((int)$v['votes'], 'voix', 'voix') ?></span><?php endif; ?>
         </span>

@@ -33,6 +33,7 @@ final class Cat
     /** Prix de pack conseillé par univers (les arbres coûtent plus cher à l'unité). */
     public static function packPrice(string $cat): float
     {
+        if ($cat === 'seeds') return (float)setting('seed_pack_price', '19');
         return $cat === 'fruit_trees' ? 60.0 : (float)setting('default_pack_price', '30');
     }
 

@@ -1,6 +1,6 @@
 <?php $s = $g['sale']; $ps = $g['public_status']; $best = $s['showcase'] ?? null; ?>
 <a class="group-card on-photo" href="/groupes/<?= e($g['slug']) ?>" data-reveal style="--i:<?= (int)($i ?? 0) % 3 ?>">
-  <span class="card-flag"><?php partial('partials/status', ['s' => $ps]) ?></span>
+  <span class="card-flag"><?php partial('partials/status', ['s' => $ps]) ?><?php if (Demo::isExample($g)): ?><span class="status status--example">Exemple fictif</span><?php endif; ?></span>
   <?= ph($g['photo'], 'Jardin à ' . $g['commune'], '', 800) ?>
   <div class="group-card-body">
     <h3><?= e($g['name']) ?></h3>

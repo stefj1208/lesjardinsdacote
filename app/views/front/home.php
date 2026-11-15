@@ -28,7 +28,12 @@ $pct = fn(array $u): int => (int)($u['save'] ?? ($u['example']['save_pct'] ?? 0)
         <input id="hq" name="q" placeholder="Votre commune ou code postal" autocomplete="address-level2">
         <button class="btn" type="submit">Trouver mon groupe <span class="arr" aria-hidden="true">→</span></button>
       </form>
-      <p class="neighbours rise" style="--i:8"><span class="nb-faces" aria-hidden="true"><i></i><i></i><i></i></span><span>Déjà <b data-count="<?= (int)$neighbours ?>"><?= (int)$neighbours ?></b> <?= plural((int)$neighbours, 'voisin inscrit', 'voisins inscrits') ?> dans <?= count($groups) ?> <?= plural(count($groups), 'commune', 'communes') ?></span></p>
+      <?php $realGroups = count(array_filter($groups, fn($g) => !Demo::isExample($g))); ?>
+      <?php if ($neighbours > 0 && $realGroups > 0): ?>
+        <p class="neighbours rise" style="--i:8"><span class="nb-faces" aria-hidden="true"><i></i><i></i><i></i></span><span>Déjà <b data-count="<?= (int)$neighbours ?>"><?= (int)$neighbours ?></b> <?= plural((int)$neighbours, 'voisin inscrit', 'voisins inscrits') ?> dans <?= $realGroups ?> <?= plural($realGroups, 'commune', 'communes') ?></span></p>
+      <?php else: ?>
+        <p class="neighbours rise" style="--i:8"><span class="nb-faces" aria-hidden="true"><i></i><i></i><i></i></span><span>Les premiers groupes se lancent : <a href="/lancer-un-groupe">ouvrez celui de votre commune</a></span></p>
+      <?php endif; ?>
       <ol class="steps3 rise" style="--i:9" aria-label="Comment ça marche, en trois étapes">
         <li><b>1</b> Je rejoins le groupe de ma commune</li>
         <li><b>2</b> On vote les variétés, l'association achète au prix coûtant</li>

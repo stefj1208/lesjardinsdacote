@@ -55,7 +55,7 @@ $adminUi = ($bodyClass ?? '') === 'admin' || !empty($adminApp);
 </header>
 <?php else: ?>
 <header class="site-head">
-  <?php if (setting('demo_data') === '1'): ?><div class="demo-bar">Site de démonstration<span class="hide-sm"> : les groupes, votes et achats affichés sont fictifs</span>.</div><?php endif; ?>
+  <?php if (false): ?><?php endif; ?>
   <div class="wrap">
     <a class="brand" href="/" aria-label="<?= e($siteName) ?> — accueil"><?php partial('partials/logo') ?><span class="brand-name">Les jardins d'à côté</span></a>
     <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav" data-nav-toggle>

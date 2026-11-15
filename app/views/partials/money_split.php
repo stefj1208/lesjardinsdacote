@@ -1,6 +1,6 @@
 <?php
 /** Où vont les euros d'une commande d'un pack. @var float $price */
-$price = $price ?? (float)setting('default_pack_price', '30');
+$price = $price ?? Cat::packPrice('seeds');
 $fee = Asso::fee(); $fund = Asso::fundShare(); $ops = max(0, $fee - $fund); $tot = $price + $fee;
 $pc = fn(float $x) => $tot > 0 ? round($x / $tot * 100, 1) : 0;
 ?>

@@ -14,6 +14,10 @@ $curIdx = array_search($ps, $order, true);
 
 <div class="wrap">
   <header class="g-head" data-reveal>
+  <?php if (Demo::isExample($g)): ?>
+    <div class="example-note" role="note"><b>Exemple fictif.</b> Ce groupe, ses membres, ses votes et ses achats sont inventés pour montrer comment se passe un achat groupé. On ne peut ni le rejoindre ni y commander.
+      <a class="btn btn--sm" href="/lancer-un-groupe">Lancer un vrai groupe dans ma commune <span class="arr" aria-hidden="true">→</span></a></div>
+  <?php endif; ?>
     <div class="row row--between" style="align-items:flex-start">
       <div>
         <div class="row"><?php partial('partials/status', ['s' => $ps, 'long' => true]) ?><?php if ($s): ?><span class="chip"><?= e(Cat::label($s['category'])) ?></span><?php endif; ?></div>
