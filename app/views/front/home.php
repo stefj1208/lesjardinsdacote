@@ -14,13 +14,15 @@ foreach ($seedList as $v) if ($v['supplier_ref']) $byRef[$v['supplier_ref']] = $
 $show = array_values(array_filter(array_map(fn($r) => $byRef[$r] ?? null, Season::SHOWCASE)));
 if (count($show) < 8) $show = array_slice($seedList, 0, 12);
 $seedU = $univers['seeds'] ?? null;
+// Économie affichée : valeur fixée dans Cat (aromatiques, fleurs) sinon celle calculée sur l'exemple de pack.
+$pct = fn(array $u): int => (int)($u['save'] ?? ($u['example']['save_pct'] ?? 0));
 ?>
 <section class="h5">
   <div class="wrap h5-grid">
     <div class="h5-text">
-      <p class="eyebrow eyebrow--start rise" style="--i:0">Association loi 1901 · achats groupés entre voisins</p>
-      <h1 class="h5-title"><?= $words('Votre jardin, acheté en gros') ?> <em><?= $words('avec vos voisins.', 5) ?></em></h1>
-      <p class="lede rise" style="--i:6">Plants potagers, arbres fruitiers, aromatiques, graines bio : dans votre commune, on choisit ensemble, l'association achète en votre nom <strong>au prix coûtant</strong>, des bénévoles préparent les packs. Seuls <?= eur(Asso::fee()) ?> de frais par commande, dont <?= eur(Asso::fundShare()) ?> pour planter des arbres.</p>
+      <p class="h5-kicker rise" style="--i:0">Association à but non lucratif d'achats groupés entre voisins / collègues</p>
+      <h1 class="h5-title"><?= $words('Achetez groupé et en gros') ?> <em><?= $words('avec vos voisins et collègues.', 5) ?></em></h1>
+      <p class="lede rise" style="--i:6">Plants potagers, arbres fruitiers, aromatiques, graines bio : dans votre commune, on choisit ensemble, l'association achète en votre nom <strong>au prix coûtant</strong>, des bénévoles préparent les packs. Faites des économies allant <strong>jusqu'à −72&nbsp;%</strong> : par exemple, 10 graines de tomates à <strong>0,94&nbsp;€</strong> au lieu de 3,90&nbsp;€ au prix public.</p>
       <form class="hero-search rise" style="--i:7" action="/groupes" method="get" role="search">
         <label class="sr-only" for="hq">Votre commune</label>
         <input id="hq" name="q" placeholder="Votre commune ou code postal" autocomplete="address-level2">
@@ -33,14 +35,14 @@ $seedU = $univers['seeds'] ?? null;
         <li><b>3</b> Je retire mon pack près de chez moi</li>
       </ol>
       <nav class="uchips rise" style="--i:10" aria-label="Univers">
-        <?php foreach ($univers as $u): ?><a class="uchip" href="/univers/<?= e($u['slug']) ?>"><?= e($u['label']) ?><?php if (!empty($u['example']['save_pct'])): ?> <b>−<?= (int)$u['example']['save_pct'] ?>&nbsp;%</b><?php endif; ?></a><?php endforeach; ?>
+        <?php foreach ($univers as $u): ?><a class="uchip" href="/univers/<?= e($u['slug']) ?>"><?= e($u['label']) ?><?php if ($pct($u)): ?> <b>−<?= $pct($u) ?>&nbsp;%</b><?php endif; ?></a><?php endforeach; ?>
       </nav>
     </div>
     <div class="h5-bento" aria-hidden="true">
       <?php $n = 0; foreach ($tiles as $u): $n++; ?>
-        <a class="tile tile--<?= $n ?> reveal-img" href="/univers/<?= e($u['slug']) ?>" tabindex="-1" style="--i:<?= $n ?>" data-speed="<?= [1 => '-0.04', 2 => '0.05', 3 => '-0.02', 4 => '0.06'][$n] ?>">
+        <a class="tile tile--<?= $n ?> reveal-img" href="/univers/<?= e($u['slug']) ?>" tabindex="-1" style="--i:<?= $n ?>">
           <?= ph($u['photo'], '', '', 900, $n <= 2) ?>
-          <span class="tile-label"><?= e($u['label']) ?><?php if (!empty($u['example']['save_pct'])): ?><b>−<?= (int)$u['example']['save_pct'] ?> %</b><?php endif; ?></span>
+          <span class="tile-label"><?= e($u['label']) ?><?php if ($pct($u)): ?><b>−<?= $pct($u) ?> %</b><?php endif; ?></span>
         </a>
       <?php endforeach; ?>
       <?php if ($heroPack): ?>
@@ -57,7 +59,7 @@ $seedU = $univers['seeds'] ?? null;
 
 <?php if ($varieties): ?>
 <div class="ticker" aria-label="Quelques plantes proposées">
-  <div class="ticker-track">
+  <div class="ticker-track" style="--dur:<?= max(90, count($varieties) * 4) ?>s">
     <?php for ($k = 0; $k < 2; $k++): ?><div style="display:flex"<?= $k ? ' aria-hidden="true"' : '' ?>><?php foreach ($varieties as $v): ?><span><em><?= e($v['name']) ?></em> <?= e($v['variety']) ?></span><?php endforeach; ?></div><?php endfor; ?>
   </div>
 </div>
@@ -74,7 +76,7 @@ $seedU = $univers['seeds'] ?? null;
         <a class="ucard" href="/univers/<?= e($u['slug']) ?>" data-tilt>
           <span class="ucard-photo reveal-img" style="--i:<?= $k++ ?>"><?= ph($u['photo'], $u['label'], '', 900) ?></span>
           <span class="ucard-body">
-            <span class="row row--between"><span class="chip chip--ok"><?= e($u['season']) ?></span><?php if ($ex && $ex['save_pct']): ?><span class="save-pill">−<?= (int)$ex['save_pct'] ?> %</span><?php endif; ?></span>
+            <span class="row row--between"><span class="chip chip--ok"><?= e($u['season']) ?></span><?php if ($pct($u)): ?><span class="save-pill">−<?= $pct($u) ?> %</span><?php endif; ?></span>
             <span class="ucard-title"><?= e($u['label']) ?></span>
             <span class="ucard-intro"><?= e($u['intro']) ?></span>
             <span class="ucard-ex"><?php foreach ($u['examples'] as $x): ?><span><?= e($x) ?></span><?php endforeach; ?></span>

@@ -128,10 +128,9 @@
     });
   }
 
-  /* ---------- 4. Goutte d'eau et traînée de pollen (souris uniquement) ---------- */
+  /* ---------- 4. Traînée de pollen (souris uniquement ; le curseur normal reste visible) ---------- */
   if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
-  var drop = doc.createElement('div'); drop.className = 'drop is-hidden'; body.appendChild(drop);
-  html.classList.add('has-drop');
+  var drop = doc.createElement('div'); // goutte retirée : élément fantôme non affiché, pour garder le code simple
   var cv = doc.createElement('canvas'); cv.className = 'pollen'; body.appendChild(cv);
   var ctx = cv.getContext('2d'), dpr = Math.min(2, window.devicePixelRatio || 1), parts = [], running = false;
   function size() { cv.width = innerWidth * dpr; cv.height = innerHeight * dpr; cv.style.width = innerWidth + 'px'; cv.style.height = innerHeight + 'px'; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); }
