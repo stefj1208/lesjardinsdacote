@@ -21,12 +21,17 @@ $catLabel = fn(string $c) => Agents::CATEGORIES[$c]['label'] ?? $c;
   </div>
 <?php endif; ?>
 
+<?php if (!Social::facebookReady() && !Social::instagramReady() && array_filter($pending, fn($i) => $i['category'] === 'social')): ?>
+  <div class="callout"><strong>Publication en un clic :</strong> reliez votre page Facebook et votre compte Instagram dans <a href="/admin/parametres#reseaux">Paramètres → Réseaux sociaux</a>. En attendant, copiez le texte, téléchargez l'image et publiez depuis votre téléphone.</div>
+<?php endif; ?>
+
 <?php if (!$pending): ?>
   <div class="panel mt-3"><p class="mb-0">Rien à valider pour l'instant. Les agents déposeront leurs prochaines propositions ici.</p></div>
 <?php endif; ?>
 
 <?php foreach ($pending as $it): ?>
-  <form class="panel vitem mt-3" method="post" action="/admin/a-valider/<?= (int)$it['id'] ?>">
+  <?php $meta = Agents::meta($it); $isSocial = $it['category'] === 'social'; ?>
+  <form class="panel vitem mt-3" method="post" action="/admin/a-valider/<?= (int)$it['id'] ?>" enctype="multipart/form-data">
     <?= csrf_field() ?>
     <div class="vitem-head">
       <span class="chip"><?= e($catLabel($it['category'])) ?></span>
@@ -51,12 +56,47 @@ $catLabel = fn(string $c) => Agents::CATEGORIES[$c]['label'] ?? $c;
       <div class="field"><label for="body-<?= (int)$it['id'] ?>">Message (envoyé après validation)</label>
         <textarea id="body-<?= (int)$it['id'] ?>" name="body" rows="8"><?= e((string)$it['body']) ?></textarea></div>
     <?php elseif ($it['body']): ?>
-      <div class="field"><label for="body-<?= (int)$it['id'] ?>">Contenu</label>
+      <?php if ($isSocial): ?>
+        <div class="vsocial">
+          <?php if (!empty($meta['image'])): ?>
+            <a class="vsocial-img" href="<?= e($meta['image']) ?>" download><img src="<?= e($meta['image']) ?>" alt="Visuel du post" loading="lazy"></a>
+          <?php else: ?>
+            <div class="vsocial-img vsocial-img--none">Pas encore de visuel</div>
+          <?php endif; ?>
+          <div class="vsocial-side">
+            <label class="small" for="img-<?= (int)$it['id'] ?>"><?= empty($meta['image']) ? 'Ajouter une image' : 'Remplacer l\'image' ?> (JPG ou PNG, par exemple créée avec Gemini ou Canva)</label>
+            <input id="img-<?= (int)$it['id'] ?>" type="file" name="image" accept="image/jpeg,image/png">
+            <button class="btn btn--ghost btn--sm" name="action" value="image" type="submit">Enregistrer l'image</button>
+            <?php if (!empty($meta['design_url'])): ?><a class="small" href="<?= e($meta['design_url']) ?>" target="_blank" rel="noopener">Ouvrir le visuel dans Canva →</a><?php endif; ?>
+          </div>
+        </div>
+      <?php endif; ?>
+      <div class="field"><label for="body-<?= (int)$it['id'] ?>"><?= $isSocial ? 'Texte du post' : 'Contenu' ?></label>
         <textarea id="body-<?= (int)$it['id'] ?>" name="body" rows="6"><?= e((string)$it['body']) ?></textarea></div>
     <?php endif; ?>
 
+    <?php if ($it['to_email'] && $it['category'] === 'collectivite'): $sel = $meta['attachments'] ?? []; ?>
+      <input type="hidden" name="has_attachments" value="1">
+      <fieldset class="vattach"><legend>Pièces jointes</legend>
+        <?php foreach (Mailer::ATTACHABLE as $k => $a): ?>
+          <label><input type="checkbox" name="attachments[]" value="<?= e($k) ?>"<?= in_array($k, $sel, true) ? ' checked' : '' ?>> <?= e($a[2]) ?> (PDF) <a href="<?= e($a[0]) ?>" target="_blank" rel="noopener">voir</a></label>
+        <?php endforeach; ?>
+      </fieldset>
+    <?php endif; ?>
+
     <div class="row vitem-actions">
+      <?php if ($isSocial): ?>
+        <?php if (Social::facebookReady() && Social::instagramReady() && !empty($meta['image'])): ?><button class="btn btn--accent" name="action" value="publish_all" type="submit">Publier sur Facebook et Instagram</button><?php endif; ?>
+        <?php if (Social::facebookReady()): ?><button class="btn" name="action" value="publish_fb" type="submit">Publier sur Facebook</button><?php endif; ?>
+        <?php if (Social::instagramReady() && !empty($meta['image'])): ?><button class="btn" name="action" value="publish_ig" type="submit">Publier sur Instagram</button><?php endif; ?>
+        <?php if (!Social::facebookReady() && !Social::instagramReady()): ?>
+          <button class="btn btn--accent" type="button" data-copy="#body-<?= (int)$it['id'] ?>">Copier le texte</button>
+          <?php if (!empty($meta['image'])): ?><a class="btn btn--ghost" href="<?= e($meta['image']) ?>" download>Télécharger l'image</a><?php endif; ?>
+          <button class="btn btn--ghost" name="action" value="approve" type="submit">Marquer comme publié</button>
+        <?php endif; ?>
+      <?php else: ?>
       <button class="btn btn--accent" name="action" value="approve" type="submit"><?= $it['to_email'] ? 'Valider et envoyer' : 'Valider' ?></button>
+      <?php endif; ?>
       <button class="btn btn--ghost" name="action" value="reject" type="submit">Refuser</button>
       <input class="vnote" name="note" placeholder="Motif (facultatif, aide les agents à s'améliorer)">
     </div>

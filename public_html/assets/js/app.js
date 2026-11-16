@@ -304,3 +304,14 @@
     cards.forEach(function (c) { c.hidden = q !== '' && c._t.indexOf(q) === -1; });
   });
 })();
+
+
+/* v15 — copier le texte d'un post */
+document.addEventListener('click', function (e) {
+  var b = e.target.closest('[data-copy]');
+  if (!b) return;
+  var t = document.querySelector(b.getAttribute('data-copy'));
+  if (!t) return;
+  var done = function () { var o = b.textContent; b.textContent = 'Copié'; setTimeout(function () { b.textContent = o; }, 1600); };
+  if (navigator.clipboard) navigator.clipboard.writeText(t.value).then(done); else { t.select(); document.execCommand('copy'); done(); }
+});

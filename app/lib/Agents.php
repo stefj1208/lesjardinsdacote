@@ -51,6 +51,10 @@ final class Agents
     {
         $cat = isset(self::CATEGORIES[$d['category'] ?? '']) ? $d['category'] : 'autre';
         $to = trim((string)($d['to'] ?? ''));
+        $meta = is_array($d['meta'] ?? null) ? $d['meta'] : [];
+        if (is_array($d['attachments'] ?? null)) $meta['attachments'] = array_values(array_intersect(array_keys(Mailer::ATTACHABLE), $d['attachments']));
+        if ($cat === 'social' && !empty($d['image_url']) && ($img = Social::adoptImage((string)$d['image_url']))) $meta['image'] = $img;
+        if (!empty($d['design_url']) && preg_match('#^https://www\.canva\.com/#', (string)$d['design_url'])) $meta['design_url'] = mb_substr((string)$d['design_url'], 0, 500);
         $id = db()->insert('agent_items', [
             'category' => $cat,
             'status' => ($d['status'] ?? '') === 'draft_needed' ? 'draft_needed' : 'pending',
@@ -59,7 +63,7 @@ final class Agents
             'to_email' => filter_var($to, FILTER_VALIDATE_EMAIL) ? $to : null,
             'subject' => mb_substr(trim((string)($d['subject'] ?? '')), 0, 255) ?: null,
             'body' => (string)($d['body'] ?? '') ?: null,
-            'meta' => isset($d['meta']) ? json_encode($d['meta'], JSON_UNESCAPED_UNICODE) : null,
+            'meta' => $meta ? json_encode($meta, JSON_UNESCAPED_UNICODE) : null,
             'inbox_id' => isset($d['inbox_id']) ? (int)$d['inbox_id'] : null,
             'source' => mb_substr($source, 0, 100),
         ]);
@@ -116,6 +120,11 @@ final class Agents
             audit('agents.reject', '#' . $id . ' ' . $it['title']);
             return ['ok' => true, 'status' => 'rejected'];
         }
+        if (array_key_exists('attachments', $edit)) {
+            $meta = self::meta($it);
+            $meta['attachments'] = array_values(array_intersect(array_keys(Mailer::ATTACHABLE), (array)$edit['attachments']));
+            db()->exec('UPDATE agent_items SET meta = ? WHERE id = ?', [json_encode($meta, JSON_UNESCAPED_UNICODE), $id]);
+        }
         $nl = fn(?string $s) => trim(str_replace("\r\n", "\n", (string)$s));
         $subject = $nl($edit['subject'] ?? $it['subject'] ?? '');
         $body = $nl($edit['body'] ?? $it['body'] ?? '');
@@ -137,7 +146,16 @@ final class Agents
             $text .= "\n\n—\n" . self::RGPD_FOOTER;
         }
         try {
-            Mailer::queue($it['to_email'], (string)$it['subject'], Mailer::layout((string)$it['subject'], nl2p($text)));
+            $att = self::meta($it)['attachments'] ?? [];
+            if ($it['category'] === 'fournisseur') {
+                $html = Mailer::plain(nl2p($text));
+            } elseif ($it['category'] === 'collectivite') {
+                $pro = in_array('entreprises', $att, true) && !in_array('collectivites', $att, true);
+                $html = Mailer::layout((string)$it['subject'], nl2p($text), 'Découvrir le projet en deux minutes', base_url() . ($pro ? '/entreprises' : '/collectivites'));
+            } else {
+                $html = Mailer::layout((string)$it['subject'], nl2p($text));
+            }
+            Mailer::queue($it['to_email'], (string)$it['subject'], $html, $att);
             db()->exec('UPDATE agent_items SET status = "sent", sent_at = NOW() WHERE id = ?', [$id]);
             if ($it['inbox_id']) db()->exec('UPDATE inbox_messages SET status = "answered", answered_at = NOW() WHERE id = ?', [$it['inbox_id']]);
             audit('agents.send', '#' . $id . ' → ' . $it['to_email']);
@@ -146,6 +164,32 @@ final class Agents
             db()->exec('UPDATE agent_items SET status = "failed", error = ? WHERE id = ?', [mb_substr($e->getMessage(), 0, 500), $id]);
             return ['ok' => false, 'error' => $e->getMessage()];
         }
+    }
+
+    public static function meta(array $it): array
+    {
+        $m = json_decode((string)($it['meta'] ?? ''), true);
+        return is_array($m) ? $m : [];
+    }
+
+    public static function setMeta(int $id, array $meta): void
+    {
+        db()->exec('UPDATE agent_items SET meta = ? WHERE id = ?', [$meta ? json_encode($meta, JSON_UNESCAPED_UNICODE) : null, $id]);
+    }
+
+    /** Publie un post validé sur les réseaux choisis (un clic depuis « À valider »). */
+    public static function publish(int $id, string $text, array $networks, ?int $userId): array
+    {
+        $it = db()->one('SELECT * FROM agent_items WHERE id = ?', [$id]);
+        if (!$it || $it['category'] !== 'social' || !in_array($it['status'], ['pending', 'approved'], true)) return ['ok' => false, 'error' => 'Déjà traité.'];
+        $text = trim(str_replace("\r\n", "\n", $text)) ?: (string)$it['body'];
+        $r = Social::publish($text, self::meta($it)['image'] ?? null, $networks);
+        if (!$r['ok']) return ['ok' => false, 'error' => implode(' ', $r['errors']) ?: 'Aucun réseau choisi.'];
+        $edited = $text !== trim(str_replace("\r\n", "\n", (string)$it['body'])) ? 1 : 0;
+        db()->exec('UPDATE agent_items SET status = "sent", sent_at = NOW(), decided_at = COALESCE(decided_at, NOW()), decided_by = ?, edited = ?, body = ?, decision_note = ? WHERE id = ?',
+            [$userId, $edited, $text, 'publié sur ' . implode(' et ', $r['ok']), $id]);
+        audit('agents.publish', '#' . $id . ' → ' . implode(', ', $r['ok']));
+        return ['ok' => true, 'published' => $r['ok'], 'errors' => $r['errors']];
     }
 
     /* ---------------- Statistiques (règle des 90 %) ---------------- */

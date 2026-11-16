@@ -626,8 +626,25 @@ function admin_validate(): void
 function admin_validate_decide(string $id): void
 {
     Auth::requireAdmin();
-    $action = input('action') === 'reject' ? 'reject' : 'approve';
-    $r = Agents::decide((int)$id, $action, ['subject' => input('subject'), 'body' => input('body')], (int)Auth::user()['id'], (string)input('note', ''));
+    $act = (string)input('action');
+    // Réseaux sociaux : changer le visuel, ou publier en un clic.
+    if ($act === 'image') {
+        $it = db()->one('SELECT * FROM agent_items WHERE id = ?', [(int)$id]);
+        if ($it && ($img = Social::adoptUpload('image'))) { Agents::setMeta((int)$id, ['image' => $img] + Agents::meta($it)); flash('success', 'Visuel remplacé.'); }
+        else flash('error', 'Image refusée : JPG ou PNG, 8 Mo au plus.');
+        back('/admin/a-valider');
+    }
+    if (str_starts_with($act, 'publish')) {
+        $nets = ['publish_fb' => ['facebook'], 'publish_ig' => ['instagram'], 'publish_all' => ['facebook', 'instagram']][$act] ?? [];
+        $r = Agents::publish((int)$id, (string)input('body', ''), $nets, (int)Auth::user()['id']);
+        if (!($r['ok'] ?? false)) flash('error', 'Publication impossible. ' . ($r['error'] ?? ''));
+        else flash($r['errors'] ? 'info' : 'success', 'Publié sur ' . implode(' et ', $r['published']) . '.' . ($r['errors'] ? ' ' . implode(' ', $r['errors']) : ''));
+        back('/admin/a-valider');
+    }
+    $action = $act === 'reject' ? 'reject' : 'approve';
+    $edit = ['subject' => input('subject'), 'body' => input('body')];
+    if (input('has_attachments')) $edit['attachments'] = (array)($_POST['attachments'] ?? []);
+    $r = Agents::decide((int)$id, $action, $edit, (int)Auth::user()['id'], (string)input('note', ''));
     if (!($r['ok'] ?? false)) flash('error', $r['error'] ?? 'Impossible de traiter cet élément.');
     else flash('success', ['approved' => 'Validé.', 'sent' => 'Validé — le message part dans les minutes qui viennent.', 'rejected' => 'Refusé.'][$r['status']] ?? 'Fait.');
     back('/admin/a-valider');
@@ -643,7 +660,7 @@ function admin_agents_regenerate(): void
 
 const SETTING_KEYS = ['sachet_cost', 'pack_fixed_costs', 'market_price_note', 'logo_path', 'association_name', 'association_legal', 'association_address', 'contact_email', 'publication_director', 'host_info',
     'vat_mention', 'pickup_reminder_hours', 'default_vote_days', 'default_sale_days', 'default_batch_size', 'default_pack_price', 'hero_photo',
-    'order_fee', 'order_fee_fund', 'membership_fee', 'president_name', 'treasurer_name', 'imap_host', 'imap_user'];
+    'order_fee', 'order_fee_fund', 'membership_fee', 'president_name', 'treasurer_name', 'imap_host', 'imap_user', 'seed_pack_price', 'fb_page_id', 'ig_user_id'];
 
 function admin_settings(): void
 {
@@ -673,6 +690,8 @@ function admin_settings_save(): void
     // Mot de passe de la boîte mail : enregistré seulement s'il est saisi (jamais réaffiché).
     if (trim((string)input('imap_password', '')) !== '') set_setting('imap_password', trim((string)input('imap_password')));
     if (input('imap_clear')) set_setting('imap_password', '');
+    if (trim((string)input('fb_page_token', '')) !== '') set_setting('fb_page_token', trim((string)input('fb_page_token')));
+    if (input('fb_clear')) set_setting('fb_page_token', '');
     if ($up = admin_upload('hero_file', 'accueil')) set_setting('hero_photo', $up);
     if ($up = admin_upload('logo_file', 'logo')) set_setting('logo_path', $up);
     flash('success', 'Paramètres enregistrés.');

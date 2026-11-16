@@ -4,7 +4,7 @@ declare(strict_types=1);
 /** Mise à jour automatique de la base au premier passage après un déploiement. */
 final class Migrator
 {
-    public const VERSION = 14;
+    public const VERSION = 15;
     private static bool $reseed = false;
 
     public static function execFile(string $file): void
@@ -36,6 +36,7 @@ final class Migrator
             if ($v < 12) self::to12();
             if ($v < 13) self::to13();
             if ($v < 14) self::to14();
+            if ($v < 15) self::to15();
             if (self::$reseed) Demo::seedCatalog();
             if (self::$reseed && setting('demo_data') === '1') { Demo::purge(); Demo::seed(); }
         } finally {
@@ -218,5 +219,13 @@ final class Migrator
         if (setting('demo_data') === '1') { Demo::purge(); Demo::seed(); }
         set_setting('schema_version', '14');
         audit('migrate', 'schéma v14 : ' . $n . ' variétés de graines au vote');
+    }
+
+    /** v14 → v15 : pièces jointes aux e-mails (plaquettes), visuels et publication des posts. */
+    private static function to15(): void
+    {
+        if (!self::hasColumn('email_queue', 'attachments')) db()->pdo->exec('ALTER TABLE email_queue ADD COLUMN attachments VARCHAR(500) NULL AFTER html');
+        set_setting('schema_version', '15');
+        audit('migrate', 'schéma v15 : pièces jointes et publication des posts');
     }
 }

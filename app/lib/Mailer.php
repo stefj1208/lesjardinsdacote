@@ -7,10 +7,24 @@ declare(strict_types=1);
  */
 final class Mailer
 {
-    public static function queue(string $to, string $subject, string $html): void
+    /** Documents que l'on peut joindre à un message (clé → fichier public, nom affiché). */
+    public const ATTACHABLE = [
+        'collectivites' => ['/assets/docs/plaquette-collectivites.pdf', 'Les-Jardins-d-a-Cote-plaquette-collectivites.pdf', 'Plaquette mairies et collectivités'],
+        'entreprises'   => ['/assets/docs/plaquette-entreprises.pdf', 'Les-Jardins-d-a-Cote-plaquette-entreprises.pdf', 'Plaquette entreprises et CSE'],
+    ];
+
+    /** @param string[] $attachments clés de ATTACHABLE */
+    public static function queue(string $to, string $subject, string $html, array $attachments = []): void
     {
         if (!filter_var($to, FILTER_VALIDATE_EMAIL)) return;
-        db()->insert('email_queue', ['to_email' => $to, 'subject' => $subject, 'html' => $html]);
+        $att = array_values(array_intersect(array_keys(self::ATTACHABLE), $attachments));
+        db()->insert('email_queue', ['to_email' => $to, 'subject' => $subject, 'html' => $html, 'attachments' => $att ? json_encode($att) : null]);
+    }
+
+    /** Message sobre, sans habillage : pour écrire à un fournisseur comme on écrirait depuis sa messagerie. */
+    public static function plain(string $bodyHtml): string
+    {
+        return '<!doctype html><html lang="fr"><head><meta charset="utf-8"></head><body style="font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:#1b1b1b">' . $bodyHtml . '</body></html>';
     }
 
     /** Envoi immédiat (mot de passe oublié, etc.). Retourne true si accepté. */
@@ -32,7 +46,7 @@ final class Mailer
         $rows = db()->all("SELECT * FROM email_queue WHERE status = 'queued' AND attempts < 5 ORDER BY id LIMIT " . (int)$limit);
         foreach ($rows as $m) {
             try {
-                self::deliver($m['to_email'], $m['subject'], $m['html']);
+                self::deliver($m['to_email'], $m['subject'], $m['html'], (array)json_decode((string)($m['attachments'] ?? ''), true));
                 db()->exec("UPDATE email_queue SET status = 'sent', sent_at = NOW(), attempts = attempts + 1 WHERE id = ?", [$m['id']]);
                 $sent++;
             } catch (Throwable $e) {
@@ -45,7 +59,7 @@ final class Mailer
         return ['sent' => $sent, 'failed' => $failed];
     }
 
-    private static function deliver(string $to, string $subject, string $html): void
+    private static function deliver(string $to, string $subject, string $html, array $attachments = []): void
     {
         $from = (string)config('mail.from', 'no-reply@localhost');
         $fromName = (string)config('mail.from_name', setting('association_name', "Les Jardins d'à Côté"));
@@ -68,6 +82,24 @@ final class Mailer
             . "--$boundary\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n"
             . chunk_split(base64_encode($html))
             . "--$boundary--\r\n";
+
+        // Pièces jointes : le message devient multipart/mixed, le texte restant en première partie.
+        $files = [];
+        foreach ($attachments as $k) {
+            $a = self::ATTACHABLE[$k] ?? null;
+            if ($a && is_file(PUBLIC_DIR . $a[0])) $files[] = $a;
+        }
+        if ($files) {
+            $mixed = 'm' . random_token(12);
+            $inner = 'Content-Type: multipart/alternative; boundary="' . $boundary . "\"\r\n\r\n" . $body;
+            $body = "--$mixed\r\n" . $inner;
+            foreach ($files as [$path, $name]) {
+                $body .= "--$mixed\r\nContent-Type: application/pdf; name=\"$name\"\r\nContent-Transfer-Encoding: base64\r\nContent-Disposition: attachment; filename=\"$name\"\r\n\r\n"
+                    . chunk_split(base64_encode((string)file_get_contents(PUBLIC_DIR . $path)));
+            }
+            $body .= "--$mixed--\r\n";
+            $headers[count($headers) - 1] = 'Content-Type: multipart/mixed; boundary="' . $mixed . '"';
+        }
 
         if (config('env') === 'dev' && config('mail.log_only')) {
             @file_put_contents(APP_DIR . '/storage/logs/mail.log', "To: $to\nSubject: $subject\n$text\n-----\n", FILE_APPEND);

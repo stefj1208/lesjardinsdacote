@@ -23,6 +23,15 @@
       <div class="field"><label for="imap_password">Mot de passe de la boîte</label><input id="imap_password" name="imap_password" type="password" autocomplete="new-password" placeholder="<?= setting('imap_password', '') !== '' ? 'enregistré — saisir pour remplacer' : 'à renseigner' ?>"></div>
     </div>
 
+    <h2 class="mt-4" id="reseaux">Réseaux sociaux (publication en un clic)</h2>
+    <p class="hint">Pour publier depuis « À valider » sans quitter le site. Il faut une page Facebook, un compte Instagram professionnel relié à cette page, et un jeton d'accès de page longue durée créé sur developers.facebook.com (autorisations <code>pages_manage_posts</code>, <code>pages_read_engagement</code>, <code>instagram_content_publish</code>). Tant que ces champs sont vides, les posts se copient et se publient à la main.</p>
+    <div class="grid-2">
+      <div class="field"><label for="fb_page_id">Identifiant de la page Facebook</label><input id="fb_page_id" name="fb_page_id" inputmode="numeric" value="<?= e((string)setting('fb_page_id', '')) ?>"></div>
+      <div class="field"><label for="ig_user_id">Identifiant du compte Instagram professionnel</label><input id="ig_user_id" name="ig_user_id" inputmode="numeric" value="<?= e((string)setting('ig_user_id', '')) ?>"></div>
+      <div class="field"><label for="fb_page_token">Jeton d'accès de la page</label><input id="fb_page_token" name="fb_page_token" type="password" autocomplete="new-password" placeholder="<?= setting('fb_page_token', '') !== '' ? 'enregistré — saisir pour remplacer' : 'coller le jeton ici' ?>">
+        <?php if (setting('fb_page_token', '') !== ''): ?><label class="small"><input type="checkbox" name="fb_clear" value="1"> Effacer le jeton</label><?php endif; ?></div>
+    </div>
+
     <h2 class="mt-4">Frais et adhésion</h2>
     <div class="grid-2">
       <div class="field"><label for="order_fee">Frais de fonctionnement et logistique (€ par commande)</label><input id="order_fee" name="order_fee" inputmode="decimal" value="<?= e($s['order_fee']) ?>"></div>

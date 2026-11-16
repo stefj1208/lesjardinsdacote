@@ -295,6 +295,7 @@ CREATE TABLE IF NOT EXISTS email_queue (
   to_email VARCHAR(190) NOT NULL,
   subject VARCHAR(255) NOT NULL,
   html MEDIUMTEXT NOT NULL,
+  attachments VARCHAR(500) NULL,
   status ENUM('queued','sent','failed') NOT NULL DEFAULT 'queued',
   attempts TINYINT UNSIGNED NOT NULL DEFAULT 0,
   last_error VARCHAR(500) NULL,
