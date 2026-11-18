@@ -155,7 +155,7 @@ final class Agents
             } else {
                 $html = Mailer::layout((string)$it['subject'], nl2p($text));
             }
-            Mailer::queue($it['to_email'], (string)$it['subject'], $html, $att);
+            Mailer::queue($it['to_email'], (string)$it['subject'], $html, $att, true);
             db()->exec('UPDATE agent_items SET status = "sent", sent_at = NOW() WHERE id = ?', [$id]);
             if ($it['inbox_id']) db()->exec('UPDATE inbox_messages SET status = "answered", answered_at = NOW() WHERE id = ?', [$it['inbox_id']]);
             audit('agents.send', '#' . $id . ' → ' . $it['to_email']);

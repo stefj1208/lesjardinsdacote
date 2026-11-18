@@ -4,7 +4,7 @@ declare(strict_types=1);
 /** Mise à jour automatique de la base au premier passage après un déploiement. */
 final class Migrator
 {
-    public const VERSION = 15;
+    public const VERSION = 16;
     private static bool $reseed = false;
 
     public static function execFile(string $file): void
@@ -37,6 +37,7 @@ final class Migrator
             if ($v < 13) self::to13();
             if ($v < 14) self::to14();
             if ($v < 15) self::to15();
+            if ($v < 16) self::to16();
             if (self::$reseed) Demo::seedCatalog();
             if (self::$reseed && setting('demo_data') === '1') { Demo::purge(); Demo::seed(); }
         } finally {
@@ -227,5 +228,23 @@ final class Migrator
         if (!self::hasColumn('email_queue', 'attachments')) db()->pdo->exec('ALTER TABLE email_queue ADD COLUMN attachments VARCHAR(500) NULL AFTER html');
         set_setting('schema_version', '15');
         audit('migrate', 'schéma v15 : pièces jointes et publication des posts');
+    }
+
+    /**
+     * v15 → v16 : copie des messages envoyés par l'association dans « Envoyés » de la boîte contact@.
+     * Rattrapage : les messages validés depuis « À valider » ces 14 derniers jours sont recopiés une fois.
+     */
+    private static function to16(): void
+    {
+        if (!self::hasColumn('email_queue', 'keep_copy')) db()->pdo->exec('ALTER TABLE email_queue ADD COLUMN keep_copy TINYINT(1) NOT NULL DEFAULT 0 AFTER attachments');
+        $n = 0;
+        if (Inbox::ready()) {
+            foreach (db()->all("SELECT a.to_email, a.subject, a.sent_at FROM agent_items a WHERE a.status = 'sent' AND a.to_email IS NOT NULL AND a.sent_at > (NOW() - INTERVAL 14 DAY)") as $it) {
+                $q = db()->one('SELECT * FROM email_queue WHERE to_email = ? AND subject = ? AND status = "sent" ORDER BY id DESC LIMIT 1', [$it['to_email'], $it['subject']]);
+                if ($q && Inbox::saveSent(Mailer::rebuild($q))) $n++;
+            }
+        }
+        set_setting('schema_version', '16');
+        audit('migrate', 'schéma v16 : copie des envois dans « Envoyés » (' . $n . ' message(s) rattrapé(s))');
     }
 }

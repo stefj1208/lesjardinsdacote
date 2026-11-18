@@ -98,6 +98,35 @@ final class Inbox
         return ['new' => $added];
     }
 
+    /**
+     * Dépose une copie d'un message envoyé dans le dossier « Envoyés » de la boîte relevée.
+     * Un envoi par SMTP ou par mail() ne laisse aucune trace dans la messagerie : sans cette copie, le webmail ne montre rien.
+     */
+    public static function saveSent(string $raw): bool
+    {
+        if (!self::ready()) return false;
+        $host = setting('imap_host', 'imap.hostinger.com');
+        $base = '{' . $host . ':993/imap/ssl}';
+        $st = @imap_open($base . 'INBOX', self::user(), (string)setting('imap_password'), OP_HALFOPEN, 1);
+        if (!$st) { imap_errors(); return false; }
+        try {
+            $folder = (string)setting('imap_sent_folder', '');
+            if ($folder === '') {
+                $names = array_map(fn($b) => substr(imap_utf7_decode($b->name) ?: $b->name, strlen($base)), (array)imap_getmailboxes($st, $base, '*'));
+                foreach (['INBOX.Sent', 'Sent', 'INBOX.Sent Items', 'Sent Items', 'INBOX.Envoyés', 'Envoyés'] as $c) if (in_array($c, $names, true)) { $folder = $c; break; }
+                if ($folder === '') foreach ($names as $n) if (preg_match('/sent|envoy/i', $n)) { $folder = $n; break; }
+                if ($folder === '') return false;
+                set_setting('imap_sent_folder', $folder);
+            }
+            $ok = @imap_append($st, $base . imap_utf7_encode($folder), $raw, '\\Seen');
+            if (!$ok) set_setting('imap_sent_folder', '');
+            return (bool)$ok;
+        } finally {
+            imap_close($st);
+            imap_errors();
+        }
+    }
+
     private static function decodeHeader(string $s): string
     {
         $out = '';

@@ -14,11 +14,11 @@ final class Mailer
     ];
 
     /** @param string[] $attachments clés de ATTACHABLE */
-    public static function queue(string $to, string $subject, string $html, array $attachments = []): void
+    public static function queue(string $to, string $subject, string $html, array $attachments = [], bool $keepCopy = false): void
     {
         if (!filter_var($to, FILTER_VALIDATE_EMAIL)) return;
         $att = array_values(array_intersect(array_keys(self::ATTACHABLE), $attachments));
-        db()->insert('email_queue', ['to_email' => $to, 'subject' => $subject, 'html' => $html, 'attachments' => $att ? json_encode($att) : null]);
+        db()->insert('email_queue', ['to_email' => $to, 'subject' => $subject, 'html' => $html, 'attachments' => $att ? json_encode($att) : null, 'keep_copy' => $keepCopy ? 1 : 0]);
     }
 
     /** Message sobre, sans habillage : pour écrire à un fournisseur comme on écrirait depuis sa messagerie. */
@@ -46,7 +46,9 @@ final class Mailer
         $rows = db()->all("SELECT * FROM email_queue WHERE status = 'queued' AND attempts < 5 ORDER BY id LIMIT " . (int)$limit);
         foreach ($rows as $m) {
             try {
-                self::deliver($m['to_email'], $m['subject'], $m['html'], (array)json_decode((string)($m['attachments'] ?? ''), true));
+                $raw = self::deliver($m['to_email'], $m['subject'], $m['html'], (array)json_decode((string)($m['attachments'] ?? ''), true));
+                // Copie dans « Envoyés » de la boîte contact@ pour les messages écrits au nom de l'association.
+                if (!empty($m['keep_copy'])) Inbox::saveSent($raw);
                 db()->exec("UPDATE email_queue SET status = 'sent', sent_at = NOW(), attempts = attempts + 1 WHERE id = ?", [$m['id']]);
                 $sent++;
             } catch (Throwable $e) {
@@ -59,7 +61,14 @@ final class Mailer
         return ['sent' => $sent, 'failed' => $failed];
     }
 
-    private static function deliver(string $to, string $subject, string $html, array $attachments = []): void
+    /** Envoie le message et retourne sa forme brute (MIME complète), pour en garder une copie. */
+    /** Forme brute d'un message déjà envoyé (ligne de email_queue), datée de son envoi : pour en déposer une copie. */
+    public static function rebuild(array $m): string
+    {
+        return self::deliver($m['to_email'], $m['subject'], $m['html'], (array)json_decode((string)($m['attachments'] ?? ''), true), true, strtotime((string)($m['sent_at'] ?? '')) ?: null);
+    }
+
+    private static function deliver(string $to, string $subject, string $html, array $attachments = [], bool $dryRun = false, ?int $date = null): string
     {
         $from = (string)config('mail.from', 'no-reply@localhost');
         $fromName = (string)config('mail.from_name', setting('association_name', "Les Jardins d'à Côté"));
@@ -73,7 +82,7 @@ final class Mailer
             'From: ' . $encFrom,
             'Reply-To: ' . (setting('contact_email') ?: $from),
             'Message-ID: ' . $msgId,
-            'Date: ' . date('r'),
+            'Date: ' . date('r', $date ?? time()),
             'MIME-Version: 1.0',
             'Content-Type: multipart/alternative; boundary="' . $boundary . '"',
         ];
@@ -101,9 +110,11 @@ final class Mailer
             $headers[count($headers) - 1] = 'Content-Type: multipart/mixed; boundary="' . $mixed . '"';
         }
 
+        $raw = 'To: <' . $to . ">\r\nSubject: " . $encSubject . "\r\n" . implode("\r\n", $headers) . "\r\n\r\n" . $body;
+        if ($dryRun) return $raw;
         if (config('env') === 'dev' && config('mail.log_only')) {
             @file_put_contents(APP_DIR . '/storage/logs/mail.log', "To: $to\nSubject: $subject\n$text\n-----\n", FILE_APPEND);
-            return;
+            return $raw;
         }
 
         $host = (string)config('mail.smtp_host', '');
@@ -111,11 +122,11 @@ final class Mailer
             if (!mail($to, $encSubject, $body, implode("\r\n", $headers), '-f' . $from)) {
                 throw new RuntimeException('mail() a refusé le message');
             }
-            return;
+            return $raw;
         }
         self::smtp($host, (int)config('mail.smtp_port', 465), (string)config('mail.smtp_secure', 'ssl'),
-            (string)config('mail.smtp_user', ''), (string)config('mail.smtp_pass', ''), $from, $to,
-            'To: <' . $to . ">\r\nSubject: " . $encSubject . "\r\n" . implode("\r\n", $headers) . "\r\n\r\n" . $body);
+            (string)config('mail.smtp_user', ''), (string)config('mail.smtp_pass', ''), $from, $to, $raw);
+        return $raw;
     }
 
     private static function smtp(string $host, int $port, string $secure, string $user, string $pass, string $from, string $to, string $data): void
